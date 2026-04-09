@@ -43,7 +43,7 @@ export default function NotFound() {
                         className={cn(
                             "mx-auto block h-auto w-full object-contain",
                             "max-h-[min(26svh,11rem)]",
-                            "sm:max-h-[min(38svh,24rem)]",
+                            "sm:max-h-[min(30svh,24rem)]",
                         )}
                     />
                 </div>

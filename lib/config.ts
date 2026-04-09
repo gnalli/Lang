@@ -13,6 +13,11 @@ export const siteConfig = {
         referrer: 'origin-when-cross-origin',
         keywords: ['blog'],
         image: "https://cdn.cnlang.net/og-image.png",  // 后续补充
+        icons: {
+            icon: '/favicon.ico',
+            shortcut: '/favicon.ico',
+            apple: '/apple-icon.png'
+        }
     },
     social: {
         github: {

@@ -21,6 +21,7 @@ export const metadata = {
   openGraph: siteConfig.seo.openGraph,
   robots: siteConfig.seo.robots,
   verification: siteConfig.seo.verification,
+  icons: siteConfig.site.icons,
 }
 
 export default function RootLayout({
