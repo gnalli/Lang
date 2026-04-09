@@ -128,3 +128,39 @@
     scrollbar-gutter: stable;
   }
 }
+
+/* 仅行内 code（非 pre 内），避免 prose-code 作用到代码块与 Shiki 片段 */
+@layer components {
+  .article-mdx-prose :not(pre) > code {
+    @apply rounded-md border border-border/70 bg-muted/80 px-1.5 py-0.5 text-[0.875em] font-normal text-foreground shadow-none;
+  }
+  /* 压过 typography 的 code 反引号装饰（组件层顺序不一定占优） */
+  .article-mdx-prose code::before,
+  .article-mdx-prose code::after {
+    content: none !important;
+  }
+}
+
+/*
+ * Shiki / rehype-pretty-code：双主题背景只保留在最外层 code；
+ * 子节点（含 .line、token span）去掉主题给的底，否则会一行一块「白底框」。
+ */
+code[data-theme*=" "] {
+  background-color: var(--shiki-light-bg) !important;
+}
+
+code[data-theme*=" "] * {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html.dark code[data-theme*=" "] {
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+html.dark code[data-theme*=" "] * {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}

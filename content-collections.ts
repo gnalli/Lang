@@ -1,6 +1,8 @@
 import { defineCollection, defineConfig } from "@content-collections/core"
 import { compileMDX } from "@content-collections/mdx"
+import rehypePrettyCode from "rehype-pretty-code"
 import rehypeSlug from "rehype-slug"
+import remarkGfm from "remark-gfm"
 import wordCount from "word-count"
 import { z } from "zod"
 
@@ -21,7 +23,22 @@ const blogs = defineCollection({
   transform: async (post, context) => {
     const mdx = await compileMDX(context, post, {
       cwd: process.cwd(),
-      rehypePlugins: [rehypeSlug],
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [
+        [
+          rehypePrettyCode,
+          {
+            theme: {
+              light: "github-light",
+              dark: "github-dark",
+            },
+            bypassInlineCode: true,
+            grid: false,
+            keepBackground: false,
+          },
+        ],
+        rehypeSlug,
+      ],
     })
     return {
       ...post,

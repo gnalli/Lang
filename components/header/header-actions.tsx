@@ -6,7 +6,9 @@ import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/lib/config"
+import { HeaderAnalyticsDrawer } from "./header-analytics-drawer"
 import { HeaderCommandPalette } from "./header-command-palette"
+import { HeaderRssMenu } from "./header-rss-menu"
 
 const iconBtn =
     "size-10 rounded-xl text-foreground/85 hover:bg-accent sm:size-11 [&_svg]:size-[1.15rem] sm:[&_svg]:size-5"
@@ -52,15 +54,17 @@ const navLinkClass =
 
 export function HeaderActions() {
     return (
-        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <HeaderCommandPalette />
-            <Link href="/blog" className={`${navLinkClass} max-[340px]:hidden`}>
-                占个位
+            <Link href="/archive" className={`${navLinkClass} max-[340px]:hidden`}>
+                存档
             </Link>
-            <Link href="/about" className={`${navLinkClass} max-[390px]:hidden`}>
-                关于我
+            <Link href="/ai" className={`${navLinkClass} max-[390px]:hidden`}>
+                AI
             </Link>
             <ThemeToggleButton />
+            <HeaderAnalyticsDrawer />
+            <HeaderRssMenu />
             <GitHubIconButton />
         </div>
     )

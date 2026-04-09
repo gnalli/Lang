@@ -8,6 +8,7 @@ import { siteConfig } from "@/lib/config"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 type PageProps = { params: Promise<{ tag: string }> }
 
@@ -20,11 +21,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const { tag } = await params
     const label = decodeURIComponent(tag)
     const title = `标签：${label}`
+    const canonical = new URL(`/tag/${encodeURIComponent(label)}`, siteConfig.seo.metadataBase).toString()
+    const description = `浏览标签「${label}」下的文章 · ${siteConfig.site.title.default}`
     return {
         title,
+        description,
+        alternates: { canonical },
         openGraph: {
             title,
+            description,
+            type: "website",
+            url: canonical,
             locale: siteConfig.seo.openGraph.locale,
+            siteName: siteConfig.seo.openGraph.siteName,
+            images: siteConfig.seo.openGraph.images,
         },
     }
 }
@@ -51,12 +61,12 @@ export default async function TagPage({ params }: PageProps) {
                         首页
                     </Link>
                     <span className="mx-2 text-muted-foreground/60">/</span>
-                    <span>标签</span>
+                    <span>博文分类</span>
                 </p>
-                <h1 className="mt-3 text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                <h1 className="mt-4 text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                     {decoded}
                 </h1>
-                <p className="mt-2 text-sm text-muted-foreground">共 {list.length} 篇文章</p>
+                <h3 className="mt-2 text-sm text-muted-foreground">共 {list.length} 篇文章</h3>
             </header>
 
             <ul
@@ -75,17 +85,27 @@ export default async function TagPage({ params }: PageProps) {
                             )}
                         >
                             <CardHeader className="space-y-0 px-6 pb-3 pt-6 sm:px-8 sm:pb-4 sm:pt-8">
-                                <CardTitle className="font-heading text-lg font-semibold leading-snug text-foreground sm:text-xl">
+                                <CardTitle className="font-heading text-lg font-semibold leading-snug text-foreground sm:text-xl line-clamp-1">
                                     <Link
                                         href={`/blog/${blog.slug}`}
                                         className="text-balance underline-offset-4 transition-colors hover:text-primary hover:underline"
                                     >
-                                        {blog.title}
+                                        <Tooltip >
+                                            <TooltipTrigger asChild>
+                                                <h2 className={cn(
+                                                    "min-w-0 flex-1 truncate text-lg font-semibold leading-snug text-foreground",
+                                                    "sm:text-xl",
+                                                )}>{blog.title}</h2>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="left" className="bg-primary">
+                                                <p>{blog.title}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
                                     </Link>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="flex flex-1 flex-col px-6 sm:px-8">
-                                <p className="text-pretty text-sm leading-relaxed text-muted-foreground line-clamp-5">
+                                <p className="text-pretty text-sm leading-relaxed text-muted-foreground line-clamp-2">
                                     {blog.summary?.trim() ? blog.summary : "暂无摘要"}
                                 </p>
                             </CardContent>

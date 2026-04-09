@@ -2,9 +2,13 @@
 
 import * as React from "react"
 import { ArrowRight, ChevronDown } from "lucide-react"
+import { motion, useReducedMotion } from "motion/react"
 import Link from "next/link"
 import { formatDate } from "@/lib/forma-date"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Item, ItemContent, ItemFooter, ItemDescription } from "@/components/ui/item"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 export type RecentPostItem = {
@@ -22,6 +26,7 @@ export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
     const [visibleCount, setVisibleCount] = React.useState(() =>
         Math.min(PAGE_SIZE, posts.length),
     )
+    const reduceMotion = useReducedMotion()
 
     const list = posts.slice(0, visibleCount)
     const hasMore = visibleCount < posts.length
@@ -31,72 +36,117 @@ export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
     }
 
     return (
-        <div>
-            <div className="relative">
-                <ul className="flex flex-col divide-y divide-border/80">
-                    {list.map((blog) => (
-                        <li key={blog.slug} className="min-w-0">
-                            <article>
-                                <Link
-                                    href={`/blog/${blog.slug}`}
-                                    className={cn(
-                                        "group block rounded-xl px-3 py-7 transition-colors sm:px-4 sm:py-8",
-                                        "hover:bg-muted/45",
-                                        "no-underline",
-                                    )}
-                                >
-                                    <div className="flex items-start gap-4 sm:gap-6">
-                                        {/* <h2
-                                            className={cn(
-                                                "min-w-0 flex-1 truncate text-lg font-semibold leading-snug text-foreground",
-                                                "sm:text-xl",
-                                            )}
-                                        >
-                                            {blog.title}
-                                        </h2> */}
-                                        <Tooltip >
-                                            <TooltipTrigger asChild>
-                                                <h2 className={cn(
-                                                    "min-w-0 flex-1 truncate text-lg font-semibold leading-snug text-foreground",
-                                                    "sm:text-xl",
-                                                )}>{blog.title}</h2>
-                                            </TooltipTrigger>
-                                            <TooltipContent side="left" className="bg-primary">
-                                                <p>{blog.title}</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                        <time
-                                            className="shrink-0 pt-0.5 text-xs tabular-nums text-muted-foreground sm:text-sm"
-                                            dateTime={blog.date}
-                                        >
-                                            {formatDate(blog.date)} · {blog.wordCount} 字
-                                        </time>
-                                    </div>
-
-                                    {blog.summary ? (
-                                        <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-muted-foreground sm:mt-5 sm:text-[0.9375rem]">
-                                            {blog.summary}
-                                        </p>
-                                    ) : null}
-
-                                    <div
+        <div className="flex w-full min-w-0 flex-col gap-4">
+            <div className="relative w-full min-w-0">
+                <div
+                    role="list"
+                    className="grid w-full min-w-0 grid-cols-1 gap-4 max-lg:grid-cols-2 max-lg:gap-3 sm:max-lg:gap-4"
+                >
+                    {list.map((blog, index) => (
+                        <motion.div
+                            key={blog.slug}
+                            role="listitem"
+                            className="min-w-0 w-full max-w-full overflow-hidden rounded-lg"
+                            initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={
+                                reduceMotion
+                                    ? { duration: 0 }
+                                    : {
+                                        duration: 0.45,
+                                        delay: Math.min(index * 0.05, 0.4),
+                                        ease: [0.25, 0.46, 0.45, 0.94],
+                                    }
+                            }
+                            whileHover={
+                                reduceMotion
+                                    ? undefined
+                                    : {
+                                        y: -4,
+                                        transition: { type: "spring", stiffness: 420, damping: 28 },
+                                    }
+                            }
+                        >
+                            <Card className="h-full min-w-0 bg-muted/50 dark:bg-muted/40 max-w-full gap-0 overflow-hidden border-0 py-0 shadow-lg ring-0 transition-shadow duration-300 hover:shadow-xl">
+                                <CardContent className="p-0">
+                                    <Item
+                                        variant="default"
+                                        size="default"
                                         className={cn(
-                                            "mt-4 flex items-center gap-1.5 text-sm font-medium sm:mt-5",
-                                            "text-muted-foreground transition-colors",
-                                            "group-hover:text-primary",
+                                            "min-w-0 rounded-none border-0 py-0 shadow-none ring-0",
+                                            "hover:bg-muted/40",
                                         )}
+                                        asChild
                                     >
-                                        <span>阅读更多</span>
-                                        <ArrowRight
-                                            className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5"
-                                            aria-hidden
-                                        />
-                                    </div>
-                                </Link>
-                            </article>
-                        </li>
+                                        <Link
+                                            href={`/blog/${blog.slug}`}
+                                            className="flex min-w-0 w-full max-w-full flex-col items-stretch! gap-0 overflow-hidden no-underline hover:no-underline"
+                                        >
+                                            <ItemContent className="min-w-0 w-full max-w-full shrink-0 overflow-hidden gap-0 px-3 py-3.5 lg:px-6 lg:py-6">
+                                                <div className="flex min-w-0 max-w-full flex-col gap-1.5 lg:flex-row lg:items-start lg:gap-4">
+                                                    <div className="min-w-0 max-w-full flex-1 overflow-hidden">
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <p
+                                                                    className={cn(
+                                                                        "m-0 block min-w-0 max-w-full cursor-default text-left font-heading text-sm font-semibold leading-snug text-foreground",
+                                                                        "max-lg:line-clamp-2 max-lg:wrap-break-word max-lg:overflow-hidden lg:truncate lg:text-lg",
+                                                                    )}
+                                                                >
+                                                                    {blog.title}
+                                                                </p>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent
+                                                                side="left"
+                                                                className="max-w-sm"
+                                                            >
+                                                                <p>{blog.title}</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </div>
+                                                    <time
+                                                        className="shrink-0 text-[0.65rem] leading-snug tabular-nums text-muted-foreground max-lg:max-w-full max-lg:wrap-break-word lg:pt-0.5 lg:text-xs xl:text-sm"
+                                                        dateTime={blog.date}
+                                                    >
+                                                        {formatDate(blog.date)} · {blog.wordCount} 字
+                                                    </time>
+                                                </div>
+
+                                                {blog.summary ? (
+                                                    <ItemDescription
+                                                        className={cn(
+                                                            "mt-2 block min-w-0 max-w-full overflow-hidden wrap-break-word text-left text-xs leading-relaxed lg:mt-4 lg:text-sm lg:text-[0.9375rem]",
+                                                            "line-clamp-2",
+                                                        )}
+                                                    >
+                                                        {blog.summary}
+                                                    </ItemDescription>
+                                                ) : null}
+                                            </ItemContent>
+
+                                            <ItemFooter className="min-w-0 w-full max-w-full shrink-0 border-0 px-3 pb-3.5 pt-0 lg:px-6 lg:pb-6">
+                                                <span
+                                                    className={cn(
+                                                        "flex min-w-0 items-center gap-1 text-xs font-medium lg:gap-1.5 lg:text-sm",
+                                                        "text-muted-foreground transition-colors",
+                                                        "group-hover/item:text-primary",
+                                                    )}
+                                                >
+                                                    阅读更多
+                                                    <ArrowRight
+                                                        data-icon="inline-end"
+                                                        className="size-3.5 shrink-0 transition-transform group-hover/item:translate-x-0.5 lg:size-4"
+                                                        aria-hidden
+                                                    />
+                                                </span>
+                                            </ItemFooter>
+                                        </Link>
+                                    </Item>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
                     ))}
-                </ul>
+                </div>
 
                 {hasMore ? (
                     <div
@@ -111,36 +161,18 @@ export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
             </div>
 
             {hasMore ? (
-                <div className="relative z-20 -mt-14 flex justify-center px-2 pb-1 pt-10 sm:-mt-16 sm:pt-12">
-                    <button
+                <div className="relative z-20 -mt-12 flex justify-center px-2 pb-1 pt-8 sm:-mt-14 sm:pt-10">
+                    <Button
                         type="button"
+                        variant="default"
+                        size="lg"
                         onClick={loadMore}
-                        className={cn(
-                            "flex max-w-full overflow-hidden rounded-xl shadow-lg transition-all",
-                            "ring-1 ring-black/15 dark:ring-white/10",
-                            "hover:brightness-110 active:scale-[0.99]",
-                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                        )}
+                        className="shadow-md"
                         aria-label={`再加载 ${Math.min(PAGE_SIZE, posts.length - visibleCount)} 篇文章`}
                     >
-                        <span
-                            className={cn(
-                                "flex shrink-0 items-center justify-center px-3 py-2 sm:px-2",
-                                "bg-primary/40 dark:bg-primary/50 text-primary-foreground dark:text-gray-100",
-                            )}
-                            aria-hidden
-                        >
-                            <ChevronDown className="size-5 text-white dark:text-zinc-100" strokeWidth={2.25} /> &nbsp;查看更多
-                        </span>
-                        {/* <span
-                            className={cn(
-                                "flex min-w-0 flex-1 items-center justify-center px-6 py-3.5 text-sm font-semibold tracking-wide text-white",
-                                "bg-[#2C3243] dark:bg-zinc-800 sm:px-10 sm:text-base",
-                            )}
-                        >
-                            查看更多
-                        </span> */}
-                    </button>
+                        <ChevronDown data-icon="inline-start" aria-hidden />
+                        查看更多
+                    </Button>
                 </div>
             ) : null}
         </div>

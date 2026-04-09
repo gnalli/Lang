@@ -1,15 +1,82 @@
+"use client"
+
+import * as React from "react"
 import type { TocItem } from "@/lib/extract-toc"
 import { formatTocLabel } from "@/lib/extract-toc"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+
+/** 与 `blog-article-prose` 里 `prose-headings:scroll-mt-24` / 顶栏 sticky 对齐 */
+const SCROLL_ACTIVE_OFFSET_PX = 96
 
 type Props = {
     items: TocItem[]
     className?: string
 }
 
-/** 无边框目录：大屏由 FixedTocSlot 外层滚动；小屏块内 ScrollArea */
+function useActiveTocId(ids: string[]) {
+    const [activeId, setActiveId] = React.useState<string | null>(() =>
+        ids.length > 0 ? ids[0]! : null,
+    )
+
+    React.useEffect(() => {
+        if (ids.length === 0) {
+            setActiveId(null)
+            return
+        }
+
+        const resolveElements = () =>
+            ids
+                .map((id) => document.getElementById(id))
+                .filter((el): el is HTMLElement => el !== null)
+
+        if (resolveElements().length === 0) {
+            setActiveId(ids[0] ?? null)
+            return
+        }
+
+        let raf = 0
+
+        const update = () => {
+            const els = ids
+                .map((id) => document.getElementById(id))
+                .filter((el): el is HTMLElement => el !== null)
+            if (els.length === 0) {
+                setActiveId(ids[0] ?? null)
+                return
+            }
+            let next: string | null = els[0]!.id
+            for (const el of els) {
+                if (el.getBoundingClientRect().top <= SCROLL_ACTIVE_OFFSET_PX) {
+                    next = el.id
+                }
+            }
+            setActiveId((prev) => (prev === next ? prev : next))
+        }
+
+        const onScrollOrResize = () => {
+            cancelAnimationFrame(raf)
+            raf = requestAnimationFrame(update)
+        }
+
+        update()
+        window.addEventListener("scroll", onScrollOrResize, { passive: true })
+        window.addEventListener("resize", onScrollOrResize)
+
+        return () => {
+            cancelAnimationFrame(raf)
+            window.removeEventListener("scroll", onScrollOrResize)
+            window.removeEventListener("resize", onScrollOrResize)
+        }
+    }, [ids])
+
+    return activeId
+}
+
+/** 无边框目录：随正文滚动高亮当前章节对应条目 */
 export function ArticleToc({ items, className }: Props) {
+    const ids = React.useMemo(() => items.map((i) => i.id), [items])
+    const activeId = useActiveTocId(ids)
+
     if (items.length === 0) {
         return (
             <p className={cn("text-xs text-muted-foreground/90", className)}>暂无目录</p>
@@ -19,15 +86,22 @@ export function ArticleToc({ items, className }: Props) {
     const minDepth = Math.min(...items.map((i) => i.depth))
 
     const list = (
-        <ul className="space-y-0.5 text-[0.8125rem] leading-snug">
+        <ul className="space-y-0.5 text-[0.85rem] leading-snug">
             {items.map((item, index) => {
                 const indent = Math.max(0, item.depth - minDepth)
+                const isActive = activeId === item.id
                 return (
                     <li key={`${item.id}-${index}`}>
-                                <a
-                                    href={`#${item.id}`}
-                                    style={{ paddingLeft: `${indent * 0.75}rem` }}
-                            className="block rounded-lg py-1.5 text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
+                        <a
+                            href={`#${item.id}`}
+                            style={{ paddingLeft: `${indent * 0.75}rem` }}
+                            aria-current={isActive ? "location" : undefined}
+                            className={cn(
+                                "block rounded-lg py-1.5 transition-colors",
+                                isActive
+                                    ? "bg-muted/50 font-medium text-foreground"
+                                    : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                            )}
                         >
                             <span className="line-clamp-3">{formatTocLabel(item.text)}</span>
                         </a>
@@ -39,13 +113,7 @@ export function ArticleToc({ items, className }: Props) {
 
     return (
         <nav aria-label="文章目录" className={cn(className)}>
-            <p className="mb-3 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-muted-foreground/80">
-                目录
-            </p>
-            <div className="lg:hidden">
-                <ScrollArea className="h-[min(58vh,24rem)] pr-2">{list}</ScrollArea>
-            </div>
-            <div className="hidden lg:block pr-2">{list}</div>
+            <div className="pr-2">{list}</div>
         </nav>
     )
 }

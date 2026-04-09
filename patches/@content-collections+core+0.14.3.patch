@@ -1,0 +1,13 @@
+diff --git a/node_modules/@content-collections/core/dist/index.js b/node_modules/@content-collections/core/dist/index.js
+index 1a46e39..4172106 100644
+--- a/node_modules/@content-collections/core/dist/index.js
++++ b/node_modules/@content-collections/core/dist/index.js
+@@ -2111,7 +2111,7 @@ function createTransformer(emitter, cacheManager) {
+ 	async function transformCollection(collections, collection) {
+ 		const transform = collection.transform;
+ 		if (transform) {
+-			const limit = pLimit(os.cpus().length);
++			const limit = pLimit(Math.max(1, os.cpus().length));
+ 			const typedTransform = transform;
+ 			const docs = collection.documents.map((doc) => limit(() => transformDocument(collections, collection, typedTransform, doc)));
+ 			const transformed = await Promise.all(docs);

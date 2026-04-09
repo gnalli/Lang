@@ -24,7 +24,7 @@ export function HeaderBrand() {
             >
                 <Link
                     href="/"
-                    className="text-base font-semibold tracking-tight text-foreground sm:text-lg max-[420px]:hidden"
+                    className="text-base font-semibold tracking-tight text-foreground sm:text-lg max-[360px]:hidden"
                 >
                     Lang&apos;s Blog
                 </Link>

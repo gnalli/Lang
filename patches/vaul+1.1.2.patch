@@ -1,0 +1,12 @@
+diff --git a/node_modules/vaul/dist/index.js b/node_modules/vaul/dist/index.js
+index 7f343be..475aaab 100644
+--- a/node_modules/vaul/dist/index.js
++++ b/node_modules/vaul/dist/index.js
+@@ -1361,6 +1361,7 @@ function Root({ open: openProp, onOpenChange, children, onDrag: onDragProp, onRe
+         modal
+     ]);
+     return /*#__PURE__*/ React__namespace.default.createElement(DialogPrimitive__namespace.Root, {
++        modal: false,
+         defaultOpen: defaultOpen,
+         onOpenChange: (open)=>{
+             if (!dismissible && !open) return;

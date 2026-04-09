@@ -1,12 +1,13 @@
-import type { MetadataRoute } from 'next'
+import type { MetadataRoute } from "next"
+import { siteSeoOrigin } from "@/lib/config"
 
 export default function robots(): MetadataRoute.Robots {
-    return {
-        rules: {
-            userAgent: '*',
-            allow: '/',
-            disallow: ['/api/', '/actions/'],
-        },
-        sitemap: 'https://localhost:3000/sitemap.xml',
-    }
+  const base = siteSeoOrigin()
+  return {
+    rules: {
+      userAgent: "*",
+      allow: "/",
+    },
+    sitemap: `${base}/sitemap.xml`,
+  }
 }

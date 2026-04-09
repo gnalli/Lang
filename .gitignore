@@ -20,7 +20,6 @@
 
 # misc
 .DS_Store
-*.pem
 
 # debug
 npm-debug.log*
@@ -28,13 +27,22 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# env files
-.env*.local
+# 环境变量与密钥（永远不要提交；可单独维护一份不含密钥的 .env.example 并入库）
+.env*
+!.env.example
+.envrc
+
+# Vercel CLI 本地链接（可能含团队/项目 id）
+.vercel
+
+# 密钥类文件扩展名
+*.pem
+*.p12
+*.key
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
 # content-collections
-.content-collections
-.agents
+/.content-collections/

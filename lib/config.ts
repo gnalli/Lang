@@ -1,52 +1,46 @@
 export const siteConfig = {
     site: {
         title: {
-            default: 'My Blog',
-            template: '%s | My Blog',
+            default: "Lang's Blog",
+            template: "%s | Lang's Blog",
         },
-        description: 'My Blog',
-        icons: {
-            icon: '/favicon.ico',
+        description: "Lang's Blog",
+        /** 展示名与个人页路径；完整 URL 由 `siteAuthorProfileUrl()` / `siteAuthors()` 按环境拼接 */
+        author: {
+            name: 'Author',
+            profilePath: '/about',
         },
-        authors: [{
-            name: 'Lang Li', url: 'https://www.example.com'
-        }],
         referrer: 'origin-when-cross-origin',
         keywords: ['blog'],
-        image: "https://xxx.com/og-image.png",  // 后续补充
+        image: "https://cdn.cnlang.net/og-image.png",  // 后续补充
     },
     social: {
         github: {
-            url: 'https://github.com/langli',
-            username: 'langli',
+            url: 'https://github.com/Lynnull',
+            username: 'Lynnull',
         },
-        twitter: {
-            //
-        }
     },
     seo: {
-        metadataBase: new URL('https://www.example.com/'),
+        metadataBase: new URL('https://www.cnlang.net/'),
         alternates: {
             canonical: '/',
-        },
-        types: {
-            'application/rss+xml': '/rss.xml',
-            'application/atom+xml': '/atom.xml',
-            'application/json': '/feed.json',
+            types: {
+                'application/rss+xml': '/rss.xml',
+                'application/atom+xml': '/atom.xml',
+            },
         },
         openGraph: {
-            title: 'My Blog',
-            description: 'My Blog',
+            title: "Lang's Blog",
+            description: "Lang's Blog",
             locale: 'zh_CN',
             url: '/',
-            siteName: 'My Blog',
+            siteName: "Lang's Blog",
             images: [
                 {
                     url: '/og-image.png'
                 }
             ],
-            type: 'article',
-
+            type: 'website',
         },
         robots: {
             index: true,
@@ -61,7 +55,42 @@ export const siteConfig = {
             },
         },
         verification: {
-            google: 'google',
+            google: 'mgIluz7N4SUy0mS_pJaQz8bRBoJhzpIIOw1ww4c6zEo'
         }
     }
+}
+
+/**
+ * 当前站点根 URL（无尾斜杠）。
+ * 开发环境在 `.env` 设置 `NEXT_PUBLIC_APP_URL=http://localhost:3000`；
+ * 未设置时回退到生产 `seo.metadataBase`。
+ */
+export function sitePublicOrigin(): string {
+    const raw = process.env.NEXT_PUBLIC_APP_URL?.trim()
+    if (raw) {
+        return raw.replace(/\/$/, "")
+    }
+    return new URL(siteConfig.seo.metadataBase).origin.replace(/\/$/, "")
+}
+
+/** 作者个人页绝对地址（与当前环境域名一致） */
+export function siteAuthorProfileUrl(): string {
+    const p = siteConfig.site.author.profilePath.trim()
+    const path = p.startsWith("/") ? p : `/${p}`
+    return `${sitePublicOrigin()}${path}`
+}
+
+/** 供 `metadata.authors`、JSON-LD 等 */
+export function siteAuthors(): { name: string; url: string }[] {
+    return [
+        {
+            name: siteConfig.site.author.name,
+            url: siteAuthorProfileUrl(),
+        },
+    ]
+}
+
+/** SEO canonical 站点根（无尾斜杠），与 sitemap / 正文 canonical 一致 */
+export function siteSeoOrigin(): string {
+    return new URL(siteConfig.seo.metadataBase).origin.replace(/\/$/, "")
 }

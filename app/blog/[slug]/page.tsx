@@ -3,13 +3,18 @@ import { allBlogs } from "content-collections"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { ArticleToc } from "@/components/blog/article-toc"
-import { FixedTocSlot } from "@/components/blog/fixed-toc-slot"
-import { GoToTopButton } from "@/components/blog/go-to-top-button"
 import { siteConfig } from "@/lib/config"
 import { blogArticleProseClassName } from "@/lib/blog-article-prose"
 import { extractToc } from "@/lib/extract-toc"
 import { formatDate } from "@/lib/forma-date"
 import { cn } from "@/lib/utils"
+import Comments from "@/components/comments"
+import { PageViewBeacon } from "@/components/analytics/page-view-beacon"
+import { ArticleJsonLd } from "@/components/seo/article-json-ld"
+import { ArticleZoomableImage } from "@/components/blog/article-zoomable-image"
+import { ArticleFigure } from "@/components/blog/article-code-figure"
+import { ArticleLink } from "@/components/blog/article-link"
+import { ArticleTable } from "@/components/blog/article-table"
 
 export const dynamicParams = false
 
@@ -31,20 +36,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     if (!blog) return {}
 
     const url = new URL(`/blog/${blog.slug}`, siteConfig.seo.metadataBase).toString()
+    const description = blog.summary?.trim() || siteConfig.site.description
+    const ogImages = siteConfig.site.image
+        ? [{ url: siteConfig.site.image }]
+        : siteConfig.seo.openGraph.images
+    const kw = blog.keywords
+        ? blog.keywords.split(/[,，;；]/).map((s) => s.trim()).filter(Boolean)
+        : undefined
 
     return {
         title: blog.title,
-        description: blog.summary ?? siteConfig.site.description,
-        keywords: blog.keywords,
+        description,
+        keywords: kw,
+        alternates: { canonical: url },
         openGraph: {
             title: blog.title,
-            description: blog.summary ?? undefined,
+            description: blog.summary?.trim() || undefined,
             type: "article",
             url,
             locale: siteConfig.seo.openGraph.locale,
-            images: siteConfig.site.image
-                ? [{ url: siteConfig.site.image }]
-                : siteConfig.seo.openGraph.images,
+            siteName: siteConfig.seo.openGraph.siteName,
+            publishedTime: new Date(blog.date).toISOString(),
+            modifiedTime: new Date(blog.updated ?? blog.date).toISOString(),
+            authors: [siteConfig.site.author.name],
+            images: ogImages,
         },
     }
 }
@@ -56,12 +71,15 @@ export default async function BlogPostPage({ params }: PageProps) {
 
     const toc = extractToc(blog.content)
 
+    const pageUrl = new URL(`/blog/${blog.slug}`, siteConfig.seo.metadataBase).toString()
+
     return (
         <>
-            <main id="blog-post-top" className="pb-8 lg:pb-12">
+            <ArticleJsonLd blog={blog} pageUrl={pageUrl} />
+            <main id="blog-post-top" className="pb-4 lg:pb-12">
                 <div
                     className={cn(
-                        "grid items-start",
+                        "grid items-start lg:items-stretch",
                         "gap-x-12 lg:gap-x-20 xl:gap-x-28 2xl:gap-x-32",
                         "gap-y-10",
                         "lg:justify-center",
@@ -71,7 +89,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                     )}
                 >
                     {/* 标题与正文同一 max-w-2xl 列，左缘对齐 */}
-                    <div className="min-w-0 w-full max-w-2xl">
+                    <div className="min-h-0 min-w-0 w-full max-w-2xl">
                         <header className="mb-10">
                             <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-[2.125rem] sm:leading-tight">
                                 {blog.title}
@@ -88,31 +106,59 @@ export default async function BlogPostPage({ params }: PageProps) {
                         </header>
 
                         {toc.length > 0 ? (
-                            <div className="mb-10 rounded-2xl bg-muted/25 p-4 lg:hidden">
-                                <ArticleToc items={toc} />
+                            <div className="mb-10 rounded-2xl bg-muted/25 p-4 lg:hidden ">
+                                <ArticleToc key={blog.slug} items={toc} />
                             </div>
                         ) : null}
 
-                        <div className={cn("w-full", blogArticleProseClassName())}>
-                            <MDXContent code={blog.mdx} />
+                        <div
+                            className={cn(
+                                // 博文字体大小
+                                "w-full text-base md:text-[1.0625rem]",
+                                blogArticleProseClassName(),
+                            )}
+                        >
+                            <MDXContent
+                                code={blog.mdx}
+                                components={{
+                                    a: ArticleLink,
+                                    img: ArticleZoomableImage,
+                                    figure: ArticleFigure,
+                                    table: ArticleTable,
+                                }}
+                            />
+                        </div>
+
+                        <div className="mt-12 w-full min-w-0">
+                            <Comments />
                         </div>
                     </div>
 
-                    <aside className="hidden w-full min-w-[200px] max-w-[260px] lg:block">
+                    <aside
+                        className={cn(
+                            "hidden w-full min-w-[200px] max-w-[260px]",
+                            "lg:z-20 lg:block lg:h-full lg:min-h-0 lg:self-stretch",
+                        )}
+                    >
                         {toc.length > 0 ? (
-                            <FixedTocSlot footer={<GoToTopButton placement="tocColumn" />}>
-                                <ArticleToc items={toc} />
-                            </FixedTocSlot>
+                            <div className="relative min-h-0 lg:h-full">
+                                <div
+                                    className={cn(
+                                        "lg:sticky lg:top-24 lg:z-20",
+                                        // 目录区域限制高度（避免占满整屏）；仅溢出时出现滚动条
+                                        "lg:max-h-[min(40rem,calc(100dvh-6rem))] lg:overflow-y-auto lg:overflow-x-hidden lg:overscroll-y-contain lg:pr-1",
+                                        "border-t-40 border-transparent bg-clip-padding"
+                                    )}
+                                >
+                                    <ArticleToc key={blog.slug} items={toc} />
+                                </div>
+                            </div>
                         ) : null}
                     </aside>
                 </div>
             </main>
 
-            {toc.length > 0 ? (
-                <GoToTopButton placement="viewport" className="lg:hidden" />
-            ) : (
-                <GoToTopButton />
-            )}
+            <PageViewBeacon path={`/blog/${slug}`} slug={slug} />
         </>
     )
 }
