@@ -17,7 +17,8 @@ export function blogArticleProseClassName() {
         "prose-ul:my-4 prose-ol:my-4 prose-li:my-1.5 marker:text-muted-foreground",
         "prose-hr:border-border prose-hr:my-10",
         "prose-blockquote:border-l-primary/35 prose-blockquote:text-muted-foreground",
-        "prose-img:mx-auto prose-img:rounded-lg prose-img:border prose-img:border-border/70 prose-img:shadow-sm",
+        // 图片与上下正文的间距：改 my-* / mt-* / mb-* 即可（与段落 margin 叠加）
+        "prose-img:mx-auto prose-img:my-4 prose-img:rounded-lg prose-img:border prose-img:border-border/70 prose-img:shadow-sm sm:prose-img:my-4",
         "prose-table:my-1 prose-table:min-w-full prose-table:w-max prose-table:border-collapse prose-table:text-[0.9375em] prose-table:text-foreground/90",
         "prose-table:border prose-table:border-border prose-table:rounded-lg",
         "prose-thead:border-border prose-tr:border-border",

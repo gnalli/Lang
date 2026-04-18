@@ -131,6 +131,31 @@
 
 /* 仅行内 code（非 pre 内），避免 prose-code 作用到代码块与 Shiki 片段 */
 @layer components {
+  /* 长 URL（尤其 ul>li>a）勿撑破窄屏；list 子项需 min-width:0 才能在 grid/flex 内收缩 */
+  .article-mdx-prose {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .article-mdx-prose pre {
+    overflow-wrap: normal;
+  }
+  .article-mdx-prose ul,
+  .article-mdx-prose ol {
+    min-width: 0;
+  }
+  .article-mdx-prose li {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .article-mdx-prose p {
+    overflow-wrap: anywhere;
+  }
+  .article-mdx-prose a {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
   .article-mdx-prose :not(pre) > code {
     @apply rounded-md border border-border/70 bg-muted/80 px-1.5 py-0.5 text-[0.875em] font-normal text-foreground shadow-none;
   }

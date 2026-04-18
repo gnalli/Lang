@@ -2,13 +2,20 @@
 
 import * as React from "react"
 import { createPortal } from "react-dom"
+import { getProxiedImageSrcForBrowser } from "@/lib/proxied-image-src"
 import { cn } from "@/lib/utils"
+
+function normalizeImgSrc(src: React.ComponentPropsWithoutRef<"img">["src"]): string {
+    if (typeof src === "string") return src.trim()
+    if (src == null) return ""
+    return String(src)
+}
 
 /** MDX `img`：Portal 预览；打开时锁定背后滚动；滚轮 / 滑动结束预览（不滚后面页面） */
 export function ArticleZoomableImage(
     props: React.ComponentPropsWithoutRef<"img">,
 ) {
-    const { className, src, alt, title } = props
+    const { className, src, alt, title, ...rest } = props
     const [open, setOpen] = React.useState(false)
     const [mounted, setMounted] = React.useState(false)
     const overlayRef = React.useRef<HTMLDivElement>(null)
@@ -104,9 +111,13 @@ export function ArticleZoomableImage(
         }
     }, [open])
 
-    if (!src || typeof src !== "string") {
+    const srcStr = normalizeImgSrc(src)
+    if (!srcStr) {
         return null
     }
+
+    /** 同源代理，避免浏览器对 CDN 直链的 403/CORS 与 curl 不一致 */
+    const displaySrc = getProxiedImageSrcForBrowser(srcStr)
 
     const label = alt?.trim() ? `查看大图：${alt}` : "查看大图"
 
@@ -131,11 +142,13 @@ export function ArticleZoomableImage(
                 >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src={src}
+                        {...rest}
+                        src={displaySrc}
                         alt={alt ?? ""}
                         className="max-h-[min(85dvh,100%)] w-auto max-w-full rounded-md object-contain pointer-events-none"
                         decoding="async"
                         fetchPriority="high"
+                        loading="eager"
                     />
                 </button>
             </div>
@@ -160,7 +173,8 @@ export function ArticleZoomableImage(
             >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                    src={src}
+                    {...rest}
+                    src={displaySrc}
                     alt={alt ?? ""}
                     title={title}
                     className={cn(

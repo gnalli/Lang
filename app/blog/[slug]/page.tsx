@@ -113,8 +113,8 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                         <div
                             className={cn(
-                                // 博文字体大小
-                                "w-full text-base md:text-[1.0625rem]",
+                                // 博文字体大小；min-w-0 + overflow-x-clip 防止 ul>li 中长链接撑出横向滚动
+                                "w-full min-w-0 max-w-full overflow-x-clip text-base md:text-[1.0625rem]",
                                 blogArticleProseClassName(),
                             )}
                         >

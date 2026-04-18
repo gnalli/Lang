@@ -35,17 +35,22 @@ export default function NotFound() {
                         "ring-1 ring-border/30 dark:bg-muted sm:px-7 sm:py-5",
                     )}
                 >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src="/404.png"
-                        alt=""
-                        decoding="async"
+                    {/*
+                      用背景图而非<img>，避免部分环境下对大图产生link preload却未立刻参与绘制的控制台警告
+                    */}
+                    <div
                         className={cn(
-                            "mx-auto block h-auto w-full object-contain",
-                            "max-h-[min(26svh,11rem)]",
-                            "sm:max-h-[min(30svh,24rem)]",
+                            "mx-auto flex w-full justify-center",
+                            "h-[min(26svh,11rem)] sm:h-[min(30svh,24rem)]",
                         )}
-                    />
+                    >
+                        <div
+                            className="h-full w-full bg-contain bg-center bg-no-repeat"
+                            style={{ backgroundImage: "url(/404.png)" }}
+                            role="img"
+                            aria-hidden
+                        />
+                    </div>
                 </div>
 
                 <header className="w-full shrink text-center">

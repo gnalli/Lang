@@ -105,8 +105,7 @@ export function HeaderAnalyticsDrawer() {
             ) : showConfigureHint ? (
               <div className="flex min-h-[180px] flex-col justify-center gap-2 text-sm text-muted-foreground">
                 <p>
-                  统计未配置：请在服务端配置 Supabase 与有效的
-                  service_role。
+                  Supabase连接失败，请检查相关配置...
                 </p>
               </div>
             ) : showGenericError ? (

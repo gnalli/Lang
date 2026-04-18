@@ -1,10 +1,14 @@
+/** 站点默认摘要（meta / OG / JSON-LD） */
+const defaultSiteDescription =
+    "Lang 的个人技术博客，记录云原生、前后端开发与数据库、中间件等领域的学习笔记与实践总结。"
+
 export const siteConfig = {
     site: {
         title: {
             default: "Lang's Blog",
             template: "%s | Lang's Blog",
         },
-        description: "Lang's Blog",
+        description: defaultSiteDescription,
         /** 展示名与个人页路径；完整 URL 由 `siteAuthorProfileUrl()` / `siteAuthors()` 按环境拼接 */
         author: {
             name: 'Author',
@@ -21,8 +25,8 @@ export const siteConfig = {
     },
     social: {
         github: {
-            url: 'https://github.com/Lynnull',
-            username: 'Lynnull',
+            url: 'https://github.com/gnalli',
+            username: 'gnalli',
         },
     },
     seo: {
@@ -36,7 +40,7 @@ export const siteConfig = {
         },
         openGraph: {
             title: "Lang's Blog",
-            description: "Lang's Blog",
+            description: defaultSiteDescription,
             locale: 'zh_CN',
             url: '/',
             siteName: "Lang's Blog",

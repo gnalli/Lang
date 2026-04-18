@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { motion, useReducedMotion } from "motion/react"
 import { Bookmark, ChevronDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatMonthDayOnly } from "@/lib/forma-date"
 import { cn } from "@/lib/utils"
@@ -179,7 +180,7 @@ export function ArchiveListExpandable({ posts }: { posts: ArchivePostItem[] }) {
 
       {hasMore ? (
         <motion.div
-          className="relative z-20 -mt-14 flex justify-center px-2 pb-1 pt-10 sm:-mt-16 sm:pt-12"
+          className="relative z-20 -mt-12 flex justify-center px-2 pb-1 pt-8 sm:-mt-14 sm:pt-10"
           initial={reduceMotion ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={
@@ -188,31 +189,20 @@ export function ArchiveListExpandable({ posts }: { posts: ArchivePostItem[] }) {
               : { duration: 0.4, ease: easeOut }
           }
         >
-          <button
+          <Button
             type="button"
+            variant="default"
+            size="lg"
             onClick={loadMore}
             className={cn(
-              "flex max-w-full overflow-hidden rounded-xl shadow-lg transition-all",
-              "ring-1 ring-black/15 dark:ring-white/10",
-              "hover:brightness-110 active:scale-[0.99]",
-              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none",
+              "shadow-md",
+              "h-9 min-h-9 gap-2 rounded-lg px-5 text-sm font-medium sm:h-10 sm:min-h-10 sm:px-6 sm:text-base",
             )}
             aria-label={`再加载 ${Math.min(PAGE_SIZE, posts.length - visibleCount)} 篇文章`}
           >
-            <span
-              className={cn(
-                "flex shrink-0 items-center justify-center px-3 py-2 sm:px-2",
-                "bg-primary/40 text-primary-foreground dark:bg-primary/50 dark:text-gray-100",
-              )}
-              aria-hidden
-            >
-              <ChevronDown
-                className="size-5 text-white dark:text-zinc-100"
-                strokeWidth={2.25}
-              />{" "}
-              &nbsp;查看更多
-            </span>
-          </button>
+            <ChevronDown data-icon="inline-start" className="size-5" aria-hidden />
+            查看更多
+          </Button>
         </motion.div>
       ) : null}
     </div>

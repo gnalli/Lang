@@ -9,7 +9,7 @@ export default function Comments() {
     return (
         <Giscus
             id="comments"
-            repo="Lynnull/Lang"
+            repo="gnalli/Lang"
             repoId="R_kgDOR4-pxA"
             category="General"
             categoryId="DIC_kwDOR4-pxM4C59xP"
