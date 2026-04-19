@@ -46,7 +46,7 @@ export default function FooterActions() {
                 </a>
             </div>
             <p className="mx-auto mt-4 max-w-6xl text-center text-xs text-muted-foreground">
-                © {year} {name}‘s Blog Powered by Nextjs & React & Shadcn
+                © {year} {name}'s Blog Powered by Nextjs & React & Shadcn
             </p>
         </footer>
     )
