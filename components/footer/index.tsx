@@ -17,9 +17,9 @@ export default function FooterActions() {
         <footer className="border-t border-border/60 px-4 py-8 sm:px-6">
             <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-sm text-muted-foreground">
                 {author?.url ? (
-                    <Link href={author.url} prefetch={false} className={link}>{name}</Link>
+                    <Link href={author.url} prefetch={false} className={link}>Author</Link>
                 ) : (
-                    <span className="text-foreground/85">{name}</span>
+                    <span className="text-foreground/85">Author</span>
                 )}
                 <span aria-hidden className="text-border select-none">
                     ·

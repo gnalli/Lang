@@ -11,7 +11,7 @@ export const siteConfig = {
         description: defaultSiteDescription,
         /** 展示名与个人页路径；完整 URL 由 `siteAuthorProfileUrl()` / `siteAuthors()` 按环境拼接 */
         author: {
-            name: 'Author',
+            name: 'Lang',
             profilePath: '/about',
         },
         referrer: 'origin-when-cross-origin',
