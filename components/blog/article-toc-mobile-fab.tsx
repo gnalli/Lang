@@ -78,8 +78,8 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
   return (
     <div
       className={cn(
-        // 纯 CSS 居中：切勿用 visualViewport + scroll 反复写 inline top，会在滑动时每一帧重算导致剧烈跳动
-        "fixed right-0 top-1/2 z-40 -translate-y-1/2 lg:hidden",
+        // 贴底固定：在底栏/安全区之上再上抬约三指（3.5rem），避免与系统手势、浏览器工具条打架
+        "fixed right-0 top-auto bottom-[calc(28rem+env(safe-area-inset-bottom,0px))] z-40 lg:hidden",
       )}
     >
       <div className="pr-[max(0.25rem,env(safe-area-inset-right,0px))]">
