@@ -11,6 +11,8 @@ const SCROLL_ACTIVE_OFFSET_PX = 96
 type Props = {
     items: TocItem[]
     className?: string
+    /** 点击目录项后回调（如关闭移动端抽屉） */
+    onItemNavigate?: () => void
 }
 
 function useActiveTocId(ids: string[]) {
@@ -73,7 +75,7 @@ function useActiveTocId(ids: string[]) {
 }
 
 /** 无边框目录：随正文滚动高亮当前章节对应条目 */
-export function ArticleToc({ items, className }: Props) {
+export function ArticleToc({ items, className, onItemNavigate }: Props) {
     const ids = React.useMemo(() => items.map((i) => i.id), [items])
     const activeId = useActiveTocId(ids)
 
@@ -96,6 +98,7 @@ export function ArticleToc({ items, className }: Props) {
                             href={`#${item.id}`}
                             style={{ paddingLeft: `${indent * 0.75}rem` }}
                             aria-current={isActive ? "location" : undefined}
+                            onClick={() => onItemNavigate?.()}
                             className={cn(
                                 "block rounded-lg py-1.5 transition-colors",
                                 isActive

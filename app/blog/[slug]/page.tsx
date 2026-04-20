@@ -3,6 +3,7 @@ import { allBlogs } from "content-collections"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { ArticleToc } from "@/components/blog/article-toc"
+import { ArticleTocMobileFab } from "@/components/blog/article-toc-mobile-fab"
 import { siteConfig } from "@/lib/config"
 import { blogArticleProseClassName } from "@/lib/blog-article-prose"
 import { extractToc } from "@/lib/extract-toc"
@@ -88,8 +89,13 @@ export default async function BlogPostPage({ params }: PageProps) {
                             : "lg:grid-cols-1",
                     )}
                 >
-                    {/* 标题与正文同一 max-w-2xl 列，左缘对齐 */}
-                    <div className="min-h-0 min-w-0 w-full max-w-2xl">
+                    {/* 默认 max-w-2xl；770–1020px 间正文列占满可用宽度（平板横屏等），其余视口不变 */}
+                    <div
+                        className={cn(
+                            "min-h-0 min-w-0 w-full max-w-2xl",
+                            "[@media(min-width:770px)_and_(max-width:1020px)]:max-w-none",
+                        )}
+                    >
                         <header className="mb-10">
                             <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-[2.125rem] sm:leading-tight">
                                 {blog.title}
@@ -104,12 +110,6 @@ export default async function BlogPostPage({ params }: PageProps) {
                                 ) : null}
                             </p>
                         </header>
-
-                        {toc.length > 0 ? (
-                            <div className="mb-10 rounded-2xl bg-muted/25 p-4 lg:hidden ">
-                                <ArticleToc key={blog.slug} items={toc} />
-                            </div>
-                        ) : null}
 
                         <div
                             className={cn(
@@ -156,6 +156,10 @@ export default async function BlogPostPage({ params }: PageProps) {
                         ) : null}
                     </aside>
                 </div>
+
+                {toc.length > 0 ? (
+                    <ArticleTocMobileFab key={blog.slug} items={toc} />
+                ) : null}
             </main>
 
             <PageViewBeacon path={`/blog/${slug}`} slug={slug} />
