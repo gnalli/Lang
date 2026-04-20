@@ -79,7 +79,7 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
     <div
       className={cn(
         // 贴底固定：在底栏/安全区之上再上抬约三指（3.5rem），避免与系统手势、浏览器工具条打架
-        "fixed right-0 top-auto bottom-[calc(28rem+env(safe-area-inset-bottom,0px))] z-40 lg:hidden",
+        "fixed right-0 top-auto bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] z-40 lg:hidden",
       )}
     >
       <div className="pr-[max(0.25rem,env(safe-area-inset-right,0px))]">
