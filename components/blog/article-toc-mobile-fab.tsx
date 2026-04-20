@@ -67,7 +67,13 @@ function useTocDrawerWidth(items: TocItem[]) {
   return widthPx
 }
 
-/** 可滚动时：滚动距离 ≥ 最大可滚动距离 × fraction 时显示；不可滚动时始终显示。带滞回，避免在阈值附近反复显隐引起闪烁。 */
+/** 距顶部小于此值视为「回顶」，才隐藏按钮（避免在 ~20% 阈值附近上下滑动时反复显隐 → 按钮跳动） */
+const SCROLL_SHOW_NEAR_TOP_PX = 56
+
+/**
+ * 滚动超过 maxScroll×fraction 后显示；一旦显示，在页面中间区域上下滑不再切换显隐，
+ * 只有滚回接近顶部才隐藏。短页不可滚时始终显示。
+ */
 function useShowAfterScrollFraction(fraction: number) {
   const [show, setShow] = React.useState(false)
 
@@ -80,11 +86,11 @@ function useShowAfterScrollFraction(fraction: number) {
         setShow(true)
         return
       }
-      const up = maxScroll * fraction
-      const down = maxScroll * Math.max(0, fraction - 0.08)
+      const threshold = maxScroll * fraction
       setShow((prev) => {
-        if (!prev) return y >= up
-        return y > down
+        if (y < SCROLL_SHOW_NEAR_TOP_PX) return false
+        if (y >= threshold) return true
+        return prev
       })
     }
 
@@ -112,9 +118,8 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
   return (
     <div
       className={cn(
-        // 不用 top:50% + translate：移动端地址栏伸缩会改变包含块高度，居中会抖；用 svh 近似居中且更稳
-        "fixed right-0 z-40 translate-z-0 transform-gpu will-change-transform lg:hidden",
-        "top-[calc(50svh-2.75rem)]",
+        // 右侧垂直居中：用 50svh + translateY(-50%)，比 top:50% 更稳（svh 为「最小视口高度」，不随地址栏伸缩跳变）；显隐用闩锁避免阈值附近闪动
+        "fixed right-0 top-[50svh] z-40 -translate-y-1/2 transform-gpu translate-z-0 lg:hidden",
         "transition-[opacity,visibility] duration-300",
         showFab
           ? "visible opacity-100"
