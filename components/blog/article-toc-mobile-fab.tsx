@@ -67,48 +67,57 @@ function useTocDrawerWidth(items: TocItem[]) {
   return widthPx
 }
 
-/** 距顶部小于此值视为「回顶」，才隐藏按钮（避免在 ~20% 阈值附近上下滑动时反复显隐 → 按钮跳动） */
-const SCROLL_SHOW_NEAR_TOP_PX = 56
-
 /**
- * 滚动超过 maxScroll×fraction 后显示；一旦显示，在页面中间区域上下滑不再切换显隐，
- * 只有滚回接近顶部才隐藏。短页不可滚时始终显示。
+ * 用 visualViewport 计算垂直居中 top（px），避免 top:50%/svh 与 iOS 地址栏、底栏伸缩不同步导致跳动。
  */
-function useShowAfterScrollFraction(fraction: number) {
-  const [show, setShow] = React.useState(false)
+function useTocFabVisualViewportTop(ref: React.RefObject<HTMLDivElement | null>) {
+  React.useLayoutEffect(() => {
+    const el = ref.current
+    if (!el || typeof window === "undefined") return
 
-  React.useEffect(() => {
-    const update = () => {
-      const root = document.documentElement
-      const maxScroll = Math.max(0, root.scrollHeight - root.clientHeight)
-      const y = window.scrollY
-      if (maxScroll === 0) {
-        setShow(true)
+    let raf = 0
+    const position = () => {
+      const vv = window.visualViewport
+      if (!vv) {
+        el.style.top = "50svh"
+        el.style.transform = "translateY(-50%)"
         return
       }
-      const threshold = maxScroll * fraction
-      setShow((prev) => {
-        if (y < SCROLL_SHOW_NEAR_TOP_PX) return false
-        if (y >= threshold) return true
-        return prev
-      })
+      const h = el.offsetHeight
+      const top = vv.offsetTop + (vv.height - h) / 2
+      el.style.top = `${Math.max(0, Math.round(top * 2) / 2)}px`
+      el.style.transform = "none"
+      el.style.bottom = "auto"
     }
 
-    update()
-    window.addEventListener("scroll", update, { passive: true })
-    window.addEventListener("resize", update)
+    const schedule = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(position)
+    }
+
+    position()
+    const vv = window.visualViewport
+    vv?.addEventListener("resize", schedule)
+    vv?.addEventListener("scroll", schedule)
+    window.addEventListener("resize", schedule)
+
+    const ro = new ResizeObserver(schedule)
+    ro.observe(el)
+
     return () => {
-      window.removeEventListener("scroll", update)
-      window.removeEventListener("resize", update)
+      cancelAnimationFrame(raf)
+      vv?.removeEventListener("resize", schedule)
+      vv?.removeEventListener("scroll", schedule)
+      window.removeEventListener("resize", schedule)
+      ro.disconnect()
     }
-  }, [fraction])
-
-  return show
+  }, [])
 }
 
 export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
   const [open, setOpen] = React.useState(false)
-  const showFab = useShowAfterScrollFraction(0.2)
+  const fabWrapRef = React.useRef<HTMLDivElement>(null)
+  useTocFabVisualViewportTop(fabWrapRef)
   const drawerWidthPx = useTocDrawerWidth(items)
 
   if (items.length === 0) {
@@ -117,13 +126,10 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
 
   return (
     <div
+      ref={fabWrapRef}
       className={cn(
-        // 右侧垂直居中：用 50svh + translateY(-50%)，比 top:50% 更稳（svh 为「最小视口高度」，不随地址栏伸缩跳变）；显隐用闩锁避免阈值附近闪动
-        "fixed right-0 top-[50svh] z-40 -translate-y-1/2 transform-gpu translate-z-0 lg:hidden",
-        "transition-[opacity,visibility] duration-300",
-        showFab
-          ? "visible opacity-100"
-          : "invisible pointer-events-none opacity-0",
+        // SSR/首帧兜底；客户端用 layout effect 写入 inline top 覆盖（visualViewport 居中）
+        "fixed right-0 top-[50svh] z-40 -translate-y-1/2 lg:hidden",
       )}
     >
       <div className="pr-[max(0.25rem,env(safe-area-inset-right,0px))]">
