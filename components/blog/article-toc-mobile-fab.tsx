@@ -78,8 +78,8 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
   return (
     <div
       className={cn(
-        // 贴齐视口底边，仅用 padding 承接安全区；不再用 bottom 大偏移，避免滑动时与地址栏联动产生跳动
-        "fixed right-0 top-auto bottom-0 z-40 pb-[env(safe-area-inset-bottom,0px)] lg:hidden",
+        // 右侧垂直居中。滑动时底栏显隐会改变视口高度，top:50% 会跟着抖；改用 50svh（小视口高度）相对更稳
+        "fixed right-0 top-[50svh] z-40 -translate-y-1/2 lg:hidden",
       )}
     >
       <div className="pr-[max(0.25rem,env(safe-area-inset-right,0px))]">
