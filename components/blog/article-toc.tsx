@@ -98,7 +98,29 @@ export function ArticleToc({ items, className, onItemNavigate }: Props) {
                             href={`#${item.id}`}
                             style={{ paddingLeft: `${indent * 0.75}rem` }}
                             aria-current={isActive ? "location" : undefined}
-                            onClick={() => onItemNavigate?.()}
+                            onClick={(e) => {
+                                if (!onItemNavigate) return
+                                // 移动端抽屉内：原生 # 跳转易被 Vaul/Radix 与关抽屉时序打断，改为手动滚动并更新 hash
+                                e.preventDefault()
+                                const id = item.id
+                                onItemNavigate()
+                                // 略晚于关抽屉，避免 Vaul 锁滚动/焦点层仍拦截导致 scrollIntoView 无效（尤其移动端）
+                                window.setTimeout(() => {
+                                    const el = document.getElementById(id)
+                                    if (el) {
+                                        el.scrollIntoView({
+                                            behavior: "smooth",
+                                            block: "start",
+                                        })
+                                    }
+                                    const { pathname, search } = window.location
+                                    window.history.replaceState(
+                                        null,
+                                        "",
+                                        `${pathname}${search}#${id}`,
+                                    )
+                                }, 120)
+                            }}
                             className={cn(
                                 "block rounded-lg py-1.5 transition-colors",
                                 isActive

@@ -67,7 +67,7 @@ function useTocDrawerWidth(items: TocItem[]) {
   return widthPx
 }
 
-/** 可滚动时：滚动距离 ≥ 最大可滚动距离 × fraction 时显示；不可滚动时始终显示（无法达到 20%） */
+/** 可滚动时：滚动距离 ≥ 最大可滚动距离 × fraction 时显示；不可滚动时始终显示。带滞回，避免在阈值附近反复显隐引起闪烁。 */
 function useShowAfterScrollFraction(fraction: number) {
   const [show, setShow] = React.useState(false)
 
@@ -80,7 +80,12 @@ function useShowAfterScrollFraction(fraction: number) {
         setShow(true)
         return
       }
-      setShow(y >= maxScroll * fraction)
+      const up = maxScroll * fraction
+      const down = maxScroll * Math.max(0, fraction - 0.08)
+      setShow((prev) => {
+        if (!prev) return y >= up
+        return y > down
+      })
     }
 
     update()
@@ -107,7 +112,10 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
   return (
     <div
       className={cn(
-        "fixed right-0 top-1/2 z-40 -translate-y-1/2 transition-[opacity,visibility] duration-300 lg:hidden",
+        // 不用 top:50% + translate：移动端地址栏伸缩会改变包含块高度，居中会抖；用 svh 近似居中且更稳
+        "fixed right-0 z-40 translate-z-0 transform-gpu will-change-transform lg:hidden",
+        "top-[calc(50svh-2.75rem)]",
+        "transition-[opacity,visibility] duration-300",
         showFab
           ? "visible opacity-100"
           : "invisible pointer-events-none opacity-0",
