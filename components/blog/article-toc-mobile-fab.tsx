@@ -67,57 +67,8 @@ function useTocDrawerWidth(items: TocItem[]) {
   return widthPx
 }
 
-/**
- * 用 visualViewport 计算垂直居中 top（px），避免 top:50%/svh 与 iOS 地址栏、底栏伸缩不同步导致跳动。
- */
-function useTocFabVisualViewportTop(ref: React.RefObject<HTMLDivElement | null>) {
-  React.useLayoutEffect(() => {
-    const el = ref.current
-    if (!el || typeof window === "undefined") return
-
-    let raf = 0
-    const position = () => {
-      const vv = window.visualViewport
-      if (!vv) {
-        el.style.top = "50svh"
-        el.style.transform = "translateY(-50%)"
-        return
-      }
-      const h = el.offsetHeight
-      const top = vv.offsetTop + (vv.height - h) / 2
-      el.style.top = `${Math.max(0, Math.round(top * 2) / 2)}px`
-      el.style.transform = "none"
-      el.style.bottom = "auto"
-    }
-
-    const schedule = () => {
-      cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(position)
-    }
-
-    position()
-    const vv = window.visualViewport
-    vv?.addEventListener("resize", schedule)
-    vv?.addEventListener("scroll", schedule)
-    window.addEventListener("resize", schedule)
-
-    const ro = new ResizeObserver(schedule)
-    ro.observe(el)
-
-    return () => {
-      cancelAnimationFrame(raf)
-      vv?.removeEventListener("resize", schedule)
-      vv?.removeEventListener("scroll", schedule)
-      window.removeEventListener("resize", schedule)
-      ro.disconnect()
-    }
-  }, [])
-}
-
 export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
   const [open, setOpen] = React.useState(false)
-  const fabWrapRef = React.useRef<HTMLDivElement>(null)
-  useTocFabVisualViewportTop(fabWrapRef)
   const drawerWidthPx = useTocDrawerWidth(items)
 
   if (items.length === 0) {
@@ -126,10 +77,9 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
 
   return (
     <div
-      ref={fabWrapRef}
       className={cn(
-        // SSR/首帧兜底；客户端用 layout effect 写入 inline top 覆盖（visualViewport 居中）
-        "fixed right-0 top-[50svh] z-40 -translate-y-1/2 lg:hidden",
+        // 纯 CSS 居中：切勿用 visualViewport + scroll 反复写 inline top，会在滑动时每一帧重算导致剧烈跳动
+        "fixed right-0 top-1/2 z-40 -translate-y-1/2 lg:hidden",
       )}
     >
       <div className="pr-[max(0.25rem,env(safe-area-inset-right,0px))]">
