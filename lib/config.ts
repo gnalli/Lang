@@ -1,6 +1,6 @@
 /** 站点默认摘要（meta / OG / JSON-LD） */
 const defaultSiteDescription =
-    "Lang 的个人技术博客，记录云原生、前后端开发与数据库、中间件等领域的学习笔记与实践总结。"
+    "Lang 的个人技术博客，记录云原生、前端、后端、数据库、中间件等领域的学习笔记与实践总结。"
 
 export const siteConfig = {
     site: {
