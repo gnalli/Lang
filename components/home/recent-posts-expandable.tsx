@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { ArrowRight, ChevronDown } from "lucide-react"
+import { ArrowRight, Bookmark, BookMarkedIcon, ChevronDown } from "lucide-react"
 import { motion, useReducedMotion } from "motion/react"
 import Link from "next/link"
 import { formatDate } from "@/lib/forma-date"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Item, ItemContent, ItemFooter, ItemDescription } from "@/components/ui/item"
+import { Item, ItemContent, ItemFooter, ItemDescription, ItemActions } from "@/components/ui/item"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 export type RecentPostItem = {
@@ -20,7 +20,7 @@ export type RecentPostItem = {
 }
 
 /** 首屏与每次「查看更多」追加的条数，避免一次渲染过多导致卡顿 */
-const PAGE_SIZE = 20
+const PAGE_SIZE = 18
 
 export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
     const [visibleCount, setVisibleCount] = React.useState(() =>
@@ -111,7 +111,6 @@ export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
                                                         {formatDate(blog.date)} · {blog.wordCount} 字
                                                     </time>
                                                 </div>
-
                                                 {blog.summary ? (
                                                     <ItemDescription
                                                         className={cn(
@@ -124,7 +123,7 @@ export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
                                                 ) : null}
                                             </ItemContent>
 
-                                            <ItemFooter className="min-w-0 w-full max-w-full shrink-0 border-0 px-3 pb-3.5 pt-0 lg:px-6 lg:pb-6">
+                                            {/* <ItemFooter className="min-w-0 w-full max-w-full shrink-0 border-0 px-3 pb-3.5 pt-0 lg:px-6 lg:pb-6">
                                                 <span
                                                     className={cn(
                                                         "flex min-w-0 items-center gap-1 text-xs font-medium lg:gap-1.5 lg:text-sm",
@@ -139,7 +138,7 @@ export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
                                                         aria-hidden
                                                     />
                                                 </span>
-                                            </ItemFooter>
+                                            </ItemFooter> */}
                                         </Link>
                                     </Item>
                                 </CardContent>
