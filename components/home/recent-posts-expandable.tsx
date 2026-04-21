@@ -40,7 +40,7 @@ export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
             <div className="relative w-full min-w-0">
                 <div
                     role="list"
-                    className="grid w-full min-w-0 grid-cols-1 gap-4 max-lg:grid-cols-2 max-lg:gap-3 sm:max-lg:gap-4"
+                    className="grid w-full min-w-0 grid-cols-1 gap-3 sm:gap-4 sm:max-lg:grid-cols-2"
                 >
                     {list.map((blog, index) => (
                         <motion.div
