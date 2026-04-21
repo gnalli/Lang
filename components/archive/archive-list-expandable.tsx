@@ -140,7 +140,7 @@ export function ArchiveListExpandable({ posts }: { posts: ArchivePostItem[] }) {
                         {blog.title}
                       </h3>
                       {excerpt ? (
-                        <p className="mt-2 line-clamp-2 text-left text-sm leading-relaxed text-muted-foreground">
+                        <p className="mt-2 line-clamp-1 text-left text-sm leading-relaxed text-muted-foreground">
                           {excerpt}
                         </p>
                       ) : null}

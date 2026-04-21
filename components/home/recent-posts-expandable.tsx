@@ -116,7 +116,7 @@ export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
                                                     <ItemDescription
                                                         className={cn(
                                                             "mt-2 block min-w-0 max-w-full overflow-hidden wrap-break-word text-left text-xs leading-relaxed lg:mt-4 lg:text-sm lg:text-[0.9375rem]",
-                                                            "line-clamp-2",
+                                                            "line-clamp-1",
                                                         )}
                                                     >
                                                         {blog.summary}
