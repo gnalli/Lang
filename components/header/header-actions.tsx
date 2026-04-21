@@ -57,7 +57,7 @@ export function HeaderActions() {
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <HeaderCommandPalette />
             <Link href="/archive" className={`${navLinkClass} max-[340px]:hidden`}>
-                存档
+                归档
             </Link>
             <Link href="/ai" className={`${navLinkClass} max-[390px]:hidden`}>
                 AI

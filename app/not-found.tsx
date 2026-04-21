@@ -68,7 +68,7 @@ export default function NotFound() {
                             "sm:mt-4 sm:max-w-lg sm:text-base sm:leading-relaxed",
                         )}
                     >
-                        链接可能已失效或地址有误。你可以返回首页，或在存档中浏览全部文章。
+                        链接可能已失效或地址有误。你可以返回首页，或在归档中浏览全部文章。
                     </p>
                 </header>
 
@@ -90,7 +90,7 @@ export default function NotFound() {
                         size="default"
                         className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto"
                     >
-                        <Link href="/archive">存档文章</Link>
+                        <Link href="/archive">归档文章</Link>
                     </Button>
                 </div>
             </div>

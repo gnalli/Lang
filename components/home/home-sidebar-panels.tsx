@@ -9,6 +9,7 @@ import { Item, ItemActions, ItemContent, ItemFooter, ItemGroup, ItemTitle } from
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatDate } from "@/lib/forma-date"
+import { cn } from "@/lib/utils"
 
 const sidebarCardClass =
     "border-0 bg-transparent shadow-none ring-0 ring-offset-0 dark:bg-transparent"
@@ -22,14 +23,23 @@ export type HomeRecommendedItem = {
     pageViews: number
 }
 
+const cardTitleClass = (variant: "sidebar" | "drawer") =>
+    variant === "drawer"
+        ? "text-balance text-lg font-semibold tracking-tight text-foreground"
+        : "text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-2xl"
+
 export function HomeSidebarPanels({
     tags,
     recommended,
+    variant = "sidebar",
 }: {
     tags: string[]
     recommended: HomeRecommendedItem[]
+    /** drawer：侧栏收进移动端抽屉时略紧凑的标题字号 */
+    variant?: "sidebar" | "drawer"
 }) {
     const reduceMotion = useReducedMotion()
+    const titleCn = cardTitleClass(variant)
 
     return (
         <>
@@ -44,7 +54,7 @@ export function HomeSidebarPanels({
             >
                 <Card className={sidebarCardClass}>
                     <CardHeader className="gap-1.5 p-0">
-                        <CardTitle className="text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-2xl">
+                        <CardTitle className={titleCn}>
                             博文分类
                         </CardTitle>
                         <Separator className="my-2" />
@@ -120,23 +130,23 @@ export function HomeSidebarPanels({
             >
                 <Card className={sidebarCardClass}>
                     <CardHeader className="gap-1.5 p-0">
-                        <CardTitle className="text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-2xl">
+                        <CardTitle className={titleCn}>
                             推荐阅读
                         </CardTitle>
                         <Separator className="my-2" />
                     </CardHeader>
                     <CardContent className="px-0">
-                        <ItemGroup className="gap-1" role="list">
+                        <ItemGroup className="gap-3" role="list">
                             {recommended.map((blog, index) => (
                                 <motion.div
                                     key={blog.slug}
-                                    className="min-w-0"
+                                    className="min-w-0 w-full overflow-hidden rounded-lg"
                                     initial={
                                         reduceMotion
                                             ? false
-                                            : { opacity: 0, x: 10 }
+                                            : { opacity: 0, y: 10 }
                                     }
-                                    animate={{ opacity: 1, x: 0 }}
+                                    animate={{ opacity: 1, y: 0 }}
                                     transition={
                                         reduceMotion
                                             ? { duration: 0 }
@@ -153,57 +163,66 @@ export function HomeSidebarPanels({
                                         reduceMotion
                                             ? undefined
                                             : {
-                                                  x: -2,
+                                                  y: -4,
                                                   transition: {
                                                       type: "spring",
-                                                      stiffness: 380,
-                                                      damping: 26,
+                                                      stiffness: 420,
+                                                      damping: 28,
                                                   },
                                               }
                                     }
                                 >
-                                    <Item
-                                        variant="muted"
-                                        size="sm"
-                                        className="min-w-0 px-2.5 py-2"
-                                        asChild
-                                    >
-                                        <Link
-                                            href={`/blog/${blog.slug}`}
-                                            className="min-w-0 no-underline hover:no-underline"
-                                        >
-                                            <ItemContent className="min-w-0 gap-0">
-                                                <ItemTitle className="w-full min-w-0 max-w-full text-left text-[0.8125rem] font-medium leading-snug text-foreground">
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <span className="block truncate">
-                                                                {blog.title}
-                                                            </span>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent
-                                                            side="right"
-                                                            className="bg-primary"
-                                                        >
-                                                            <p>{blog.title}</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </ItemTitle>
-                                            </ItemContent>
+                                    <Card className="h-full min-w-0 gap-0 overflow-hidden border-0 bg-muted/50 py-0 shadow-lg ring-0 transition-shadow duration-300 hover:shadow-xl dark:bg-muted/40">
+                                        <CardContent className="p-0">
+                                            <Item
+                                                variant="default"
+                                                size="sm"
+                                                className={cn(
+                                                    "min-w-0 rounded-none border-0 py-0 shadow-none ring-0",
+                                                    "hover:bg-muted/40",
+                                                )}
+                                                asChild
+                                            >
+                                                <Link
+                                                    href={`/blog/${blog.slug}`}
+                                                    className="min-w-0 no-underline hover:no-underline"
+                                                >
+                                                    <ItemContent className="min-w-0 gap-0 px-3 py-2.5">
+                                                        <ItemTitle className="w-full min-w-0 max-w-full text-left text-[0.8125rem] font-medium leading-snug text-foreground">
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <span className="block truncate">
+                                                                        {blog.title}
+                                                                    </span>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent
+                                                                    side="right"
+                                                                    className="bg-primary"
+                                                                >
+                                                                    <p>{blog.title}</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </ItemTitle>
+                                                    </ItemContent>
 
-                                            <ItemActions>
-                                                <Bookmark className="size-4" />
-                                            </ItemActions>
-                                            <ItemFooter>
-                                                <span className="text-xs text-muted-foreground">
-                                                    {formatDate(blog.date)}
-                                                </span>
-                                                <span className="text-xs text-muted-foreground tabular-nums">
-                                                    {blog.pageViews.toLocaleString("zh-CN")}{" "}
-                                                    浏览
-                                                </span>
-                                            </ItemFooter>
-                                        </Link>
-                                    </Item>
+                                                    <ItemActions>
+                                                        <Bookmark className="size-4" />
+                                                    </ItemActions>
+                                                    <ItemFooter className="px-3 pb-2.5 pt-0">
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {formatDate(blog.date)}
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground tabular-nums">
+                                                            {blog.pageViews.toLocaleString(
+                                                                "zh-CN",
+                                                            )}{" "}
+                                                            浏览
+                                                        </span>
+                                                    </ItemFooter>
+                                                </Link>
+                                            </Item>
+                                        </CardContent>
+                                    </Card>
                                 </motion.div>
                             ))}
                         </ItemGroup>

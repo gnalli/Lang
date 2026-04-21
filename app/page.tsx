@@ -4,6 +4,7 @@ import {
   HomeSidebarPanels,
   type HomeRecommendedItem,
 } from "@/components/home/home-sidebar-panels"
+import { HomeSidebarMobileFab } from "@/components/home/home-sidebar-mobile-fab"
 import { RecentPostsExpandable } from "@/components/home/recent-posts-expandable"
 import { uniqueTagsFromBlogs } from "@/lib/blog-tags"
 import { cn } from "@/lib/utils"
@@ -108,7 +109,7 @@ export default async function HomePage() {
 
         <aside
           className={cn(
-            "min-w-0 w-full max-w-full lg:w-[280px] lg:max-w-[280px] lg:justify-self-end",
+            "hidden min-w-0 w-full max-w-full lg:block lg:w-[280px] lg:max-w-[280px] lg:justify-self-end",
             "lg:sticky lg:top-24 lg:z-10 lg:self-start",
           )}
           aria-label="博文分类与推荐阅读"
@@ -118,6 +119,8 @@ export default async function HomePage() {
           </div>
         </aside>
       </div>
+
+      <HomeSidebarMobileFab tags={tags} recommended={recommendedItems} />
 
       <PageViewBeacon path="/" />
     </div>

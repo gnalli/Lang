@@ -20,7 +20,7 @@ export type RecentPostItem = {
 }
 
 /** 首屏与每次「查看更多」追加的条数，避免一次渲染过多导致卡顿 */
-const PAGE_SIZE = 10
+const PAGE_SIZE = 20
 
 export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
     const [visibleCount, setVisibleCount] = React.useState(() =>

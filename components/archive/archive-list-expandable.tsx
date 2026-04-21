@@ -2,29 +2,31 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { ChevronDown } from "lucide-react"
 import { motion, useReducedMotion } from "motion/react"
-import { Bookmark, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { formatMonthDayOnly } from "@/lib/forma-date"
+import { formatDotMonthDay } from "@/lib/forma-date"
 import { cn } from "@/lib/utils"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 export type ArchivePostItem = {
   slug: string
   title: string
   date: string
-  wordCount: number
+  tags: string[]
+  /** frontmatter summary，无则卡片摘要行可退化为标签 */
+  summary?: string | null
 }
 
-const PAGE_SIZE = 15
-
 const easeOut = [0.25, 0.46, 0.45, 0.94] as const
+
+/** 首屏最多渲染条数，减轻上百篇时的 DOM / 布局压力；其余通过「查看更多」追加 */
+const PAGE_SIZE = 50
 
 function groupByYear(posts: ArchivePostItem[]) {
   const groups: { year: string; items: ArchivePostItem[] }[] = []
   for (const post of posts) {
-    const year = post.date.slice(0, 4) || String(new Date(post.date).getFullYear())
+    const year =
+      post.date.slice(0, 4) || String(new Date(post.date).getFullYear())
     const last = groups[groups.length - 1]
     if (!last || last.year !== year) {
       groups.push({ year, items: [post] })
@@ -35,14 +37,25 @@ function groupByYear(posts: ArchivePostItem[]) {
   return groups
 }
 
+function excerptLine(post: ArchivePostItem): string | null {
+  const s = post.summary?.trim()
+  if (s) return `· ${s}`
+  if (post.tags.length > 0) return `· ${post.tags.join("、")}`
+  return null
+}
+
 export function ArchiveListExpandable({ posts }: { posts: ArchivePostItem[] }) {
+  const reduceMotion = useReducedMotion()
   const [visibleCount, setVisibleCount] = React.useState(() =>
     Math.min(PAGE_SIZE, posts.length),
   )
-  const reduceMotion = useReducedMotion()
 
-  const visible = posts.slice(0, visibleCount)
-  const groups = groupByYear(visible)
+  React.useEffect(() => {
+    setVisibleCount(Math.min(PAGE_SIZE, posts.length))
+  }, [posts.length])
+
+  const visiblePosts = posts.slice(0, visibleCount)
+  const groups = groupByYear(visiblePosts)
   const hasMore = visibleCount < posts.length
 
   const loadMore = () => {
@@ -50,160 +63,110 @@ export function ArchiveListExpandable({ posts }: { posts: ArchivePostItem[] }) {
   }
 
   return (
-    <div>
-      <div className="relative">
-        <div className="flex flex-col">
-          {groups.map((group, groupIndex) => (
-            <motion.section
-              key={`${group.year}-${groupIndex}`}
-              className={cn(
-                groupIndex > 0 &&
-                  "pt-8 sm:mt-8",
-              )}
-              initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={
-                reduceMotion
-                  ? { duration: 0 }
-                  : {
-                      duration: 0.48,
-                      delay: Math.min(groupIndex * 0.07, 0.35),
-                      ease: easeOut,
-                    }
-              }
-            >
-              <motion.h2
-                className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-[2rem]"
-                initial={reduceMotion ? false : { opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={
-                  reduceMotion
-                    ? { duration: 0 }
-                    : {
-                        duration: 0.4,
-                        delay: Math.min(groupIndex * 0.07 + 0.04, 0.4),
-                        ease: easeOut,
-                      }
-                }
-              >
-                {group.year}
-              </motion.h2>
-              <ul className="mt-6 grid list-none grid-cols-1 gap-3 p-0 sm:mt-8 md:grid-cols-2 md:gap-4">
-                {group.items.map((blog) => {
-                  const index = visible.findIndex((p) => p.slug === blog.slug)
-                  return (
-                    <motion.li
-                      key={blog.slug}
-                      className="min-w-0 list-none h-full"
-                      initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={
-                        reduceMotion
-                          ? { duration: 0 }
-                          : {
-                              duration: 0.45,
-                              delay: Math.min(index * 0.045, 0.55),
-                              ease: easeOut,
-                            }
-                      }
-                      whileHover={
-                        reduceMotion
-                          ? undefined
-                          : {
-                              y: -3,
-                              transition: {
-                                type: "spring",
-                                stiffness: 420,
-                                damping: 28,
-                              },
-                            }
-                      }
-                    >
-                      <Card
-                        className={cn(
-                          "h-full gap-0 py-0",
-                          "rounded-xl border-0 bg-muted/50 shadow-none",
-                          "ring-1 ring-border/60 dark:bg-muted/35 dark:ring-border/50",
-                        )}
-                      >
-                        <CardContent className="flex h-full flex-col p-4 sm:p-4">
-                          <Link
-                            href={`/blog/${blog.slug}`}
-                            className="flex h-full min-h-0 flex-col no-underline outline-none transition-opacity hover:opacity-90 focus-visible:opacity-90"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="line-clamp-2 min-w-0 flex-1 text-left text-sm font-medium leading-snug text-foreground sm:text-[0.9375rem]">
-                                    {blog.title}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className="max-w-sm bg-primary">
-                                  <p>{blog.title}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <Bookmark
-                                className="size-4 shrink-0 stroke-[1.65] text-muted-foreground"
-                                aria-hidden
-                              />
-                            </div>
-                            <div className="mt-auto pt-3 flex items-center justify-between gap-3 text-xs text-muted-foreground sm:text-sm">
-                              <time dateTime={blog.date} className="tabular-nums">
-                                {formatMonthDayOnly(blog.date)}
-                              </time>
-                              <span className="shrink-0 tabular-nums">
-                                {blog.wordCount > 0 ? `${blog.wordCount} 字` : "—"}
-                              </span>
-                            </div>
-                          </Link>
-                        </CardContent>
-                      </Card>
-                    </motion.li>
-                  )
-                })}
-              </ul>
-            </motion.section>
-          ))}
-        </div>
-
-        {hasMore ? (
-          <div
-            className={cn(
-              "pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 sm:h-32",
-              "bg-linear-to-t from-background via-background/75 to-transparent",
-              "backdrop-blur-[2px]",
-            )}
-            aria-hidden
-          />
-        ) : null}
-      </div>
-
-      {hasMore ? (
-        <motion.div
-          className="relative z-20 -mt-12 flex justify-center px-2 pb-1 pt-8 sm:-mt-14 sm:pt-10"
-          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+    <div className="flex flex-col">
+      {groups.map((group, groupIndex) => (
+        <motion.section
+          key={`${group.year}-${groupIndex}`}
+          className={cn("relative", groupIndex > 0 && "mt-14 sm:mt-16")}
+          aria-labelledby={`archive-year-heading-${group.year}-${groupIndex}`}
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={
             reduceMotion
               ? { duration: 0 }
-              : { duration: 0.4, ease: easeOut }
+              : {
+                  duration: 0.45,
+                  delay: Math.min(groupIndex * 0.06, 0.25),
+                  ease: easeOut,
+                }
           }
         >
+          <h2
+            id={`archive-year-heading-${group.year}-${groupIndex}`}
+            className="mb-5 flex flex-wrap items-baseline gap-x-1 text-balance sm:mb-6"
+          >
+            <span className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              {group.year}
+            </span>
+            <span className="text-xs font-normal tabular-nums text-muted-foreground sm:text-sm">
+              （共 {group.items.length} 篇）
+            </span>
+          </h2>
+
+          <div className="flex flex-col gap-4 sm:gap-5">
+            {group.items.map((blog, itemIndex) => {
+              const stagger = groupIndex * 0.05 + itemIndex * 0.04
+              const excerpt = excerptLine(blog)
+              return (
+                <motion.article
+                  key={blog.slug}
+                  className="min-w-0 overflow-hidden rounded-lg"
+                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={
+                    reduceMotion
+                      ? { duration: 0 }
+                      : {
+                          duration: 0.38,
+                          delay: Math.min(stagger, 0.4),
+                          ease: easeOut,
+                        }
+                  }
+                  whileHover={
+                    reduceMotion
+                      ? undefined
+                      : {
+                          y: -4,
+                          transition: {
+                            type: "spring",
+                            stiffness: 420,
+                            damping: 28,
+                          },
+                        }
+                  }
+                >
+                  <Link
+                    href={`/blog/${blog.slug}`}
+                    className="relative block h-full min-w-0 overflow-hidden border-0 bg-muted/50 px-4 py-5 shadow-lg ring-0 transition-[box-shadow,background-color] duration-300 hover:bg-muted/40 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:bg-muted/40 dark:hover:bg-muted/35 sm:px-5 sm:py-5"
+                  >
+                    <div className="min-w-0">
+                      <time
+                        dateTime={blog.date}
+                        className="mb-2 block w-full text-right text-xs tabular-nums text-muted-foreground sm:mb-2.5 sm:text-sm"
+                      >
+                        {formatDotMonthDay(blog.date)}
+                      </time>
+                      <h3 className="text-left text-base font-semibold leading-snug text-foreground">
+                        {blog.title}
+                      </h3>
+                      {excerpt ? (
+                        <p className="mt-2 line-clamp-2 text-left text-sm leading-relaxed text-muted-foreground">
+                          {excerpt}
+                        </p>
+                      ) : null}
+                    </div>
+                  </Link>
+                </motion.article>
+              )
+            })}
+          </div>
+        </motion.section>
+      ))}
+
+      {hasMore ? (
+        <div className="mt-10 flex justify-center sm:mt-12">
           <Button
             type="button"
             variant="default"
             size="lg"
             onClick={loadMore}
-            className={cn(
-              "shadow-md",
-              "h-9 min-h-9 gap-2 rounded-lg px-5 text-sm font-medium sm:h-10 sm:min-h-10 sm:px-6 sm:text-base",
-            )}
+            className="shadow-md"
             aria-label={`再加载 ${Math.min(PAGE_SIZE, posts.length - visibleCount)} 篇文章`}
           >
             <ChevronDown data-icon="inline-start" className="size-5" aria-hidden />
             查看更多
           </Button>
-        </motion.div>
+        </div>
       ) : null}
     </div>
   )
