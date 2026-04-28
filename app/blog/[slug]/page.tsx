@@ -158,18 +158,19 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                         {prevBlog || nextBlog ? (
                             <nav
-                                className="mt-10 flex items-center justify-between py-3"
+                                className="mt-10 grid grid-cols-2 gap-3 py-3 sm:gap-6"
                                 aria-label="同标签文章导航"
                             >
                                 <div className="min-w-0">
                                     {prevBlog ? (
                                         <Link
                                             href={`/blog/${prevBlog.slug}`}
-                                            className="group inline-flex min-w-0 items-center gap-2 text-foreground/90 transition-colors duration-300 hover:text-foreground"
+                                            className="group inline-flex max-w-full min-w-0 items-center gap-2 text-foreground/90 transition-colors duration-300 hover:text-foreground"
                                         >
-                                            <span className="rounded-full bg-muted/70 p-1.5 transition-transform duration-300 ease-out group-hover:-translate-x-0.5 group-hover:bg-muted">
-                                                <ArrowLeft className="size-3.5 shrink-0" aria-hidden />
-                                            </span>
+                                            <ArrowLeft
+                                                className="size-4 shrink-0 transition-transform duration-300 ease-out group-hover:-translate-x-0.5"
+                                                aria-hidden
+                                            />
                                             <span className="truncate text-lg underline decoration-1 underline-offset-4 transition-all duration-300 group-hover:decoration-2 group-hover:underline-offset-6">
                                                 {prevBlog.title}
                                             </span>
@@ -181,14 +182,15 @@ export default async function BlogPostPage({ params }: PageProps) {
                                     {nextBlog ? (
                                         <Link
                                             href={`/blog/${nextBlog.slug}`}
-                                            className="group inline-flex min-w-0 items-center gap-2 text-foreground/90 transition-colors duration-300 hover:text-foreground"
+                                            className="group inline-flex max-w-full min-w-0 items-center gap-2 text-foreground/90 transition-colors duration-300 hover:text-foreground"
                                         >
                                             <span className="truncate text-lg underline decoration-1 underline-offset-4 transition-all duration-300 group-hover:decoration-2 group-hover:underline-offset-6">
                                                 {nextBlog.title}
                                             </span>
-                                            <span className="rounded-full bg-muted/70 p-1.5 transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:bg-muted">
-                                                <ArrowRight className="size-3.5 shrink-0" aria-hidden />
-                                            </span>
+                                            <ArrowRight
+                                                className="size-4 shrink-0 transition-transform duration-300 ease-out group-hover:translate-x-0.5"
+                                                aria-hidden
+                                            />
                                         </Link>
                                     ) : null}
                                 </div>
