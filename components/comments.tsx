@@ -1,10 +1,31 @@
 "use client"
 
 import Giscus from "@giscus/react"
+import { useEffect, useMemo } from "react"
 import { useTheme } from "next-themes"
 
 export default function Comments() {
     const { resolvedTheme } = useTheme()
+    const giscusTheme = useMemo(
+        () => (resolvedTheme === "dark" ? "transparent_dark" : "light"),
+        [resolvedTheme],
+    )
+
+    useEffect(() => {
+        const iframe = document.querySelector<HTMLIFrameElement>("iframe.giscus-frame")
+        if (!iframe?.contentWindow) return
+
+        iframe.contentWindow.postMessage(
+            {
+                giscus: {
+                    setConfig: {
+                        theme: giscusTheme,
+                    },
+                },
+            },
+            "https://giscus.app",
+        )
+    }, [giscusTheme])
 
     return (
         <Giscus
@@ -18,7 +39,7 @@ export default function Comments() {
             reactionsEnabled="1"
             emitMetadata="0"
             inputPosition="top"
-            theme={resolvedTheme === "dark" ? "transparent_dark" : "light"}
+            theme={giscusTheme}
             lang="zh-CN"
             loading="lazy"
         />

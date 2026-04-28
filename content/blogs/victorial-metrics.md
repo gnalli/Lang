@@ -1,6 +1,6 @@
 ---
 title: VictoriaMetrics系列指南（一）
-date: 2026-04-06
+date: 2026-04-07
 updated: 2026-04-07
 keywords: "victoria生态"
 featured: true

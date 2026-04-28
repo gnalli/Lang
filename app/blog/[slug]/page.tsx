@@ -1,6 +1,8 @@
 import { MDXContent } from "@content-collections/mdx/react"
 import { allBlogs } from "content-collections"
 import type { Metadata } from "next"
+import { ArrowLeft, ArrowRight } from "lucide-react"
+import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArticleToc } from "@/components/blog/article-toc"
 import { ArticleTocMobileFab } from "@/components/blog/article-toc-mobile-fab"
@@ -25,6 +27,14 @@ type PageProps = {
 
 function getBlog(slug: string) {
     return allBlogs.find((b) => b.slug === slug) ?? null
+}
+
+function parseKeywordsToTags(keywords?: string) {
+    if (!keywords) return []
+    return keywords
+        .split(/[,，;；、|]/)
+        .map((tag) => tag.trim().toLowerCase())
+        .filter(Boolean)
 }
 
 export function generateStaticParams() {
@@ -71,7 +81,24 @@ export default async function BlogPostPage({ params }: PageProps) {
     if (!blog) notFound()
 
     const toc = extractToc(blog.content)
+    const currentTags = new Set(parseKeywordsToTags(blog.keywords))
+    const sameTagBlogs = allBlogs
+        .filter((item) => item.slug !== blog.slug)
+        .filter((item) => {
+            if (currentTags.size === 0) return false
+            const tags = parseKeywordsToTags(item.keywords)
+            return tags.some((tag) => currentTags.has(tag))
+        })
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
+    const timeline = [...sameTagBlogs, blog].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    )
+    const currentIndex = timeline.findIndex((item) => item.slug === blog.slug)
+    const prevBlog = currentIndex > 0 ? timeline[currentIndex - 1] : null
+    const nextBlog = currentIndex >= 0 && currentIndex < timeline.length - 1
+        ? timeline[currentIndex + 1]
+        : null
     const pageUrl = new URL(`/blog/${blog.slug}`, siteConfig.seo.metadataBase).toString()
 
     return (
@@ -128,6 +155,45 @@ export default async function BlogPostPage({ params }: PageProps) {
                                 }}
                             />
                         </div>
+
+                        {prevBlog || nextBlog ? (
+                            <nav
+                                className="mt-10 flex items-center justify-between py-3"
+                                aria-label="同标签文章导航"
+                            >
+                                <div className="min-w-0">
+                                    {prevBlog ? (
+                                        <Link
+                                            href={`/blog/${prevBlog.slug}`}
+                                            className="group inline-flex min-w-0 items-center gap-2 text-foreground/90 transition-colors duration-300 hover:text-foreground"
+                                        >
+                                            <span className="rounded-full bg-muted/70 p-1.5 transition-transform duration-300 ease-out group-hover:-translate-x-0.5 group-hover:bg-muted">
+                                                <ArrowLeft className="size-3.5 shrink-0" aria-hidden />
+                                            </span>
+                                            <span className="truncate text-lg underline decoration-1 underline-offset-4 transition-all duration-300 group-hover:decoration-2 group-hover:underline-offset-6">
+                                                {prevBlog.title}
+                                            </span>
+                                        </Link>
+                                    ) : null}
+                                </div>
+
+                                <div className="min-w-0 text-right">
+                                    {nextBlog ? (
+                                        <Link
+                                            href={`/blog/${nextBlog.slug}`}
+                                            className="group inline-flex min-w-0 items-center gap-2 text-foreground/90 transition-colors duration-300 hover:text-foreground"
+                                        >
+                                            <span className="truncate text-lg underline decoration-1 underline-offset-4 transition-all duration-300 group-hover:decoration-2 group-hover:underline-offset-6">
+                                                {nextBlog.title}
+                                            </span>
+                                            <span className="rounded-full bg-muted/70 p-1.5 transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:bg-muted">
+                                                <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+                                            </span>
+                                        </Link>
+                                    ) : null}
+                                </div>
+                            </nav>
+                        ) : null}
 
                         <div className="mt-12 w-full min-w-0">
                             <Comments />

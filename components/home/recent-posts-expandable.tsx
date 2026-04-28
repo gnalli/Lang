@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { ArrowRight, Bookmark, BookMarkedIcon, ChevronDown } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 import { motion, useReducedMotion } from "motion/react"
 import Link from "next/link"
 import { formatDate } from "@/lib/forma-date"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Item, ItemContent, ItemFooter, ItemDescription, ItemActions } from "@/components/ui/item"
+import { Item, ItemContent, ItemDescription } from "@/components/ui/item"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 export type RecentPostItem = {
@@ -19,20 +19,35 @@ export type RecentPostItem = {
     summary?: string | null
 }
 
-/** 首屏与每次「查看更多」追加的条数，避免一次渲染过多导致卡顿 */
-const PAGE_SIZE = 18
+/** 首页博文分页：每页展示 20 篇 */
+const PAGE_SIZE = 20
+
+function getVisiblePages(currentPage: number, totalPages: number) {
+    if (totalPages <= 7) {
+        return Array.from({ length: totalPages }, (_, i) => i + 1)
+    }
+
+    if (currentPage <= 4) {
+        return [1, 2, 3, 4, 5, "...", totalPages] as const
+    }
+
+    if (currentPage >= totalPages - 3) {
+        return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages] as const
+    }
+
+    return [1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages] as const
+}
 
 export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
-    const [visibleCount, setVisibleCount] = React.useState(() =>
-        Math.min(PAGE_SIZE, posts.length),
-    )
+    const [currentPage, setCurrentPage] = React.useState(1)
     const reduceMotion = useReducedMotion()
 
-    const list = posts.slice(0, visibleCount)
-    const hasMore = visibleCount < posts.length
+    const totalPages = Math.ceil(posts.length / PAGE_SIZE)
+    const list = posts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+    const visiblePages = getVisiblePages(currentPage, totalPages)
 
-    const loadMore = () => {
-        setVisibleCount((c) => Math.min(c + PAGE_SIZE, posts.length))
+    const goToPage = (page: number) => {
+        setCurrentPage(Math.max(1, Math.min(page, totalPages)))
     }
 
     return (
@@ -146,33 +161,53 @@ export function RecentPostsExpandable({ posts }: { posts: RecentPostItem[] }) {
                         </motion.div>
                     ))}
                 </div>
-
-                {hasMore ? (
-                    <div
-                        className={cn(
-                            "pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 sm:h-32",
-                            "bg-linear-to-t from-background via-background/75 to-transparent",
-                            "backdrop-blur-[2px]",
-                        )}
-                        aria-hidden
-                    />
-                ) : null}
             </div>
 
-            {hasMore ? (
-                <div className="relative z-20 -mt-12 flex justify-center px-2 pb-1 pt-8 sm:-mt-14 sm:pt-10">
-                    <Button
-                        type="button"
-                        variant="default"
-                        size="lg"
-                        onClick={loadMore}
-                        className="shadow-md"
-                        aria-label={`再加载 ${Math.min(PAGE_SIZE, posts.length - visibleCount)} 篇文章`}
-                    >
-                        <ChevronDown data-icon="inline-start" aria-hidden />
-                        查看更多
-                    </Button>
-                </div>
+            {totalPages > 1 ? (
+                <nav
+                    className="mt-2 flex w-full items-center justify-center overflow-x-auto px-2 py-1"
+                    aria-label="近期博文分页"
+                >
+                    <div className="flex min-w-max items-center gap-1.5 text-lg text-muted-foreground sm:gap-2 sm:text-xl">
+                        {visiblePages.map((page, index) =>
+                            page === "..." ? (
+                                <span key={`ellipsis-${index}`} className="px-1 select-none" aria-hidden>
+                                    ...
+                                </span>
+                            ) : (
+                                <Button
+                                    key={page}
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onClick={() => goToPage(page)}
+                                    aria-label={`跳转到第 ${page} 页`}
+                                    aria-current={page === currentPage ? "page" : undefined}
+                                    className={cn(
+                                        "h-10 w-10 rounded-full text-base sm:h-11 sm:w-11 sm:text-lg",
+                                        page === currentPage
+                                            ? "text-foreground"
+                                            : "text-muted-foreground hover:text-foreground",
+                                    )}
+                                >
+                                    {page}
+                                </Button>
+                            ),
+                        )}
+
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => goToPage(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            aria-label="下一页"
+                            className="h-10 w-10 rounded-full text-muted-foreground hover:text-foreground sm:h-11 sm:w-11"
+                        >
+                            <ChevronRight className="size-6" aria-hidden />
+                        </Button>
+                    </div>
+                </nav>
             ) : null}
         </div>
     )
