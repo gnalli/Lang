@@ -70,7 +70,7 @@ MongoDB真正使用的主键索引是RecordId，它本质上是一个全局唯�
 搞明白了主键，我们再看看索引的格式。在MongoDB中，索引是B+树结构的，以kv对的方式进行组织和存储。B+树每个节点中的key都是可比较的，所以MongoDB使用KeyString作为统一的索引编码方式。因此，索引的key由两部分组成：
 - Key = KeyString(indexKey) + RecordId
 
-其中KeyString(indexKey) 是从文档字段按索引规则提取并编码后的值，而RecordId作为后缀用于保证key唯一性。
+其中KeyString(indexKey) 是从文档字段按索引规则提取并编码后的值，而RecordId用来定位BSON文档。
 
 那索引的Value部分又是什么呢？MongoDB索引中，Value通常是空的，但也可以用来存放一些可选的功能字段，如`TypeBits`，该字段用于记录类型信息，它不参与字节比较，仅用于类型归一化。
 
