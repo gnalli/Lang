@@ -72,7 +72,7 @@ MongoDB真正使用的主键索引是RecordId，它本质上是一个全局唯�
 
 其中KeyString(indexKey) 是从文档字段按索引规则提取并编码后的值，而RecordId作为后缀用于保证key唯一性。
 
-那索引的Value部分又是什么呢？MongoDB索引中，Value通常是空的，但也可以用来存放一个可选的字段 - `TypeBits`，该字段用于记录类型信息，它不参与字节比较，仅用于类型归一化。
+那索引的Value部分又是什么呢？MongoDB索引中，Value通常是空的，但也可以用来存放一些可选的功能字段，如`TypeBits`，该字段用于记录类型信息，它不参与字节比较，仅用于类型归一化。
 
 另外，_id索引与普通索引的结构略有区别。由于_id本身具有唯一性，因此Key中不再需要RecordId，RecordId被存储在了Value中。结构类似：
 - Key = _id，Value = RecordId
