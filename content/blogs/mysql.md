@@ -106,7 +106,7 @@ binlog支持三种记录格式，这也是实际生产中一个非常重要的�
 
 由上面的两个参数可知，将它们都设置为`1`是最安全的配置，但这也会增加IO压力。在使用时，可以根据实际情况进行调整。
 
-无论是redolog还是binlog，在很多情况下都会经过page cache。page cache是操作系统的内存，它不受Mysql内存参数限制，而是受系统总内存限制，并有可能和Mysql的buffer pool竞争资源。但它可以在mysql重启时，保存数据信息，用来恢复数据。除非机器断电宕机了。
+无论是redolog还是binlog，在很多情况下都会经过page cache。page cache是操作系统的内存，它不受Mysql内存参数限制，而是受系统总内存限制，并有可能和Mysql的buffer pool竞争资源。在mysql正常关闭（非断电或kill -9）时，page cache的数据会刷入到磁盘，保证数据不丢。
 
 那为什么redolog用了buffer缓冲，而binlog没有呢？这是因为redolog是高频写入，每个数据页修改都要记录，所以使用了buffer来实现“持续积累 + 批量刷盘”。而binlog是事务级写入，一次事务一次写，事务结束即释放。
 
