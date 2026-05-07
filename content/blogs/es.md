@@ -85,7 +85,7 @@ search -> Doc3(Position:0)
 1. 文档分词：在文档写入ES之前，文本内容会先经过分析器处理，被切分成多个词项。例如大写转小写、去除无意义字符
 2. 去除停用词：分析过程中，一些无意义或贡献较低的高频词会被过滤。例如the、a、is
 3. 构建词典：系统会收集所有词项，并生成词典。词典一般会按一定顺序组织，便于快速查找
-4. 构建倒排列表：对于每个词项，记录它出现过的文档ID，以及可能的词频、位置等信息
+4. 构建倒排列表：对于每个词项，记录它在哪些文档出现过的文档ID，以及可能的词频、位置等信息
 5. 存储倒排索引：最终，倒排索引会被写入磁盘，并根据需要加载部分结构到内存中，以支持高效查询
 
 再看一个完整的例子。假设现有三个文档：
@@ -186,22 +186,26 @@ ES的分片路由机制，核心不是一致性哈希算法，而是基于_routi
 6. 副本分片执行同样的写入操作
 7. 当主分片确认所有需要同步的副本都成功后，才向客户端返回成功
 
-> wait_for_active_shards配置决定在写入开始前，要求至少有多少个分片副本处于active状态。其默认值是1，也就是只要求主分片active
+由上可知，副本分片并不会主动从主分片拉取新的写入数据，而是执行主分片下发的操作，这会导致主分片承担更大的压力。因此，副本分片数量越多，主分片的网络、CPU与复制开销就越大，甚至可能导致写性能下降。真正提升写吞吐的方式通常是增加主分片的数量，让更多的主分片承担写流量。
+
+> wait_for_active_shards配置决定在写入时，至少要多少个分片写入完成才算成功
 
 # 拓展
 ## Refresh
-refresh的作用是让新写入的数据对搜索可见。ES默认会周期性refresh，现代Stack默认通常是1s。也就是说，写入成功并不代表“立刻可搜索”；通常要等下一次refresh，或者显式使用`refresh=true /refresh=wait_for`。
+refresh的作用是让新写入的数据对搜索可见。ES默认会周期性refresh，现代Stack默认通常是1s。也就是说，写入成功并不代表“立刻可搜索”；通常要等下一次refresh，或者显式使用`refresh=true / refresh=wait_for`。
+
+需要注意的是，refresh不是“刷盘”，而是将indexing buffer写成segment，这些segment很多时候仍然只存在于系统缓存中，因此，“可搜索”并不代表“崩溃安全”。
 
 ## Translog
-Translog是ES保证崩溃恢复能力的关键机制，可以将其看作是预写日志（WAL）。因为Lucene commit成本高，不可能每次写请求都立刻做完整commit，所以每次写入除了进入Lucene内部结构外，还会记录到Translog。
-
-如果节点异常崩溃，ES可以在恢复时重放最近一次Lucene commit之后的Translog记录，尽量减少数据丢失。现代ES默认的配置是：
+Translog才是是ES保证崩溃恢复能力的关键机制，可以将其看作是预写日志（WAL）。由于Lucene commit成本非常高，不可能每次写请求都立刻执行完整commit，因此每次写入除了更新Lucene内部结构外，还会追加写入translog。节点异常崩溃后，ES会在恢复阶段回放最近一次Lucene commit之后的translog，从而尽量减少数据丢失。现代ES默认的配置是：
 ```text
 - index.translog.durability = request
 - index.translog.sync_interval = 5s
 ```
 
-这两个配置不能混成一句话理解。默认情况下不是“每5秒才刷一次盘”，而是在request模式下，每个写请求成功返回前，translog已经在主分片和已分配副本上完成fsync。
-
-如果改成async，才会按sync_interval周期性fsync，此时最近一小段时间内的已确认写入在故障时可能丢失。
+这两个配置很容易被误解。默认并不是“每5秒才刷一次translog”，因为在request模式下，每个index/delete/update/bulk请求返回成功前，主分片和所有已分配副本分片的translog都已经完成fsync，因此默认情况下已确认写入通常不会因为节点崩溃而丢失。只有在：
+```text
+index.translog.durability = async
+```
+ES才会按sync_interval周期性fsync，此时最近几秒内已经ACK的数据在节点异常宕机时可能丢失。另一方面，Flush则会真正触发 Lucene commit，并开启新的translog generation；而Refresh仅解决“搜索可见性”，并不直接提供数据持久性。如果改成async，才会按sync_interval周期性fsync，此时最近一小段时间内的已确认写入在故障时可能丢失。
 
