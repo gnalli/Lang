@@ -27,8 +27,8 @@ Redis启动后，核心逻辑本质上就是不断运行ae的事件循环。这�
 2. 计算阻塞等待时间：接着，ae会计算“距离最近时间事件的时间差”。作为epoll_wait的timeout
 3. 随后，Redis调用底层多路复用函数，如epoll_wait，并传入上一步得到的timeout。线程会在这里阻塞，直到某些Socket上出现I/O事件，或timeout到期
 4. 处理I/O事件：如果多路复用调用返回，说明已有fd就绪。此时ae会遍历就绪列表，并调用这些fd预先注册好的事件处理函数
-  - 如果是可读事件，执行readQueryFromClient，读取客户端命令
-  - 如果是可写事件，执行sendReplyToClient，发送响应结果
+    - 如果是可读事件，执行readQueryFromClient，读取客户端命令
+    - 如果是可写事件，执行sendReplyToClient，发送响应结果
 5. 进入下一轮事件循环：本轮时间事件和I/O事件处理完成后，事件循环重新开始，继续下一轮调度
 
 ### I/O多路复用
