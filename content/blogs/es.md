@@ -207,5 +207,5 @@ Translog才是是ES保证崩溃恢复能力的关键机制，可以将其看作�
 ```text
 index.translog.durability = async
 ```
-ES才会按sync_interval周期性fsync，此时最近几秒内已经ACK的数据在节点异常宕机时可能丢失。另一方面，Flush则会真正触发 Lucene commit，并开启新的translog generation；而Refresh仅解决“搜索可见性”，并不直接提供数据持久性。如果改成async，才会按sync_interval周期性fsync，此时最近一小段时间内的已确认写入在故障时可能丢失。
+ES才会按sync_interval周期性fsync，此时最近几秒内已经ACK的数据在节点异常宕机时可能丢失。另一方面，Flush则会真正触发 Lucene commit，并开启新的translog generation；而Refresh仅解决“搜索可见性”，并不直接提供数据持久性。
 
