@@ -103,7 +103,7 @@ Kafka默认依赖`OS Page Cache`，可以通过`log.flush.interval.ms`控制刷�
 - DMA：Socket缓冲区 → 网卡（NIC）
 
 
-因此，Kafka使用sendfile()系统调用实现“零拷贝”。优化后的数据路径如下：
+因此，Kafka使用sendfile()系统调用实现“零拷贝”，数据直接在两个文件描述符（通常是文件和Socket）之间传输，无需将数据复制到用户空间。优化后的数据路径如下：
 ```text
 磁盘 → Page Cache → Socket缓冲区 → 网卡
 ```
@@ -140,7 +140,7 @@ Kafka默认依赖`OS Page Cache`，可以通过`log.flush.interval.ms`控制刷�
 
 需要注意的是，KRaft主要负责的是集群元数据的变更同步。而Kafka中普通消息的副本同步，依然是Kafka自己那套分区副本机制。
 
-> Kafka内部使用一个特殊的内部主题来持久化这些元数据：__cluster_metadata
+> Kafka内部使用一个特殊的内部topic来持久化这些元数据：__cluster_metadata
 
 ## 分区Leader选举
 为了保证数据可靠性，Kafka的每个分区都可以配置多个副本，其中包含一个Leader副本和多个Follower副本。Leader副本用于对外提供读写能力，生产者和消费者只与Leader交互。而Follower副本则从Leader同步数据，不参与读写，仅用于容灾。
