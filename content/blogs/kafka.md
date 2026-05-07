@@ -98,8 +98,8 @@ Kafka默认依赖`OS Page Cache`，可以通过`log.flush.interval.ms`控制刷�
 ```
 其过程中会发生两次CPU主导的内存拷贝和四次上下文切换：
 - read()：磁盘 → Page Cache（DMA）
-- read()：Page Cache → 用户空间（CPU拷贝）
-- write()：用户空间 → Socket缓冲区（CPU拷贝）
+- read()：Page Cache → 用户Buffer（CPU拷贝）
+- write()：用户Buffer → Socket缓冲区（CPU拷贝）
 - DMA：Socket缓冲区 → 网卡（NIC）
 
 
