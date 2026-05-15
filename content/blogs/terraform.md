@@ -49,9 +49,9 @@ provider是独立发布的插件，并不包含在Terraform本体中，大多数
 
 > Terraform还支持本地缓存来减少重复下载，通过在`~/.terraformrc`配置文件中配置`plugin_cache_dir`可定义缓存的位置
 
-如果要从私有仓库中下载provider，你可能需要提供一个通用的认证配置文件（.netrc），用于让Terraform在访问API/私有仓库时自动认证。改文件的权限必须设置为600，否则Terraform会拒绝使用。
+如果要从私有仓库中下载provider，你可能需要提供一个通用的认证配置文件（.netrc），用于让Terraform在访问API/私有仓库时自动认证。该文件的权限必须设置为600，否则Terraform会拒绝使用。
 
-> 使用terraform login命令认证时，会自动生成一个认证配置文件
+> 使用terraform login登录仓库后，会自动生成一个认证配置文件
 
 ### 配置示例
 以下示例配置了阿里云的provider，并指定了provider的版本和来源
