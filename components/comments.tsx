@@ -1,17 +1,46 @@
 "use client"
 
 import Giscus from "@giscus/react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTheme } from "next-themes"
+
+function effectiveTheme(resolvedTheme?: string) {
+    if (resolvedTheme === "dark" || resolvedTheme === "light") {
+        return resolvedTheme
+    }
+    if (typeof document !== "undefined" && document.documentElement.classList.contains("dark")) {
+        return "dark"
+    }
+    return "light"
+}
+
+function giscusThemeUrl(theme: "light" | "dark", origin: string) {
+    return theme === "dark"
+        ? `${origin}/giscus/site-dark.css`
+        : `${origin}/giscus/site-light.css`
+}
 
 export default function Comments() {
     const { resolvedTheme } = useTheme()
-    const giscusTheme = useMemo(
-        () => (resolvedTheme === "dark" ? "transparent_dark" : "light"),
-        [resolvedTheme],
-    )
+    const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    const theme = useMemo(
+        () => (mounted ? effectiveTheme(resolvedTheme) : undefined),
+        [mounted, resolvedTheme],
+    )
+
+    const giscusTheme = useMemo(() => {
+        if (!mounted || typeof window === "undefined" || !theme) return undefined
+        return giscusThemeUrl(theme, window.location.origin)
+    }, [mounted, theme])
+
+    useEffect(() => {
+        if (!giscusTheme) return
+
         const iframe = document.querySelector<HTMLIFrameElement>("iframe.giscus-frame")
         if (!iframe?.contentWindow) return
 
@@ -27,8 +56,13 @@ export default function Comments() {
         )
     }, [giscusTheme])
 
+    if (!giscusTheme) {
+        return <div id="comments" className="min-h-48" aria-busy="true" />
+    }
+
     return (
         <Giscus
+            key={giscusTheme}
             id="comments"
             repo="gnalli/Lang"
             repoId="R_kgDOR4-pxA"

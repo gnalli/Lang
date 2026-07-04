@@ -2,6 +2,7 @@
 title: udp协议
 date: 2026-04-10
 updated: 2026-04-10
+category: ops
 keywords: "网络"
 featured: true
 summary: "这篇文章介绍udp协议的一些基础知识"

@@ -6,7 +6,7 @@ import { formatTocLabel } from "@/lib/extract-toc"
 import { cn } from "@/lib/utils"
 
 /** 与 `blog-article-prose` 里 `prose-headings:scroll-mt-24` / 顶栏 sticky 对齐 */
-const SCROLL_ACTIVE_OFFSET_PX = 96
+export const SCROLL_ACTIVE_OFFSET_PX = 96
 
 type Props = {
     items: TocItem[]
@@ -15,7 +15,7 @@ type Props = {
     onItemNavigate?: () => void
 }
 
-function useActiveTocId(ids: string[]) {
+export function useActiveTocId(ids: string[]) {
     const [activeId, setActiveId] = React.useState<string | null>(() =>
         ids.length > 0 ? ids[0]! : null,
     )
@@ -124,8 +124,8 @@ export function ArticleToc({ items, className, onItemNavigate }: Props) {
                             className={cn(
                                 "block rounded-lg py-1.5 transition-colors",
                                 isActive
-                                    ? "bg-muted/50 font-medium text-foreground"
-                                    : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                                    ? "bg-accent font-medium text-foreground"
+                                    : "text-muted-foreground hover:bg-accent hover:text-foreground",
                             )}
                         >
                             <span className="line-clamp-3">{formatTocLabel(item.text)}</span>

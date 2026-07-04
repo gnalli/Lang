@@ -6,6 +6,8 @@ import remarkGfm from "remark-gfm"
 import wordCount from "word-count"
 import { z } from "zod"
 
+const blogCategory = z.enum(["ops", "ai", "notes"])
+
 const blogs = defineCollection({
   name: "blogs",
   directory: "content/blogs",
@@ -16,6 +18,8 @@ const blogs = defineCollection({
     date: z.string(),
     updated: z.string().optional(),
     featured: z.boolean().optional().default(false),
+    /** 展示栏目：ops 运维 / ai / notes；省略时默认 notes */
+    category: blogCategory.optional().default("notes"),
     summary: z.string().optional(),
     keywords: z.string().optional(),
     content: z.string(),

@@ -4,6 +4,7 @@ import {
   feedCacheHeaders,
   getPostsForFeed,
   getSiteOrigin,
+  rssItemCategoriesXml,
 } from "@/lib/feed-shared"
 
 export const revalidate = 3600
@@ -14,15 +15,18 @@ export async function GET() {
   const posts = getPostsForFeed()
 
   const itemsXml = posts
-    .map(
-      (post) => `    <item>
+    .map((post) => {
+      const categoriesXml = rssItemCategoriesXml(post.categories)
+      const categoriesBlock = categoriesXml ? `\n${categoriesXml}` : ""
+      return `    <item>
       <title>${escapeXml(post.title)}</title>
       <link>${escapeXml(post.url)}</link>
       <guid isPermaLink="true">${escapeXml(post.url)}</guid>
       <pubDate>${escapeXml(new Date(post.date).toUTCString())}</pubDate>
+      <author>${escapeXml(post.authorName)}</author>${categoriesBlock}
       <description>${escapeXml(post.summaryLine)}</description>
-    </item>`,
-    )
+    </item>`
+    })
     .join("\n")
 
   const baseUrl = getSiteOrigin()

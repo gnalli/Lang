@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { siteConfig, siteAuthors } from "@/lib/config"
 import Header from "@/components/header"
 import FooterActions from "@/components/footer"
+import { ScrollProgressBar } from "@/components/scroll-progress-bar"
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Agentation } from "agentation"
 
@@ -36,7 +37,7 @@ export default function RootLayout({
       </head>
       <body
         style={{ fontFamily: "LXGW WenKai, sans-serif" }}
-        className="min-w-0 bg-background px-4 pt-16 sm:px-6"
+        className="min-w-0 bg-background"
       >
         {process.env.NODE_ENV === "development" && <Agentation />}
         <ThemeProvider
@@ -46,9 +47,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TooltipProvider delayDuration={200}>
-            <Header />
-            {children}
-            <FooterActions />
+            <div className="flex min-h-dvh flex-col">
+              <ScrollProgressBar />
+              <Header />
+              <main className="flex-1 px-4 sm:px-6">{children}</main>
+              <FooterActions />
+            </div>
           </TooltipProvider>
         </ThemeProvider>
         <GoogleAnalytics gaId="G-GHZR0G837X" />

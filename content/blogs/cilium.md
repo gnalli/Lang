@@ -2,6 +2,7 @@
 title: cilium
 date: 2026-04-05
 updated: 2026-04-05
+category: ops
 keywords: "网络"
 featured: true
 summary: "这篇文章介绍有关cilium的一些基础知识"

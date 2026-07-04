@@ -2,6 +2,7 @@
 title: 网络基础知识
 date: 2026-04-07
 updated: 2026-04-07
+category: ops
 keywords: "网络"
 featured: true
 summary: "这篇文章介绍有关网络的一些基础知识"

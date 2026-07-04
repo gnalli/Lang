@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next"
 import { allBlogs } from "content-collections"
-import { uniqueTagsFromBlogs } from "@/lib/blog-tags"
 import { siteSeoOrigin } from "@/lib/config"
 
 export const revalidate = 3600
@@ -21,21 +20,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
-    // {
-    //   url: `${base}/about`,
-    //   lastModified: new Date(),
-    //   changeFrequency: "monthly",
-    //   priority: 0.5,
-    // },
+    {
+      url: `${base}/ops`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${base}/ai`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${base}/notes`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${base}/about`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
   ]
-
-  const tags = uniqueTagsFromBlogs(allBlogs)
-  const tagEntries: MetadataRoute.Sitemap = tags.map((tag) => ({
-    url: `${base}/tag/${encodeURIComponent(tag)}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly",
-    priority: 0.6,
-  }))
 
   const posts: MetadataRoute.Sitemap = allBlogs.map((b) => ({
     url: `${base}/blog/${b.slug}`,
@@ -44,5 +53,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }))
 
-  return [...staticEntries, ...tagEntries, ...posts]
+  return [...staticEntries, ...posts]
 }

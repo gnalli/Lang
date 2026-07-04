@@ -30,3 +30,10 @@ export function formatDotMonthDay(date: string) {
   const day = String(d.getDate()).padStart(2, "0")
   return `${m}.${day}`
 }
+
+/** 列表日期（如 `4/10/2026`），用于首页近期博文、运维教程等 */
+export function formatDateList(date: string) {
+  const d = new Date(date)
+  if (Number.isNaN(d.getTime())) return date
+  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`
+}

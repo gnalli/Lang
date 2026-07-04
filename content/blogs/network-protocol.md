@@ -2,6 +2,7 @@
 title: 网络协议杂记
 date: 2026-04-08
 updated: 2026-04-08
+category: ops
 keywords: "网络"
 featured: true
 summary: "这篇文章简单聊一下DNS、HTTP/1、HTTP/2、HTTP/3、QUIC、TLS等网络协议"

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ListTree } from "lucide-react"
+import { TextAlignStart } from "lucide-react"
 import {
   Drawer,
   DrawerContent,
@@ -9,7 +9,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
-import { ArticleToc } from "@/components/blog/article-toc"
+import { ArticleTocFumadocs } from "@/components/blog/article-toc-fumadocs"
 import type { TocItem } from "@/lib/extract-toc"
 import { formatTocLabel } from "@/lib/extract-toc"
 import { cn } from "@/lib/utils"
@@ -82,22 +82,25 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
         "fixed right-0 top-[50svh] z-40 -translate-y-1/2 lg:hidden",
       )}
     >
-      <div className="pr-[max(0.25rem,env(safe-area-inset-right,0px))]">
+      <div className="pr-[env(safe-area-inset-right,0px)]">
         <Drawer direction="right" open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>
             <button
               type="button"
               className={cn(
-                "flex flex-col items-center gap-1 rounded-l-xl border border-r-0 border-border/80 bg-background/95 py-3 pl-2.5 pr-2 shadow-md backdrop-blur-sm",
-                "text-foreground transition-colors hover:bg-muted/60 active:bg-muted/80",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "flex h-11 w-10 items-center justify-center touch-manipulation",
+                "rounded-l-full rounded-r-none",
+                "border border-r-0 border-border/40",
+                "bg-background/50 text-muted-foreground/50",
+                "backdrop-blur-[3px]",
+                "transition-[color,background-color,border-color] duration-200",
+                "hover:border-border/55 hover:bg-background/75 hover:text-muted-foreground/75",
+                "active:bg-muted/40 active:text-muted-foreground/90",
+                "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/30",
               )}
               aria-label="打开文章目录"
             >
-              <ListTree className="size-5 shrink-0" aria-hidden />
-              <span className="select-none text-[0.6875rem] font-medium leading-none tracking-tight">
-                目录
-              </span>
+              <TextAlignStart className="size-4 stroke-[1.75]" aria-hidden />
             </button>
           </DrawerTrigger>
           <DrawerContent
@@ -115,7 +118,7 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
               <DrawerTitle>{DRAWER_TITLE}</DrawerTitle>
             </DrawerHeader>
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-6 pt-2">
-              <ArticleToc items={items} onItemNavigate={() => setOpen(false)} />
+              <ArticleTocFumadocs items={items} onItemNavigate={() => setOpen(false)} />
             </div>
           </DrawerContent>
         </Drawer>

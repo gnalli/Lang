@@ -1,0 +1,95 @@
+main {
+  --primary-default: 54, 68, 55;
+  --bg-default: 248, 244, 238;
+  --color-prettylights-syntax-comment: #5d6c7b;
+  --color-prettylights-syntax-constant: #364437;
+  --color-prettylights-syntax-entity: #5d6c7b;
+  --color-prettylights-syntax-storage-modifier-import: #252525;
+  --color-prettylights-syntax-entity-tag: #364437;
+  --color-prettylights-syntax-keyword: #85181d;
+  --color-prettylights-syntax-string: #364437;
+  --color-prettylights-syntax-variable: #5d6c7b;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #85181d;
+  --color-prettylights-syntax-invalid-illegal-text: #f8f4ee;
+  --color-prettylights-syntax-invalid-illegal-bg: #85181d;
+  --color-prettylights-syntax-carriage-return-text: #f8f4ee;
+  --color-prettylights-syntax-carriage-return-bg: #85181d;
+  --color-prettylights-syntax-string-regexp: #364437;
+  --color-prettylights-syntax-markup-list: #252525;
+  --color-prettylights-syntax-markup-heading: #364437;
+  --color-prettylights-syntax-markup-italic: #252525;
+  --color-prettylights-syntax-markup-bold: #252525;
+  --color-prettylights-syntax-markup-deleted-text: #85181d;
+  --color-prettylights-syntax-markup-deleted-bg: #f0ebe3;
+  --color-prettylights-syntax-markup-inserted-text: #364437;
+  --color-prettylights-syntax-markup-inserted-bg: #ebe4d8;
+  --color-prettylights-syntax-markup-changed-text: #5d6c7b;
+  --color-prettylights-syntax-markup-changed-bg: #f3ede4;
+  --color-prettylights-syntax-markup-ignored-text: #5d6c7b;
+  --color-prettylights-syntax-markup-ignored-bg: #364437;
+  --color-prettylights-syntax-meta-diff-range: #5d6c7b;
+  --color-prettylights-syntax-brackethighlighter-angle: #5d6c7b;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #5d6c7b;
+  --color-prettylights-syntax-constant-other-reference-link: #364437;
+  --color-btn-text: #252525;
+  --color-btn-bg: rgb(248 244 238);
+  --color-btn-border: rgb(232 224 212);
+  --color-btn-shadow: 0 0 transparent;
+  --color-btn-inset-shadow: 0 0 transparent;
+  --color-btn-hover-bg: rgb(240 235 227);
+  --color-btn-hover-border: rgb(232 224 212);
+  --color-btn-active-bg: rgb(235 228 216);
+  --color-btn-active-border: rgb(54 68 55);
+  --color-btn-selected-bg: rgb(235 228 216);
+  --color-btn-primary-text: rgb(254 254 251);
+  --color-btn-primary-bg: rgb(54 68 55);
+  --color-btn-primary-border: rgb(54 68 55);
+  --color-btn-primary-shadow: 0 0 transparent;
+  --color-btn-primary-inset-shadow: 0 0 transparent;
+  --color-btn-primary-hover-bg: rgb(54 68 55 / 90%);
+  --color-btn-primary-hover-border: rgb(54 68 55 / 90%);
+  --color-btn-primary-selected-bg: rgb(54 68 55);
+  --color-btn-primary-selected-shadow: 0 0 transparent;
+  --color-btn-primary-disabled-text: rgb(254 254 251 / 80%);
+  --color-btn-primary-disabled-bg: rgb(54 68 55 / 50%);
+  --color-btn-primary-disabled-border: rgb(54 68 55 / 50%);
+  --color-action-list-item-default-hover-bg: rgb(235 228 216 / 80%);
+  --color-segmented-control-bg: rgb(243 237 228);
+  --color-segmented-control-button-bg: rgb(248 244 238);
+  --color-segmented-control-button-selected-border: rgb(232 224 212);
+  --color-fg-default: rgb(37 37 37);
+  --color-fg-muted: rgb(93 108 123);
+  --color-fg-subtle: rgb(93 108 123 / 70%);
+  --color-canvas-default: rgb(248 244 238);
+  --color-canvas-overlay: rgb(248 244 238);
+  --color-canvas-inset: rgb(243 237 228);
+  --color-canvas-subtle: rgb(240 235 227);
+  --color-border-default: rgb(232 224 212);
+  --color-border-muted: rgb(232 224 212 / 60%);
+  --color-neutral-muted: rgb(232 224 212 / 50%);
+  --color-accent-fg: rgb(54 68 55);
+  --color-accent-emphasis: rgb(54 68 55);
+  --color-accent-muted: rgb(54 68 55 / 40%);
+  --color-accent-subtle: rgb(54 68 55 / 10%);
+  --color-success-fg: #364437;
+  --color-attention-fg: #5d6c7b;
+  --color-attention-muted: rgb(93 108 123 / 40%);
+  --color-attention-subtle: rgb(243 237 228);
+  --color-danger-fg: #85181d;
+  --color-danger-muted: rgb(133 24 29 / 40%);
+  --color-danger-subtle: rgb(240 235 227);
+  --color-primer-shadow-inset: 0 0 transparent;
+  --color-scale-gray-1: rgb(243 237 228);
+  --color-scale-blue-1: rgb(54 68 55 / 15%);
+  --color-social-reaction-bg-hover: var(--color-scale-gray-1);
+  --color-social-reaction-bg-reacted-hover: var(--color-scale-blue-1);
+}
+
+.gsc-homepage-bg {
+  background: rgb(248 244 238);
+  animation: none;
+}
+
+.gsc-comment:not(.gsc-reply-box) .gsc-replies {
+  border-radius: unset;
+}

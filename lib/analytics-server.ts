@@ -114,3 +114,10 @@ export function getSlugPvMap(slugs: string[]): Promise<Record<string, number>> {
     { revalidate: ANALYTICS_CACHE_REVALIDATE_SECONDS },
   )()
 }
+
+/** 单篇博文 PV；Supabase 未配置时返回 null */
+export async function getBlogSlugPageViews(slug: string): Promise<number | null> {
+  if (!getSupabaseAdmin()) return null
+  const map = await getSlugPvMap([slug])
+  return map[slug] ?? 0
+}

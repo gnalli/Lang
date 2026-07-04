@@ -2,6 +2,7 @@
 title: iptables
 date: 2026-04-06
 updated: 2026-04-06
+category: ops
 keywords: "网络"
 featured: true
 summary: "这篇文章介绍有关iptabels、nftables相关知识"

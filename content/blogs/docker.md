@@ -2,6 +2,7 @@
 title: 聊聊docker
 date: 2026-04-06
 updated: 2026-04-07
+category: ops
 keywords: "docker"
 featured: true
 summary: "这篇文章介绍有关docker的一些基础知识"

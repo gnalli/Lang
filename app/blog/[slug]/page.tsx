@@ -4,8 +4,9 @@ import type { Metadata } from "next"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArticleToc } from "@/components/blog/article-toc"
+import { ArticleTocSidebar } from "@/components/blog/article-toc-sidebar"
 import { ArticleTocMobileFab } from "@/components/blog/article-toc-mobile-fab"
+import { BlogPostShell } from "@/components/blog/blog-post-shell"
 import { siteConfig } from "@/lib/config"
 import { blogArticleProseClassName } from "@/lib/blog-article-prose"
 import { extractToc } from "@/lib/extract-toc"
@@ -13,6 +14,7 @@ import { formatDate } from "@/lib/forma-date"
 import { cn } from "@/lib/utils"
 import Comments from "@/components/comments"
 import { PageViewBeacon } from "@/components/analytics/page-view-beacon"
+import { getBlogSlugPageViews } from "@/lib/analytics-server"
 import { ArticleJsonLd } from "@/components/seo/article-json-ld"
 import { ArticleZoomableImage } from "@/components/blog/article-zoomable-image"
 import { ArticleFigure } from "@/components/blog/article-code-figure"
@@ -20,6 +22,9 @@ import { ArticleLink } from "@/components/blog/article-link"
 import { ArticleTable } from "@/components/blog/article-table"
 
 export const dynamicParams = false
+
+/** 与 `getBlogSlugPageViews` 的 unstable_cache 一致；须为字面量以满足 Next 段配置校验 */
+export const revalidate = 120
 
 type PageProps = {
     params: Promise<{ slug: string }>
@@ -100,133 +105,105 @@ export default async function BlogPostPage({ params }: PageProps) {
         ? timeline[currentIndex + 1]
         : null
     const pageUrl = new URL(`/blog/${blog.slug}`, siteConfig.seo.metadataBase).toString()
+    const pageViews = await getBlogSlugPageViews(slug)
 
     return (
         <>
             <ArticleJsonLd blog={blog} pageUrl={pageUrl} />
             <main id="blog-post-top" className="pb-4 lg:pb-12">
-                <div
-                    className={cn(
-                        "grid items-start lg:items-stretch",
-                        "gap-x-12 lg:gap-x-20 xl:gap-x-28 2xl:gap-x-32",
-                        "gap-y-10",
-                        "lg:justify-center",
-                        toc.length > 0
-                            ? "lg:grid-cols-[minmax(0,42rem)_minmax(200px,260px)]"
-                            : "lg:grid-cols-1",
-                    )}
+                <BlogPostShell
+                    toc={
+                        toc.length > 0 ? (
+                            <ArticleTocSidebar key={blog.slug} items={toc} />
+                        ) : undefined
+                    }
                 >
-                    {/* 默认 max-w-2xl；770–1020px 间正文列占满可用宽度（平板横屏等），其余视口不变 */}
+                    <header className="mb-10">
+                        <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-[2.125rem] sm:leading-tight">
+                            {blog.title}
+                        </h1>
+                        <p className="mt-4 text-sm text-muted-foreground sm:text-base">
+                            {formatDate(blog.date)} · {blog.wordCount} 字
+                            {blog.updated ? (
+                                <>
+                                    {" "}
+                                    · 更新 {formatDate(blog.updated)}
+                                </>
+                            ) : null}
+                            {pageViews !== null ? (
+                                <>
+                                    {" "}
+                                    · {pageViews.toLocaleString("zh-CN")} 阅读
+                                </>
+                            ) : null}
+                        </p>
+                    </header>
+
                     <div
                         className={cn(
-                            "min-h-0 min-w-0 w-full max-w-2xl",
-                            "[@media(min-width:770px)_and_(max-width:1020px)]:max-w-none",
+                            "w-full min-w-0 max-w-full overflow-x-clip text-base md:text-[1.0625rem]",
+                            blogArticleProseClassName(),
                         )}
                     >
-                        <header className="mb-10">
-                            <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-[2.125rem] sm:leading-tight">
-                                {blog.title}
-                            </h1>
-                            <p className="mt-4 text-sm text-muted-foreground sm:text-base">
-                                {formatDate(blog.date)} · {blog.wordCount} 字
-                                {blog.updated ? (
-                                    <>
-                                        {" "}
-                                        · 更新 {formatDate(blog.updated)}
-                                    </>
-                                ) : null}
-                            </p>
-                        </header>
-
-                        <div
-                            className={cn(
-                                // 博文字体大小；min-w-0 + overflow-x-clip 防止 ul>li 中长链接撑出横向滚动
-                                "w-full min-w-0 max-w-full overflow-x-clip text-base md:text-[1.0625rem]",
-                                blogArticleProseClassName(),
-                            )}
-                        >
-                            <MDXContent
-                                code={blog.mdx}
-                                components={{
-                                    a: ArticleLink,
-                                    img: ArticleZoomableImage,
-                                    figure: ArticleFigure,
-                                    table: ArticleTable,
-                                }}
-                            />
-                        </div>
-
-                        {prevBlog || nextBlog ? (
-                            <nav
-                                className="mt-10 grid grid-cols-2 gap-3 py-3 sm:gap-6"
-                                aria-label="同标签文章导航"
-                            >
-                                <div className="min-w-0">
-                                    {prevBlog ? (
-                                        <Link
-                                            href={`/blog/${prevBlog.slug}`}
-                                            className="group inline-flex max-w-full min-w-0 items-center gap-2 text-foreground/90 transition-colors duration-300 hover:text-foreground"
-                                        >
-                                            <ArrowLeft
-                                                className="size-4 shrink-0 transition-transform duration-300 ease-out group-hover:-translate-x-0.5"
-                                                aria-hidden
-                                            />
-                                            <span className="truncate text-lg underline decoration-1 underline-offset-4 transition-all duration-300 group-hover:decoration-2 group-hover:underline-offset-6">
-                                                {prevBlog.title}
-                                            </span>
-                                        </Link>
-                                    ) : null}
-                                </div>
-
-                                <div className="min-w-0 text-right">
-                                    {nextBlog ? (
-                                        <Link
-                                            href={`/blog/${nextBlog.slug}`}
-                                            className="group inline-flex max-w-full min-w-0 items-center gap-2 text-foreground/90 transition-colors duration-300 hover:text-foreground"
-                                        >
-                                            <span className="truncate text-lg underline decoration-1 underline-offset-4 transition-all duration-300 group-hover:decoration-2 group-hover:underline-offset-6">
-                                                {nextBlog.title}
-                                            </span>
-                                            <ArrowRight
-                                                className="size-4 shrink-0 transition-transform duration-300 ease-out group-hover:translate-x-0.5"
-                                                aria-hidden
-                                            />
-                                        </Link>
-                                    ) : null}
-                                </div>
-                            </nav>
-                        ) : null}
-
-                        <div className="mt-12 w-full min-w-0">
-                            <Comments />
-                        </div>
+                        <MDXContent
+                            code={blog.mdx}
+                            components={{
+                                a: ArticleLink,
+                                img: ArticleZoomableImage,
+                                figure: ArticleFigure,
+                                table: ArticleTable,
+                            }}
+                        />
                     </div>
 
-                    <aside
-                        className={cn(
-                            "hidden w-full min-w-[200px] max-w-[260px]",
-                            "lg:z-20 lg:block lg:h-full lg:min-h-0 lg:self-stretch",
-                        )}
-                    >
-                        {toc.length > 0 ? (
-                            <div className="relative min-h-0 lg:h-full">
-                                <div
-                                    className={cn(
-                                        "lg:sticky lg:top-24 lg:z-20",
-                                        // 目录区域限制高度（避免占满整屏）；仅溢出时出现滚动条
-                                        "lg:max-h-[min(40rem,calc(100dvh-6rem))] lg:overflow-y-auto lg:overflow-x-hidden lg:overscroll-y-contain lg:pr-1",
-                                        "border-t-40 border-transparent bg-clip-padding"
-                                    )}
-                                >
-                                    <ArticleToc key={blog.slug} items={toc} />
-                                </div>
+                    {prevBlog || nextBlog ? (
+                        <nav
+                            className="mt-10 grid grid-cols-1 gap-4 py-3 sm:grid-cols-2 sm:gap-6"
+                            aria-label="同标签文章导航"
+                        >
+                            <div className="min-w-0">
+                                {prevBlog ? (
+                                    <Link
+                                        href={`/blog/${prevBlog.slug}`}
+                                        className="group inline-flex max-w-full min-w-0 items-center gap-2 text-foreground/90 transition-colors duration-300 hover:text-foreground"
+                                    >
+                                        <ArrowLeft
+                                            className="size-4 shrink-0 transition-transform duration-300 ease-out group-hover:-translate-x-0.5"
+                                            aria-hidden
+                                        />
+                                        <span className="truncate text-base underline decoration-1 underline-offset-4 transition-all duration-300 group-hover:decoration-2 group-hover:underline-offset-6 sm:text-lg">
+                                            {prevBlog.title}
+                                        </span>
+                                    </Link>
+                                ) : null}
                             </div>
-                        ) : null}
-                    </aside>
-                </div>
+
+                            <div className="min-w-0 sm:text-right">
+                                {nextBlog ? (
+                                    <Link
+                                        href={`/blog/${nextBlog.slug}`}
+                                        className="group inline-flex max-w-full min-w-0 items-center gap-2 text-foreground/90 transition-colors duration-300 hover:text-foreground max-sm:w-full max-sm:justify-end sm:justify-end"
+                                    >
+                                        <span className="truncate text-base underline decoration-1 underline-offset-4 transition-all duration-300 group-hover:decoration-2 group-hover:underline-offset-6 sm:text-lg">
+                                            {nextBlog.title}
+                                        </span>
+                                        <ArrowRight
+                                            className="size-4 shrink-0 transition-transform duration-300 ease-out group-hover:translate-x-0.5"
+                                            aria-hidden
+                                        />
+                                    </Link>
+                                ) : null}
+                            </div>
+                        </nav>
+                    ) : null}
+
+                    <div className="mt-12 w-full min-w-0">
+                        <Comments />
+                    </div>
+                </BlogPostShell>
 
                 {toc.length > 0 ? (
-                    <ArticleTocMobileFab key={blog.slug} items={toc} />
+                    <ArticleTocMobileFab key={`${blog.slug}-fab`} items={toc} />
                 ) : null}
             </main>
 

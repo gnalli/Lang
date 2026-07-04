@@ -2,6 +2,7 @@
 title: mysql系列指南（一）
 date: 2026-04-06
 updated: 2026-04-07
+category: ops
 keywords: "mysql"
 featured: true
 summary: "这篇文章介绍有关mysql的一些基础概念"

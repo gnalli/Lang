@@ -2,6 +2,7 @@
 title: 监控系统基础概念
 date: 2026-04-06
 updated: 2026-04-07
+category: ops
 keywords: "prometheus生态"
 featured: true
 summary: "这篇文章主要介绍监控系统中的一些基础概念"

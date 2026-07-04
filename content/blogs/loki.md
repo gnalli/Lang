@@ -2,6 +2,7 @@
 title: loki
 date: 2026-04-06
 updated: 2026-04-07
+category: ops
 keywords: "grafana生态"
 featured: true
 summary: "这篇文章介绍有关loki的一些基础概念"

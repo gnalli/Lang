@@ -2,6 +2,7 @@
 title: victoriaLogs
 date: 2026-04-06
 updated: 2026-04-06
+category: ops
 keywords: "victoria生态"
 featured: true
 summary: "这篇文章介绍有关victoriaLogs的一些基础概念"

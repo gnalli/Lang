@@ -1,6 +1,7 @@
 ---
 title: tcp协议
 date: 2026-04-09
+category: ops
 updated: 2026-04-09
 keywords: "网络"
 featured: true

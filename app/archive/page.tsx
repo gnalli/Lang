@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { allBlogs } from "content-collections"
 import { ArchiveListExpandable } from "@/components/archive/archive-list-expandable"
-import { parseKeywords } from "@/lib/blog-tags"
 import { siteConfig } from "@/lib/config"
 
 const archiveDesc = `按年份归档的全部文章 · ${siteConfig.site.title.default}`
@@ -33,7 +32,6 @@ export default function ArchivePage() {
       slug: b.slug,
       title: b.title,
       date: b.date,
-      tags: parseKeywords(b.keywords),
       summary: b.summary?.trim() || null,
     }))
 

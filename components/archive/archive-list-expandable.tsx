@@ -3,23 +3,21 @@
 import * as React from "react"
 import Link from "next/link"
 import { ChevronDown } from "lucide-react"
-import { motion, useReducedMotion } from "motion/react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { Button } from "@/components/ui/button"
 import { formatDotMonthDay } from "@/lib/forma-date"
+import { PostListInlineSummary } from "@/components/blog/post-list-inline-summary"
 import { cn } from "@/lib/utils"
 
 export type ArchivePostItem = {
   slug: string
   title: string
   date: string
-  tags: string[]
-  /** frontmatter summary，无则卡片摘要行可退化为标签 */
   summary?: string | null
 }
 
 const easeOut = [0.25, 0.46, 0.45, 0.94] as const
 
-/** 首屏最多渲染条数，减轻上百篇时的 DOM / 布局压力；其余通过「查看更多」追加 */
 const PAGE_SIZE = 50
 
 function groupByYear(posts: ArchivePostItem[]) {
@@ -37,11 +35,60 @@ function groupByYear(posts: ArchivePostItem[]) {
   return groups
 }
 
-function excerptLine(post: ArchivePostItem): string | null {
-  const s = post.summary?.trim()
-  if (s) return `· ${s}`
-  if (post.tags.length > 0) return `· ${post.tags.join("、")}`
-  return null
+function ArchivePostRow({
+  post,
+  active,
+  onActivate,
+}: {
+  post: ArchivePostItem
+  active: boolean
+  onActivate: () => void
+}) {
+  const reduceMotion = useReducedMotion()
+
+  return (
+    <li className="border-b border-foreground/15 last:border-b-0">
+      <Link
+        href={`/blog/${post.slug}`}
+        onMouseEnter={onActivate}
+        onFocus={onActivate}
+        className={cn(
+          "group/row grid grid-cols-[3.25rem_1fr] gap-x-4 no-underline transition-colors duration-300 sm:grid-cols-[3.5rem_1fr] sm:gap-x-6",
+          active
+            ? "bg-primary px-4 py-6 text-primary-foreground sm:px-5 sm:py-7"
+            : "py-6 text-foreground sm:py-7",
+        )}
+      >
+        <time
+          dateTime={post.date}
+          className={cn(
+            "pt-0.5 text-sm tabular-nums",
+            active ? "text-primary-foreground/85" : "text-muted-foreground",
+          )}
+        >
+          {formatDotMonthDay(post.date)}
+        </time>
+
+        <div className="min-w-0">
+          <h3
+            className={cn(
+              "text-pretty font-semibold leading-snug transition-colors",
+              active
+                ? "text-lg text-primary-foreground sm:text-xl"
+                : "text-base text-foreground sm:text-lg",
+            )}
+          >
+            {post.title}
+          </h3>
+          <PostListInlineSummary
+            summary={post.summary}
+            active={active}
+            reduceMotion={reduceMotion}
+          />
+        </div>
+      </Link>
+    </li>
+  )
 }
 
 export function ArchiveListExpandable({ posts }: { posts: ArchivePostItem[] }) {
@@ -49,6 +96,7 @@ export function ArchiveListExpandable({ posts }: { posts: ArchivePostItem[] }) {
   const [visibleCount, setVisibleCount] = React.useState(() =>
     Math.min(PAGE_SIZE, posts.length),
   )
+  const [activeSlug, setActiveSlug] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     setVisibleCount(Math.min(PAGE_SIZE, posts.length))
@@ -63,7 +111,7 @@ export function ArchiveListExpandable({ posts }: { posts: ArchivePostItem[] }) {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" onMouseLeave={() => setActiveSlug(null)}>
       {groups.map((group, groupIndex) => (
         <motion.section
           key={`${group.year}-${groupIndex}`}
@@ -83,7 +131,7 @@ export function ArchiveListExpandable({ posts }: { posts: ArchivePostItem[] }) {
         >
           <h2
             id={`archive-year-heading-${group.year}-${groupIndex}`}
-            className="mb-5 flex flex-wrap items-baseline gap-x-1 text-balance sm:mb-6"
+            className="mb-5 flex flex-wrap items-baseline justify-center gap-x-1 text-balance text-center sm:mb-6"
           >
             <span className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
               {group.year}
@@ -93,63 +141,16 @@ export function ArchiveListExpandable({ posts }: { posts: ArchivePostItem[] }) {
             </span>
           </h2>
 
-          <div className="flex flex-col gap-4 sm:gap-5">
-            {group.items.map((blog, itemIndex) => {
-              const stagger = groupIndex * 0.05 + itemIndex * 0.04
-              const excerpt = excerptLine(blog)
-              return (
-                <motion.article
-                  key={blog.slug}
-                  className="min-w-0 overflow-hidden rounded-lg"
-                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={
-                    reduceMotion
-                      ? { duration: 0 }
-                      : {
-                          duration: 0.38,
-                          delay: Math.min(stagger, 0.4),
-                          ease: easeOut,
-                        }
-                  }
-                  whileHover={
-                    reduceMotion
-                      ? undefined
-                      : {
-                          y: -4,
-                          transition: {
-                            type: "spring",
-                            stiffness: 420,
-                            damping: 28,
-                          },
-                        }
-                  }
-                >
-                  <Link
-                    href={`/blog/${blog.slug}`}
-                    className="relative block h-full min-w-0 overflow-hidden border-0 bg-muted/50 px-4 py-5 shadow-lg ring-0 transition-[box-shadow,background-color] duration-300 hover:bg-muted/40 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:bg-muted/40 dark:hover:bg-muted/35 sm:px-5 sm:py-5"
-                  >
-                    <div className="min-w-0">
-                      <time
-                        dateTime={blog.date}
-                        className="mb-2 block w-full text-right text-xs tabular-nums text-muted-foreground sm:mb-2.5 sm:text-sm"
-                      >
-                        {formatDotMonthDay(blog.date)}
-                      </time>
-                      <h3 className="text-left text-base font-semibold leading-snug text-foreground">
-                        {blog.title}
-                      </h3>
-                      {excerpt ? (
-                        <p className="mt-2 line-clamp-1 text-left text-sm leading-relaxed text-muted-foreground">
-                          {excerpt}
-                        </p>
-                      ) : null}
-                    </div>
-                  </Link>
-                </motion.article>
-              )
-            })}
-          </div>
+          <ul role="list">
+            {group.items.map((blog) => (
+              <ArchivePostRow
+                key={blog.slug}
+                post={blog}
+                active={activeSlug === blog.slug}
+                onActivate={() => setActiveSlug(blog.slug)}
+              />
+            ))}
+          </ul>
         </motion.section>
       ))}
 

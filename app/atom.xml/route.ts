@@ -1,5 +1,6 @@
 import { siteConfig } from "@/lib/config"
 import {
+  atomEntryCategoriesXml,
   escapeXml,
   feedCacheHeaders,
   getPostsForFeed,
@@ -29,12 +30,17 @@ export async function GET() {
     .map((post) => {
       const pub = toAtomDate(post.date)
       const upd = toAtomDate(post.updated ?? post.date)
+      const categoriesXml = atomEntryCategoriesXml(post.categories)
+      const categoriesBlock = categoriesXml ? `\n${categoriesXml}` : ""
       return `  <entry>
     <title>${escapeXml(post.title)}</title>
     <link rel="alternate" type="text/html" href="${escapeXml(post.url)}" />
     <id>${escapeXml(post.url)}</id>
     <published>${pub}</published>
     <updated>${upd}</updated>
+    <author>
+      <name>${escapeXml(post.authorName)}</name>
+    </author>${categoriesBlock}
     <summary type="text">${escapeXml(post.summaryLine)}</summary>
   </entry>`
     })

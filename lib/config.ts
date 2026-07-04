@@ -2,6 +2,9 @@
 const defaultSiteDescription =
     "Lang 的个人技术博客，记录云原生、前端、后端、数据库、中间件等领域的学习笔记与实践总结。"
 
+/** 全站默认 OG / 分享图（CDN 绝对地址） */
+const siteOgImageUrl = "https://cdn.cnlang.net/og-image.png"
+
 export const siteConfig = {
     site: {
         title: {
@@ -16,7 +19,7 @@ export const siteConfig = {
         },
         referrer: 'origin-when-cross-origin',
         keywords: ['blog'],
-        image: "https://cdn.cnlang.net/og-image.png",  // 后续补充
+        image: siteOgImageUrl,
         icons: {
             icon: '/favicon.ico',
             shortcut: '/favicon.ico',
@@ -27,6 +30,12 @@ export const siteConfig = {
         github: {
             url: 'https://github.com/gnalli',
             username: 'gnalli',
+        },
+        twitter: {
+            url: 'https://x.com',
+        },
+        youtube: {
+            url: 'https://www.youtube.com',
         },
     },
     seo: {
@@ -46,8 +55,8 @@ export const siteConfig = {
             siteName: "Lang's Blog",
             images: [
                 {
-                    url: '/og-image.png'
-                }
+                    url: siteOgImageUrl,
+                },
             ],
             type: 'website',
         },

@@ -2,6 +2,7 @@
 title: VictoriaMetrics系列指南（一）
 date: 2026-04-07
 updated: 2026-04-07
+category: ops
 keywords: "victoria生态"
 featured: true
 summary: "这篇文章介绍有关victoriaMetrics的一些基础概念"
