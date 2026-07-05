@@ -18,7 +18,7 @@ export function HeaderThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="inline-flex min-h-8 shrink-0 items-center justify-center text-foreground transition-colors hover:text-foreground/70 max-[375px]:scale-90"
+      className="inline-flex shrink-0 items-center justify-center text-foreground transition-[color,transform] duration-200 ease-out hover:-translate-y-px hover:text-foreground/65 motion-reduce:transition-none motion-reduce:hover:translate-y-0 max-[375px]:scale-90"
       aria-label={isDark ? "切换到浅色模式" : "切换到深色模式"}
     >
       {isDark ? (

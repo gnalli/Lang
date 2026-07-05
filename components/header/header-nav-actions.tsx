@@ -32,7 +32,7 @@ export function HeaderNavActions() {
   return (
     <div
       ref={groupRef}
-      className="relative flex items-center gap-x-1 sm:gap-x-1.5"
+      className="relative flex items-center gap-x-3 max-[375px]:gap-x-2.5 sm:gap-x-5"
       onPointerEnter={finePointer ? handleOpen : undefined}
       onPointerLeave={finePointer ? scheduleClose : undefined}
     >
