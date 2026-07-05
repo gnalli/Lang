@@ -24,7 +24,7 @@ type BlogPostShellProps = {
 export function BlogPostShell({ children, toc, className }: BlogPostShellProps) {
     if (!toc) {
         return (
-            <article className={cn("mx-auto w-full min-w-0 max-w-[54rem]", className)}>
+            <article className={cn("mx-auto w-full min-w-0 max-w-216", className)}> 
                 {children}
             </article>
         )

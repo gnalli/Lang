@@ -130,7 +130,7 @@ kubectl debug -it ephemeral-demo --image=busybox:1.28 --target=pod-demo
 那节点上运行的静态Pod怎么对API Server可见呢？kubelet会通过API Server为每个Pod自动创建一个`镜像Pod`，只是该Pod不能通过API Server来控制。
 
 静态Pod的创建方式比较独特，它的配置必须放在kubelet指定的目录下（staticPodPath配置），默认是节点的`/etc/kubernetes/manifests`目录：
-```yaml
+```shell
 cat <<EOF >/etc/kubernetes/manifests/static-web.yaml
 apiVersion: v1
 kind: Pod
