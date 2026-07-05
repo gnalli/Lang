@@ -1,11 +1,23 @@
 "use client"
 
 import * as React from "react"
+import { useSyncExternalStore } from "react"
+import { readSiteHeaderHeightPx } from "@/lib/site-header-offset"
 
-/** 与 `blog-article-prose` 里 `prose-headings:scroll-mt-20` / 顶栏 sticky 对齐 */
-const SCROLL_ACTIVE_OFFSET_PX = 80
+/** 与 `SITE_HEADER_OFFSET.headingScrollMargin` / 顶栏 sticky 对齐 */
+function useSiteHeaderScrollOffsetPx() {
+    return useSyncExternalStore(
+        (onStoreChange) => {
+            window.addEventListener("resize", onStoreChange)
+            return () => window.removeEventListener("resize", onStoreChange)
+        },
+        () => readSiteHeaderHeightPx(),
+        () => 64,
+    )
+}
 
 export function useActiveTocId(ids: string[]) {
+    const scrollOffsetPx = useSiteHeaderScrollOffsetPx()
     const [activeId, setActiveId] = React.useState<string | null>(() =>
         ids.length > 0 ? ids[0]! : null,
     )
@@ -38,7 +50,7 @@ export function useActiveTocId(ids: string[]) {
             }
             let next: string | null = els[0]!.id
             for (const el of els) {
-                if (el.getBoundingClientRect().top <= SCROLL_ACTIVE_OFFSET_PX) {
+                if (el.getBoundingClientRect().top <= scrollOffsetPx) {
                     next = el.id
                 }
             }
@@ -59,7 +71,7 @@ export function useActiveTocId(ids: string[]) {
             window.removeEventListener("scroll", onScrollOrResize)
             window.removeEventListener("resize", onScrollOrResize)
         }
-    }, [ids])
+    }, [ids, scrollOffsetPx])
 
     return activeId
 }

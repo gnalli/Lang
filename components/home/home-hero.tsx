@@ -7,6 +7,7 @@ import {
   useScroll,
   useSpring,
   useTransform,
+  type MotionValue,
 } from "motion/react"
 import * as React from "react"
 import { useSyncExternalStore } from "react"
@@ -50,18 +51,14 @@ function TwitchIcon({ className }: { className?: string }) {
 const iconClass =
   "text-white/85 transition-colors hover:text-white"
 
-/** 额外滚动行程：视差在更长距离内完成，动效更缓 */
-const PARALLAX_SCROLL = "min-h-[52svh] sm:min-h-[58svh]"
+const PARALLAX_SCROLL = "sm:min-h-[58svh]"
 
-/** 滚动进度弹簧：低刚度 + 较大质量，跟随更慢、更顺滑（仅用于前景卡片） */
 const SCROLL_SPRING = { stiffness: 38, damping: 26, mass: 1.4, restDelta: 0.0008 }
 
-/** 背景层向上延伸；小屏加大 bleed，抵消 iOS 惯性回顶时 sticky 与视差不同步 */
-const HERO_BG_BLEED =
-  "max-sm:-top-[max(22%,5rem)] max-sm:h-[148%] sm:-top-[10%] sm:h-[120%]"
+const HERO_FALLBACK_BG = "bg-[#1e2621]"
 
-/** 与 Hero 图顶部色调接近，极端情况下不露页面底色 */
-const HERO_STICKY_FALLBACK_BG = "bg-[#1e2621]"
+/** 视差滚动区（sticky 下方）与页面底色一致，避免露出深色条 */
+const HERO_SECTION_BG = "bg-background"
 
 function useMinWidthSm() {
   return useSyncExternalStore(
@@ -72,6 +69,128 @@ function useMinWidthSm() {
     },
     () => window.matchMedia("(min-width: 640px)").matches,
     () => false,
+  )
+}
+
+function HeroGradient() {
+  return (
+    <div className="absolute inset-0 bg-linear-to-b from-black/15 via-black/5 to-background" />
+  )
+}
+
+function HeroBackground({
+  parallaxY,
+}: {
+  parallaxY?: MotionValue<string>
+}) {
+  const bleed = cn(
+    "absolute inset-x-0 overflow-hidden",
+    SITE_HEADER_OFFSET.bgExtend,
+  )
+
+  const image = (
+    <Image
+      src="/images/editorial-hero.jpg"
+      alt=""
+      fill
+      className="object-cover object-[center_22%] sm:object-[center_18%]"
+      sizes="100vw"
+      priority
+    />
+  )
+
+  if (parallaxY) {
+    return (
+      <motion.div
+        className={cn(bleed, "origin-center will-change-transform")}
+        style={{ y: parallaxY, scale: 1.14 }}
+        aria-hidden
+      >
+        {image}
+        <HeroGradient />
+      </motion.div>
+    )
+  }
+
+  return (
+    <div className={cn(bleed, "scale-110")} aria-hidden>
+      {image}
+      <HeroGradient />
+    </div>
+  )
+}
+
+function HeroIntroCard({
+  github,
+  cardY,
+}: {
+  github: { url: string }
+  cardY?: MotionValue<number>
+}) {
+  const cardClassName = cn(
+    "w-full max-w-md border border-white/25 p-7 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)] sm:max-w-lg sm:p-9",
+    "bg-white/18 backdrop-blur-2xl supports-backdrop-filter:bg-white/12",
+  )
+
+  const body = (
+    <>
+      <h1 className="text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+        Hi, I&apos;m Lang 👋
+      </h1>
+      <p className="mt-4 text-base leading-relaxed text-white/90 sm:text-lg">
+        Former DevOps Engineer.
+      </p>
+      <p className="mt-1 text-base leading-relaxed text-white/90 sm:text-lg">
+        Now building AI Agents, one prompt at a time.
+      </p>
+
+      <div className="mt-7 flex items-center gap-5">
+        <a
+          href={github.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={iconClass}
+          aria-label="GitHub"
+        >
+          <GitHubIcon className="size-5" />
+        </a>
+        <span className={iconClass} aria-hidden>
+          <TwitchIcon className="size-5" />
+        </span>
+        <span className={iconClass} aria-hidden>
+          <XIcon className="size-4" />
+        </span>
+      </div>
+    </>
+  )
+
+  if (cardY) {
+    return (
+      <motion.div className={cardClassName} style={{ y: cardY }}>
+        {body}
+      </motion.div>
+    )
+  }
+
+  return <div className={cardClassName}>{body}</div>
+}
+
+function HeroContent({
+  github,
+  cardY,
+}: {
+  github: { url: string }
+  cardY?: MotionValue<number>
+}) {
+  return (
+    <div
+      className={cn(
+        "relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-4 pb-8 sm:px-6 sm:pb-10",
+        SITE_HEADER_OFFSET.padding,
+      )}
+    >
+      <HeroIntroCard github={github} cardY={cardY} />
+    </div>
   )
 }
 
@@ -88,9 +207,7 @@ export function HomeHero() {
   })
 
   const smoothProgress = useSpring(scrollYProgress, SCROLL_SPRING)
-
-  /** 背景须与 scroll 同步；小屏走静态 bleed，避免快速回顶露缝 */
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["-8%", "12%"])
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "10%"])
   const cardY = useTransform(smoothProgress, [0, 1], [18, -26])
 
   return (
@@ -99,80 +216,34 @@ export function HomeHero() {
       className={cn(
         "relative left-1/2 mb-10 w-screen max-w-[100vw] -translate-x-1/2 sm:mb-12",
         SITE_HEADER_OFFSET.margin,
-        PARALLAX_SCROLL,
+        HERO_SECTION_BG,
+        useParallax && PARALLAX_SCROLL,
       )}
       aria-label="介绍"
     >
-      <div
-        className={cn(
-          "sticky top-0 overflow-hidden translate-z-0",
-          HERO_STICKY_FALLBACK_BG,
-          SITE_HEADER_OFFSET.heroHeight,
-        )}
-      >
-        <motion.div
-          className={cn(
-            "absolute inset-x-0 origin-top max-sm:scale-[1.2] sm:origin-center",
-            HERO_BG_BLEED,
-            useParallax && "sm:will-change-transform",
-          )}
-          style={useParallax ? { y: backgroundY, scale: 1.12 } : undefined}
-          aria-hidden
-        >
-          <Image
-            src="/images/editorial-hero.jpg"
-            alt=""
-            fill
-            className="object-cover object-top"
-            sizes="100vw"
-            priority
-          />
-          <div className="absolute inset-0 bg-linear-to-b from-black/15 via-black/5 to-background/90" />
-        </motion.div>
-
+      {useParallax ? (
         <div
           className={cn(
-            "relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-4 pb-8 sm:px-6 sm:pb-10",
-            SITE_HEADER_OFFSET.padding,
+            "sticky top-0 overflow-hidden translate-z-0",
+            HERO_FALLBACK_BG,
+            SITE_HEADER_OFFSET.heroHeight,
           )}
         >
-          <motion.div
-            className={cn(
-              "w-full max-w-md border border-white/25 p-7 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)] sm:max-w-lg sm:p-9",
-              "bg-white/18 backdrop-blur-2xl supports-backdrop-filter:bg-white/12",
-            )}
-            style={useParallax ? { y: cardY } : undefined}
-          >
-            <h1 className="text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Hi, I&apos;m Lang 👋
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-white/90 sm:text-lg">
-              Former DevOps Engineer.
-            </p>
-            <p className="mt-1 text-base leading-relaxed text-white/90 sm:text-lg">
-              Now building AI Agents, one prompt at a time.
-            </p>
-
-            <div className="mt-7 flex items-center gap-5">
-              <a
-                href={github.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={iconClass}
-                aria-label="GitHub"
-              >
-                <GitHubIcon className="size-5" />
-              </a>
-              <span className={iconClass} aria-hidden>
-                <TwitchIcon className="size-5" />
-              </span>
-              <span className={iconClass} aria-hidden>
-                <XIcon className="size-4" />
-              </span>
-            </div>
-          </motion.div>
+          <HeroBackground parallaxY={backgroundY} />
+          <HeroContent github={github} cardY={cardY} />
         </div>
-      </div>
+      ) : (
+        <div
+          className={cn(
+            "relative overflow-hidden",
+            HERO_FALLBACK_BG,
+            SITE_HEADER_OFFSET.heroHeight,
+          )}
+        >
+          <HeroBackground />
+          <HeroContent github={github} />
+        </div>
+      )}
     </section>
   )
 }

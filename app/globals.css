@@ -81,6 +81,18 @@
     --sidebar-accent-foreground: #252525;
     --sidebar-border: #e8e0d4;
     --sidebar-ring: #364437;
+    /**
+     * Sticky Header 总高（外壳 padding + 导航栏）。
+     * 改 Header 样式时须同步 `lib/site-header-offset.ts` 及 Hero / TOC / 404 引用处。
+     * 当前对应：header pt-1.5 pb-1 sm:pt-2 sm:pb-1 + nav py-1.5 sm:py-2 + min-h-9 行
+     */
+    --site-header-height: 4rem;
+}
+
+@media (min-width: 640px) {
+    :root {
+        --site-header-height: 4.25rem;
+    }
 }
 
 .dark {

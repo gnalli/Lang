@@ -1,10 +1,12 @@
+import { SITE_HEADER_OFFSET } from "@/lib/site-header-offset"
 import { cn } from "@/lib/utils"
 
 /** Tailwind Typography：仅包在 MDX 正文外，标题区单独排版 */
 export function blogArticleProseClassName() {
     return cn(
         "article-mdx-prose prose prose-neutral max-w-none dark:prose-invert prose-code:before:content-none prose-code:after:content-none",
-        "prose-headings:scroll-mt-20 prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-foreground",
+        SITE_HEADER_OFFSET.headingScrollMargin,
+        "prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-foreground",
         "prose-h1:text-[1.65rem] sm:prose-h1:text-[1.85rem] prose-h1:mt-10 prose-h1:mb-4 first:prose-h1:mt-0",
         "prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4",
         "prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3",

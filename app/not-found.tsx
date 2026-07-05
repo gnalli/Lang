@@ -1,10 +1,8 @@
 import Link from "next/link"
 import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
+import { SITE_HEADER_OFFSET } from "@/lib/site-header-offset"
 import { cn } from "@/lib/utils"
-
-const MAIN_HEIGHT =
-  "min-h-0 h-[calc(100svh-11rem)] max-h-[calc(100svh-11rem)] sm:h-[calc(100svh-10.5rem)] sm:max-h-[calc(100svh-10.5rem)]"
 
 export const metadata: Metadata = {
   title: "页面未找到",
@@ -18,7 +16,7 @@ export default function NotFound() {
       id="not-found"
       className={cn(
         "mx-auto flex w-full max-w-3xl flex-col items-center justify-center overflow-hidden",
-        MAIN_HEIGHT,
+        SITE_HEADER_OFFSET.notFoundMainHeight,
         "px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 sm:px-2 sm:pt-4",
       )}
     >
