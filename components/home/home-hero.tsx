@@ -9,6 +9,7 @@ import {
   useTransform,
 } from "motion/react"
 import * as React from "react"
+import { useSyncExternalStore } from "react"
 import { siteConfig } from "@/lib/config"
 import { SITE_HEADER_OFFSET } from "@/lib/site-header-offset"
 import { cn } from "@/lib/utils"
@@ -55,13 +56,31 @@ const PARALLAX_SCROLL = "min-h-[52svh] sm:min-h-[58svh]"
 /** 滚动进度弹簧：低刚度 + 较大质量，跟随更慢、更顺滑（仅用于前景卡片） */
 const SCROLL_SPRING = { stiffness: 38, damping: 26, mass: 1.4, restDelta: 0.0008 }
 
-/** 背景层额外向上延伸，避免视差/弹簧滞后时在顶部露缝 */
-const HERO_BG_BLEED = "-top-[10%] h-[120%]"
+/** 背景层向上延伸；小屏加大 bleed，抵消 iOS 惯性回顶时 sticky 与视差不同步 */
+const HERO_BG_BLEED =
+  "max-sm:-top-[max(22%,5rem)] max-sm:h-[148%] sm:-top-[10%] sm:h-[120%]"
+
+/** 与 Hero 图顶部色调接近，极端情况下不露页面底色 */
+const HERO_STICKY_FALLBACK_BG = "bg-[#1e2621]"
+
+function useMinWidthSm() {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      const mq = window.matchMedia("(min-width: 640px)")
+      mq.addEventListener("change", onStoreChange)
+      return () => mq.removeEventListener("change", onStoreChange)
+    },
+    () => window.matchMedia("(min-width: 640px)").matches,
+    () => false,
+  )
+}
 
 export function HomeHero() {
   const github = siteConfig.social.github
   const sectionRef = React.useRef<HTMLElement>(null)
   const reduceMotion = useReducedMotion()
+  const isDesktop = useMinWidthSm()
+  const useParallax = isDesktop && !reduceMotion
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -70,7 +89,7 @@ export function HomeHero() {
 
   const smoothProgress = useSpring(scrollYProgress, SCROLL_SPRING)
 
-  /** 背景须与 scroll 同步；若走 spring，快速回顶时会滞后下移并露出顶部间隙 */
+  /** 背景须与 scroll 同步；小屏走静态 bleed，避免快速回顶露缝 */
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["-8%", "12%"])
   const cardY = useTransform(smoothProgress, [0, 1], [18, -26])
 
@@ -86,16 +105,18 @@ export function HomeHero() {
     >
       <div
         className={cn(
-          "sticky top-0 overflow-hidden",
+          "sticky top-0 overflow-hidden translate-z-0",
+          HERO_STICKY_FALLBACK_BG,
           SITE_HEADER_OFFSET.heroHeight,
         )}
       >
         <motion.div
           className={cn(
-            "absolute inset-x-0 origin-center will-change-transform",
+            "absolute inset-x-0 origin-top max-sm:scale-[1.2] sm:origin-center",
             HERO_BG_BLEED,
+            useParallax && "sm:will-change-transform",
           )}
-          style={reduceMotion ? undefined : { y: backgroundY, scale: 1.12 }}
+          style={useParallax ? { y: backgroundY, scale: 1.12 } : undefined}
           aria-hidden
         >
           <Image
@@ -120,7 +141,7 @@ export function HomeHero() {
               "w-full max-w-md border border-white/25 p-7 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)] sm:max-w-lg sm:p-9",
               "bg-white/18 backdrop-blur-2xl supports-backdrop-filter:bg-white/12",
             )}
-            style={reduceMotion ? undefined : { y: cardY }}
+            style={useParallax ? { y: cardY } : undefined}
           >
             <h1 className="text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
               Hi, I&apos;m Lang 👋

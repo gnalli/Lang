@@ -13,7 +13,7 @@ export function ArticleTocSidebar({ items, slug }: Props) {
     if (items.length === 0) return null
 
     return (
-        <aside className="pointer-events-auto sticky top-24 z-30 overflow-visible">
+        <aside className="pointer-events-auto sticky top-20 z-30 overflow-visible">
             <ArticleTocFumadocs items={items} showHeader />
             <ArticleTocSidebarActions slug={slug} />
         </aside>

@@ -14,10 +14,10 @@ const HeaderAnalyticsDrawer = dynamic(
 )
 
 const navLink =
-  "inline-flex min-h-11 items-center text-sm leading-snug text-foreground transition-colors hover:text-foreground/70 max-[375px]:text-[0.8125rem] sm:text-base"
+  "inline-flex min-h-8 items-center text-sm leading-snug text-foreground transition-colors hover:text-foreground/70 max-[375px]:text-[0.8125rem] sm:text-[0.9375rem]"
 
 const menuItemClass = cn(
-  "flex min-h-11 w-full items-center gap-1.5 whitespace-nowrap px-2.5 text-sm text-foreground transition-colors touch-manipulation",
+  "flex min-h-8 w-full items-center gap-1.5 whitespace-nowrap px-2.5 text-sm text-foreground transition-colors touch-manipulation",
   "hover:bg-foreground/10",
 )
 

@@ -18,13 +18,13 @@ export function HeaderThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="inline-flex shrink-0 items-center justify-center text-foreground transition-colors hover:text-foreground/70 max-[375px]:scale-90"
+      className="inline-flex min-h-8 shrink-0 items-center justify-center text-foreground transition-colors hover:text-foreground/70 max-[375px]:scale-90"
       aria-label={isDark ? "切换到浅色模式" : "切换到深色模式"}
     >
       {isDark ? (
-        <Sun className="size-[1.125rem]" strokeWidth={1.75} aria-hidden />
+        <Sun className="size-4" strokeWidth={1.75} aria-hidden />
       ) : (
-        <Moon className="size-[1.125rem]" strokeWidth={1.75} aria-hidden />
+        <Moon className="size-4" strokeWidth={1.75} aria-hidden />
       )}
     </button>
   )

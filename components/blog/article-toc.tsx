@@ -2,8 +2,8 @@
 
 import * as React from "react"
 
-/** 与 `blog-article-prose` 里 `prose-headings:scroll-mt-24` / 顶栏 sticky 对齐 */
-const SCROLL_ACTIVE_OFFSET_PX = 96
+/** 与 `blog-article-prose` 里 `prose-headings:scroll-mt-20` / 顶栏 sticky 对齐 */
+const SCROLL_ACTIVE_OFFSET_PX = 80
 
 export function useActiveTocId(ids: string[]) {
     const [activeId, setActiveId] = React.useState<string | null>(() =>
