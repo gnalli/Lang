@@ -162,7 +162,7 @@ VXLAN是一种隧道协议，用于在三层网络之上构建二层虚拟网络
 VTEP是VXLAN网络中的关键组件，负责对数据包进行封装和解封装。在k8s场景中，VTEP可以看作是k8s各节点的IP地址。
 
 当一个Pod要访问另一个Pod时，这个目标Pod应该发往哪个VTEP呢？cilium维护了一个类似下面的VTEP映射：
-```text
+```Text
 Pod IP → Node IP（VTEP）
 ```
 该映射会存储在eBPF Maps中，并通过cilium Agent在各节点进行同步，在需要的时候，去eBPF Maps中查询即可

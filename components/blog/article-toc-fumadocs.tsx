@@ -3,11 +3,18 @@
 import * as React from "react"
 import { TextAlignStart } from "lucide-react"
 import type { TocItem } from "@/lib/extract-toc"
-import { formatTocLabel } from "@/lib/extract-toc"
+import {
+    formatTocLabel,
+    getTocTopLevelIndex,
+    getVisibleTocIndices,
+    tocSectionHasChildren,
+} from "@/lib/extract-toc"
 import { cn } from "@/lib/utils"
 import { useActiveTocId } from "@/components/blog/article-toc"
 
-const LINE_BASE = 8
+export const ARTICLE_TOC_LINE_BASE_PX = 8
+
+const LINE_BASE = ARTICLE_TOC_LINE_BASE_PX
 
 /** 左侧竖线 x 偏移（相对容器） */
 function getLineOffset(depth: number, minDepth: number) {
@@ -103,7 +110,6 @@ function TocActiveIndicator({
     const thumbMetaRef = React.useRef<{ start: number; end: number; isUp: boolean } | null>(
         null,
     )
-    rangeRef.current = range
 
     const applyThumb = React.useCallback(() => {
         const container = containerRef.current
@@ -144,6 +150,7 @@ function TocActiveIndicator({
     }, [containerRef, items, minDepth])
 
     React.useLayoutEffect(() => {
+        rangeRef.current = range
         applyThumb()
 
         const container = containerRef.current
@@ -157,7 +164,7 @@ function TocActiveIndicator({
             observer.disconnect()
             window.removeEventListener("resize", applyThumb)
         }
-    }, [applyThumb, containerRef, track.d, range.start, range.end])
+    }, [applyThumb, containerRef, track.d, range])
 
     React.useEffect(() => {
         const container = containerRef.current
@@ -222,6 +229,8 @@ type FumadocsTocProps = {
     className?: string
     showHeader?: boolean
     onItemNavigate?: () => void
+    /** auto：仅随滚动展开当前一级下的子标题；always：始终展示全部 */
+    subItemsVisibility?: "auto" | "always"
 }
 
 export function ArticleTocFumadocs({
@@ -229,6 +238,7 @@ export function ArticleTocFumadocs({
     className,
     showHeader = false,
     onItemNavigate,
+    subItemsVisibility = "auto",
 }: FumadocsTocProps) {
     const containerRef = React.useRef<HTMLDivElement>(null)
     const ids = React.useMemo(() => items.map((i) => i.id), [items])
@@ -244,17 +254,35 @@ export function ArticleTocFumadocs({
         items.length > 0
             ? Math.max(0, items.findIndex((item) => item.id === activeId))
             : 0
-    const range = getActiveTocRange(items, activeIndex, minDepth)
+
+    const visibleIndices = React.useMemo(() => {
+        if (subItemsVisibility === "always") {
+            return items.map((_, index) => index)
+        }
+        return getVisibleTocIndices(items, activeIndex, minDepth)
+    }, [items, activeIndex, minDepth, subItemsVisibility])
+
+    const visibleActiveIndex = React.useMemo(() => {
+        const index = visibleIndices.indexOf(activeIndex)
+        return index >= 0 ? index : Math.max(0, visibleIndices.length - 1)
+    }, [visibleIndices, activeIndex])
+
+    const visibleItems = React.useMemo(
+        () => visibleIndices.map((index) => items[index]!),
+        [items, visibleIndices],
+    )
+
+    const range = getActiveTocRange(visibleItems, visibleActiveIndex, minDepth)
 
     React.useLayoutEffect(() => {
         const container = containerRef.current
-        if (!container || items.length === 0) {
+        if (!container || visibleItems.length === 0) {
             setTrack(null)
             return
         }
 
         const measure = () => {
-            setTrack(buildTrackPath(container, items, minDepth))
+            setTrack(buildTrackPath(container, visibleItems, minDepth))
         }
 
         measure()
@@ -266,7 +294,7 @@ export function ArticleTocFumadocs({
             observer.disconnect()
             window.removeEventListener("resize", measure)
         }
-    }, [items, minDepth])
+    }, [visibleItems, minDepth])
 
     if (items.length === 0) {
         return (
@@ -292,33 +320,52 @@ export function ArticleTocFumadocs({
                         containerRef={containerRef}
                         track={track}
                         range={range}
-                        items={items}
+                        items={visibleItems}
                         minDepth={minDepth}
                     />
                 ) : null}
 
                 <ul className="relative space-y-0">
-                    {items.map((item, index) => {
-                        const isActive = index >= range.start && index <= range.end
+                    {visibleIndices.map((originalIndex, visibleIndex) => {
+                        const item = items[originalIndex]!
+                        const isActive =
+                            visibleIndex >= range.start && visibleIndex <= range.end
                         const label = formatTocLabel(item.text)
                         const lineX = getLineOffset(item.depth, minDepth)
                         const paddingLeft = getItemPadding(item.depth, minDepth)
-                        const prev = index > 0 ? items[index - 1]! : null
-                        const next = index < items.length - 1 ? items[index + 1]! : null
+                        const prevOriginal =
+                            visibleIndex > 0 ? visibleIndices[visibleIndex - 1]! : null
+                        const nextOriginal =
+                            visibleIndex < visibleIndices.length - 1
+                                ? visibleIndices[visibleIndex + 1]!
+                                : null
+                        const prev = prevOriginal !== null ? items[prevOriginal]! : null
+                        const next = nextOriginal !== null ? items[nextOriginal]! : null
                         const upperOffset = prev
                             ? getLineOffset(prev.depth, minDepth)
                             : lineX
                         const lowerOffset = next
                             ? getLineOffset(next.depth, minDepth)
                             : lineX
+                        const isExpandedSection =
+                            subItemsVisibility === "auto" &&
+                            item.depth === minDepth &&
+                            getTocTopLevelIndex(items, activeIndex, minDepth) ===
+                                originalIndex &&
+                            tocSectionHasChildren(items, originalIndex, minDepth)
 
                         return (
-                            <li key={`${item.id}-${index}`}>
+                            <li key={`${item.id}-${originalIndex}`}>
                                 <a
                                     href={`#${item.id}`}
-                                    data-toc-index={index}
+                                    data-toc-index={visibleIndex}
                                     data-active={isActive ? "true" : "false"}
-                                    aria-current={activeId === item.id ? "location" : undefined}
+                                    aria-current={
+                                        activeId === item.id ? "location" : undefined
+                                    }
+                                    aria-expanded={
+                                        isExpandedSection ? true : undefined
+                                    }
                                     style={{ paddingInlineStart: `${paddingLeft}px` }}
                                     onClick={(e) => {
                                         if (!onItemNavigate) return
@@ -343,11 +390,11 @@ export function ArticleTocFumadocs({
                                         "transition-colors duration-200 ease-out",
                                         "text-muted-foreground hover:text-foreground",
                                         "data-[active=true]:text-primary",
-                                        index === 0 && "pt-0",
-                                        index === items.length - 1 && "pb-0",
+                                        visibleIndex === 0 && "pt-0",
+                                        visibleIndex === visibleIndices.length - 1 && "pb-0",
                                     )}
                                 >
-                                    {index > 0 && upperOffset !== lineX ? (
+                                    {visibleIndex > 0 && upperOffset !== lineX ? (
                                         <svg
                                             aria-hidden
                                             viewBox={`${Math.min(lineX, upperOffset)} 0 ${Math.abs(upperOffset - lineX) + 1} 12`}

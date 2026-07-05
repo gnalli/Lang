@@ -93,3 +93,11 @@ main {
 .gsc-comment:not(.gsc-reply-box) .gsc-replies {
   border-radius: unset;
 }
+
+.gsc-reactions-count {
+  display: none;
+}
+
+.gsc-left-header > em {
+  display: none;
+}

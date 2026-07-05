@@ -40,7 +40,7 @@ victoriaLogs之所以这样设计，是因为日志系统的目标和指标系�
 # 核心概念
 ## 数据模型
 victoriaLogs在日志摄取过程中，会将多级JSON（嵌套JSON）转换为单级JSON。为了简化搜索，数组、数字和布尔值会被转换为字符串。除此之外，字段名和字段值可以包含任意字符，但Unicode字符必须使用UTF-8编码。例如下面的JSON日志：
-```text
+```json
 {
   "host": {
     "name": "foobar",
@@ -56,7 +56,7 @@ victoriaLogs在日志摄取过程中，会将多级JSON（嵌套JSON）转换为
 ```
 会被转换成
 
-```text
+```json
 {
   "host.name": "foobar",
   "host.os.version": "1.2.3",
@@ -71,7 +71,7 @@ victoriaLogs会自动为所有导入的日志中的所有字段建立索引，�
 
 ### _msg字段
 victoriaLogs要求每条被摄取的日志至少包含一个_msg字段，它包含了实际的日志消息。例如，以下是victoriaLogs中的最小日志条目：
-```text
+```json
 {
   "_msg": "some log message"
 }
@@ -81,7 +81,7 @@ victoriaLogs要求每条被摄取的日志至少包含一个_msg字段，它包�
 
 ### _time字段
 摄入的日志中可能包含一个_time字段，表示该日志条目的时间戳。此字段必须使用`ISO8601/RFC3339`或`Unix时间戳`等格式
-```text
+```json
 {
   "_msg": "some log message",
   "_time": "2023-04-12T06:38:11.095Z"
@@ -95,15 +95,15 @@ victoriaLogs要求每条被摄取的日志至少包含一个_msg字段，它包�
 因此，每个被摄取的日志条目都应该关联到一个日志流上，每个日志流包含以下特殊字段：
 - _stream_id：这是日志流的唯一标识符，可以通过`_stream_id`过滤器选择特定流的所有日志
 - _stream：此字段包含用来构建流的字段，格式类似于Prometheus指标中的标签集
-```text
+```json
 {
-    host："host-123",
-    app："my-app"
+    "host": "host-123",
+    "app": "my-app"
 }
 ```
 如果将上面的host和app字段与流关联，则该流的所有日志条目都应该包含着两个字段。而该流的_stream字段的值则是`{host="host-123",app="my-app"}`。默认情况下，_stream字段的值为`{}`，因为victoriaLogs本身无法自动确定哪些字段可以用来表示标识一个唯一的流，这可能会导致资源利用率和查询性能不佳。因此，建议在数据摄取期间通过`_stream_fields`查询参数来指定用来构建流的字段。
 
-```text
+```json
 {
   "kubernetes.namespace": "some-namespace",
   "kubernetes.node.name": "some-node",
@@ -132,14 +132,14 @@ Jul 28 10:12:04 web-01 sshd[987]: Accepted publickey for root from 192.0.2.7 por
 2025-07-28 10:15:09,123 ERROR main MyApp - java.lang.NullPointerException: Foo.bar(Foo.java:42)
 ```
 这些日志行都没有被拆分成明显的键值对，因此从日志记录的角度来看，它们是非结构化的。victoriaLogs会将第一条日志转换成下面的结构化日志：
-```text
+```json
 {
   "_msg": "127.0.0.1 - frank [28/Jul/2025:10:12:07 +0000] \"GET /apache.gif HTTP/1.0\" 200 2326",
   "_time": "2025-07-28T10:12:07Z"
 }
 ```
 在victoriaLogs中，流是一个逻辑上的桶，其中包含所有彼此相关的日志。如下，一个payments服务的日志：
-```text
+```json
 {
   "service": "payments",
   "_time": "2025-07-28T10:20:14Z",
@@ -172,7 +172,7 @@ $ _time:1h {service="payments", user_id="johndoe"} level:="error"
 
 ## 高基数字段名
 还有第二种更隐蔽的高基数变体，那就是字段名称本身不断变化。如下所示：
-```text
+```json
 {
     "_msg": "page viewed",
     "user_id": "u-347912",
@@ -181,7 +181,7 @@ $ _time:1h {service="payments", user_id="johndoe"} level:="error"
     "sku_00000001.hover_ms": 83,
     "sku_00000002.clicks": 0,
     "sku_00000002.hover_ms": 12,
-    ...
+    //...
     "sku_00100000.clicks": 3,
     "sku_00100000.hover_ms": 57
 }

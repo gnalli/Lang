@@ -5,6 +5,7 @@ import rehypeSlug from "rehype-slug"
 import remarkGfm from "remark-gfm"
 import wordCount from "word-count"
 import { z } from "zod"
+import { rehypeNormalizeCodeLanguage } from "@/lib/rehype-normalize-code-language"
 
 const blogCategory = z.enum(["ops", "ai", "notes"])
 
@@ -29,6 +30,7 @@ const blogs = defineCollection({
       cwd: process.cwd(),
       remarkPlugins: [remarkGfm],
       rehypePlugins: [
+        rehypeNormalizeCodeLanguage,
         [
           rehypePrettyCode,
           {

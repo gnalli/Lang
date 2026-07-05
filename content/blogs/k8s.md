@@ -43,7 +43,7 @@ init容器也叫做初始化容器，该类容器会在应用容器启动之前�
 > Pod如果发生重启，那init容器也会重新执行，所以它的代码逻辑应该是幂等的
 
 要为Pod指定初始化容器，在Pod配置中添加`initContainers`字段即可。如下所示
-```text
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -69,7 +69,7 @@ sidecar容器一般作为辅助容器使用，这些容器用于增强或拓展�
 
 sidecar容器也可以看作是一个特殊的init容器。虽然它也通过`initContainers`来定义，但自k8s 1.29版本开始，原本init容器不支持的字段和功能（如restartPolicy），也都集成进来了。这意味着作为特殊init容器启动的sidecar容器，其生命周期独立出来了，它们可以自行启动、停止或重启，而不会影响主容器和其他init容器。
 
-```text
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -112,7 +112,7 @@ spec:
 ephemeral容器是一种特殊类型的容器，可见其称为临时容器。它会在现有Pod中临时运行，主要用于故障排查。
 
 临时容器与其它容器的不同之处在于，该类容器不能进行资源限制，也不会自动重启，许多字段和功能也不允许使用。而且它是通过特定的API创建的，因此无法使用`kubectl edit`命令来添加临时容器。临时容器的创建方式如下：
-```text
+```shell
 kubectl debug -it ephemeral-demo --image=busybox:1.28 --target=pod-demo
 ```
 相当于直接在`pod-demo`这个原有的Pod中，插入了一个新容器。
@@ -130,7 +130,7 @@ kubectl debug -it ephemeral-demo --image=busybox:1.28 --target=pod-demo
 那节点上运行的静态Pod怎么对API Server可见呢？kubelet会通过API Server为每个Pod自动创建一个`镜像Pod`，只是该Pod不能通过API Server来控制。
 
 静态Pod的创建方式比较独特，它的配置必须放在kubelet指定的目录下（staticPodPath配置），默认是节点的`/etc/kubernetes/manifests`目录：
-```text
+```yaml
 cat <<EOF >/etc/kubernetes/manifests/static-web.yaml
 apiVersion: v1
 kind: Pod
@@ -160,7 +160,7 @@ Service是一种“网络即服务的”机制。k8s会为每个Pod分配独立�
 
 ## Service定义
 Service定义配置如下所示：
-```text
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -189,7 +189,7 @@ k8s会为该Service分配一个IP地址（Cluster IP），该地址由`kube-prox
         - 静态频段：30000-30085
         - 动态频段：30086-32767
     - 使用特点节点来代理端口：默认情况下，NodePort会在每个节点上都开放对应的端口。但也可以在kube-proxy中使用`--nodeport-addresses`配置来定义只有特点的节点才开启代理
-```text
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -207,7 +207,7 @@ spec:
     nodePort: 31398
 ```
 - LoadBalancer：在NodePort的基础上，利用云厂商（如阿里云、AWS、GCP）的API创建一个外部负载均衡器。可用于公网或私网全路径访问
-```text
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -227,7 +227,7 @@ status:
     - ip: 192.0.2.127
 ```
 - ExternalName：这是一种特殊的类型，它没有选择器，也不转发流量。而是通过DNS映射将服务重定向到外部的域名，用于将集群外部的服务引入到集群内部访问
-```text
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -253,7 +253,7 @@ spec:
 在某些场景下，你可能并不需要Service提供的负载均衡能力，也不希望分配ClusterIP。这时可以通过将`clusterIP`设置为`None`来创建Headless Service。
 
 该类Service没有ClusterIP，kube-proxy也不会对其进行转发或负载均衡处理，集群层面不提供统一的访问入口。由于没有ClusterIP，Headless Service通过集群内部的DNS服务直接返回所有后端Pod的IP地址。客户端可以通过DNS解析拿到Pod列表，自行决定要访问哪个Pod（自己做负载均衡或选择逻辑）。
-```text
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -393,7 +393,7 @@ nftables模式是基于Linux内核中更新一代的netfilter框架（nftables�
 在Endpoints模型中，一个Service只对应一个Endpoints对象，这个对象会集中保存所有后端Pod的IP和端口信息。当Pod数量较少时，这种方式非常直接，但当规模扩大到上千甚至上万个Pod时，这个单一对象会变得非常庞大。每一次Pod的创建、删除或状态变化，都会导致整个Endpoints对象被更新，并推送到API Server和所有节点，这会带来频繁的全量更新和较高的etcd压力。同时kube-proxy或其他控制组件在处理时也必须加载完整列表，导致性能随规模线性下降。此外，原始Endpoints结构也不支持双栈、拓扑信息等更复杂的调度能力，因此逐渐难以满足现代集群的需求。
 
 为了解决这些问题，k8s引入了EndpointSlice作为替代方案。它的核心思想是将“单一大对象”拆分为“多个小切片”。默认情况下，每个EndpointSlice最多包含100个端点，这样一个大型Service的后端Pod会被分散到多个Slice中存储，从而避免单个对象过大带来的问题。
-```text
+```yaml
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
 metadata:

@@ -4,15 +4,15 @@ import { cn } from "@/lib/utils"
 /** 博文页两栏网格：正文 | 目录（与 Header max-w-6xl 同宽容器内，左对齐） */
 export const BLOG_POST_GRID = {
     /** 正文列最大宽度 */
-    article: "minmax(0,48rem)",
+    article: "minmax(0,54rem)",
     /** 目录列宽度 */
     toc: "12.5rem",
     /** lg+ 列模板 */
-    template: "minmax(0,48rem) 12.5rem",
+    template: "minmax(0,54rem) 12.5rem",
     /** 正文与目录列间距 */
-    gap: "lg:gap-x-20",
+    gap: "lg:gap-x-10",
     /** 整体左内边距（略小于原先 1fr 留白，正文稍向左靠） */
-    inset: "lg:pl-14",
+    inset: "lg:pl-12",
 } as const
 
 type BlogPostShellProps = {
@@ -24,7 +24,7 @@ type BlogPostShellProps = {
 export function BlogPostShell({ children, toc, className }: BlogPostShellProps) {
     if (!toc) {
         return (
-            <article className={cn("mx-auto w-full min-w-0 max-w-3xl", className)}>
+            <article className={cn("mx-auto w-full min-w-0 max-w-[54rem]", className)}>
                 {children}
             </article>
         )
@@ -34,8 +34,8 @@ export function BlogPostShell({ children, toc, className }: BlogPostShellProps) 
         <div
             className={cn(
                 "grid w-full grid-cols-1 gap-y-10",
-                "lg:grid-cols-[minmax(0,48rem)_12.5rem]",
-                "lg:items-stretch lg:justify-start lg:gap-x-20 lg:pl-14",
+                "lg:grid-cols-[minmax(0,54rem)_12.5rem]",
+                "lg:items-stretch lg:justify-start lg:gap-x-10 lg:pl-12",
                 className,
             )}
         >

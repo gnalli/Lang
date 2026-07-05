@@ -38,6 +38,14 @@ export const siteConfig = {
             url: 'https://www.youtube.com',
         },
     },
+    /** 侧边栏打赏弹层（填入收款码图片路径后替换占位符） */
+    donate: {
+        message: '☕ 请我喝杯咖啡',
+        /** 微信赞赏码，例如 `/images/donate-wechat.png` */
+        wechatImage: '/wx.jpg',
+        /** 支付宝收款码，例如 `/images/donate-alipay.png` */
+        alipayImage: '/zfb.jpg',
+    },
     seo: {
         metadataBase: new URL('https://www.cnlang.net/'),
         alternates: {

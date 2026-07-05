@@ -1,11 +1,17 @@
 "use client"
 
 import * as React from "react"
+import dynamic from "next/dynamic"
 import { LineChart, Search } from "lucide-react"
-import { HeaderAnalyticsDrawer } from "./header-analytics-drawer"
 import { useHeaderSearch } from "./header-command-palette"
 import { useFinePointer } from "@/lib/use-fine-pointer"
 import { cn } from "@/lib/utils"
+
+const HeaderAnalyticsDrawer = dynamic(
+  () =>
+    import("./header-analytics-drawer").then((m) => m.HeaderAnalyticsDrawer),
+  { ssr: false },
+)
 
 const navLink =
   "inline-flex min-h-11 items-center text-sm leading-snug text-foreground transition-colors hover:text-foreground/70 max-[375px]:text-[0.8125rem] sm:text-base"
@@ -106,7 +112,12 @@ export function HeaderMoreMenu() {
         ) : null}
       </div>
 
-      <HeaderAnalyticsDrawer open={analyticsOpen} onOpenChange={setAnalyticsOpen} />
+      {analyticsOpen ? (
+        <HeaderAnalyticsDrawer
+          open={analyticsOpen}
+          onOpenChange={setAnalyticsOpen}
+        />
+      ) : null}
     </>
   )
 }

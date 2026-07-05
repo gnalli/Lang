@@ -118,7 +118,11 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
               <DrawerTitle>{DRAWER_TITLE}</DrawerTitle>
             </DrawerHeader>
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-6 pt-2">
-              <ArticleTocFumadocs items={items} onItemNavigate={() => setOpen(false)} />
+              <ArticleTocFumadocs
+                items={items}
+                subItemsVisibility="always"
+                onItemNavigate={() => setOpen(false)}
+              />
             </div>
           </DrawerContent>
         </Drawer>

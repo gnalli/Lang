@@ -23,7 +23,7 @@ victoriaMetrics集群版的架构如下：
 vmagent数据采集支持两种模式：pull和push。在push模式下，数据源可以通过HTTP API向vmagent直接推送数据，在推送的过程中还可以对数据进行打标。
 
 而在pull模式下，vmagent可以通过配置定期地从数据源抓取数据，抓取间隔可以在配置中的global字段中设置。如果没有设置全局或特定的抓取间隔，则默认间隔为1分钟。抓取的超时时间则默认为10秒，如果抓取间隔短于超时时间，则以超时时间为准。
-```text
+```yaml
 config:
   global:
     scrape_interval: 10s
@@ -45,7 +45,7 @@ config:
 抓取到的数据会加载到内存中，对于如何处理这些数据，vmagent提供了两种模式：`one-shot模式`和`流模式`。对于较小的抓取响应，on-shot模式通常更高效，因为数据不需要拆分处理。而对于较大的响应，流模式可能更节省资源，数据会以64KB为单位进行顺序处理，而不是一次性处理所有数据。
 
 流模式可以通过vmagent启动时使用`-promscrape.streamParse`标志全局开启。也可以在配置中为每个抓取目标单独开启：
-```text
+```yaml
 scrape_configs:
 - job_name: 'big-federate'
   stream_parse: true 
@@ -60,7 +60,7 @@ scrape_configs:
 
 ## 重新打标
 指标数据抓取后，可以通过配置中的`metric_relabel_configs`字段对数据进行重新打标：
-```text
+```yaml
 scrape_configs:
 - job_name: test
   static_configs:
@@ -124,7 +124,7 @@ vmagent支持去重功能，可以取出时间序列中任意额外的、不必�
 
 ## 流式聚合
 流式聚合是指在写入前实时地将连续的指标数据进行汇总。假设现在正在以很高的频率抓取数据，例如每秒一次，如果每个数据点都存储下来就会占用大量空间并且还会降低查询速度。但你又不想因为去重而丢失数据，流式聚合可以解决这个问题，它允许你对更长时间段（如5分钟）的数据进行汇总：
-```text
+```yaml
 - match: '{__name__=~".+_total"}'
   interval: 5m
   outputs: [total]
@@ -141,7 +141,7 @@ vmagent支持去重功能，可以取出时间序列中任意额外的、不必�
     - 默认为false。如果设置为true，所有输入时间序列（无论是否匹配规则）都会被丢弃
 
 如果想要更精确地控制，还可以按照数据流设置去重，即在每条流式聚合规则中设置独立的去重配置：
-```text
+```yaml
 - match: '{__name__=~".+_total"}'
   interval: 1m			# 流式聚合间隔
   outputs: [total]

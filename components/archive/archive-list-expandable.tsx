@@ -3,9 +3,9 @@
 import * as React from "react"
 import Link from "next/link"
 import { ChevronDown } from "lucide-react"
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { motion, useReducedMotion } from "motion/react"
 import { Button } from "@/components/ui/button"
-import { formatDotMonthDay } from "@/lib/forma-date"
+import { formatDotMonthDay } from "@/lib/format-date"
 import { PostListInlineSummary } from "@/components/blog/post-list-inline-summary"
 import { cn } from "@/lib/utils"
 

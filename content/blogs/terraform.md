@@ -68,7 +68,7 @@ terraform {
 }
 ```
 之后就可以在配置的根模块中使用这个provider了
-```hck
+```hcl
 # main.tf
 provider "alicloud" {
   access_key = "xxxxxxxxx"

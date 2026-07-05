@@ -1,12 +1,9 @@
 import { tagCountsFromBlogs, type TagCount } from "@/lib/blog-tags"
 import { siteConfig } from "@/lib/config"
 
-/** 博文栏目：在 frontmatter 中用 category 指定，未写则默认为 notes */
-export const BLOG_CATEGORIES = ["ops", "ai", "notes"] as const
+type BlogCategory = "ops" | "ai" | "notes"
 
-export type BlogCategory = (typeof BLOG_CATEGORIES)[number]
-
-export type BlogSectionConfig = {
+type BlogSectionConfig = {
   category: BlogCategory
   title: string
   description: string
@@ -65,14 +62,14 @@ export function resolveBlogCategory(raw: string | undefined | null): BlogCategor
 }
 
 /** 按 category 筛选博文（frontmatter `category: ops | ai | notes`） */
-export function blogsForCategory<T extends { category?: string | null }>(
+function blogsForCategory<T extends { category?: string | null }>(
   blogs: readonly T[],
   category: BlogCategory,
 ): T[] {
   return blogs.filter((b) => resolveBlogCategory(b.category) === category)
 }
 
-export function sortSectionTags(tags: TagCount[], primaryTag?: string): TagCount[] {
+function sortSectionTags(tags: TagCount[], primaryTag?: string): TagCount[] {
   return [...tags].sort((a, b) => {
     if (primaryTag) {
       if (a.tag === primaryTag) return -1

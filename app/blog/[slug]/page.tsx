@@ -9,8 +9,9 @@ import { ArticleTocMobileFab } from "@/components/blog/article-toc-mobile-fab"
 import { BlogPostShell } from "@/components/blog/blog-post-shell"
 import { siteConfig } from "@/lib/config"
 import { blogArticleProseClassName } from "@/lib/blog-article-prose"
+import { parseKeywords } from "@/lib/blog-tags"
 import { extractToc } from "@/lib/extract-toc"
-import { formatDate } from "@/lib/forma-date"
+import { formatDate } from "@/lib/format-date"
 import { cn } from "@/lib/utils"
 import Comments from "@/components/comments"
 import { PageViewBeacon } from "@/components/analytics/page-view-beacon"
@@ -20,6 +21,8 @@ import { ArticleZoomableImage } from "@/components/blog/article-zoomable-image"
 import { ArticleFigure } from "@/components/blog/article-code-figure"
 import { ArticleLink } from "@/components/blog/article-link"
 import { ArticleTable } from "@/components/blog/article-table"
+import { ArticleTweet } from "@/components/blog/article-tweet"
+import { ArticleGitHubRepo } from "@/components/blog/article-github-repo"
 
 export const dynamicParams = false
 
@@ -32,14 +35,6 @@ type PageProps = {
 
 function getBlog(slug: string) {
     return allBlogs.find((b) => b.slug === slug) ?? null
-}
-
-function parseKeywordsToTags(keywords?: string) {
-    if (!keywords) return []
-    return keywords
-        .split(/[,，;；、|]/)
-        .map((tag) => tag.trim().toLowerCase())
-        .filter(Boolean)
 }
 
 export function generateStaticParams() {
@@ -56,14 +51,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const ogImages = siteConfig.site.image
         ? [{ url: siteConfig.site.image }]
         : siteConfig.seo.openGraph.images
-    const kw = blog.keywords
-        ? blog.keywords.split(/[,，;；]/).map((s) => s.trim()).filter(Boolean)
-        : undefined
+    const kw = parseKeywords(blog.keywords)
+    const keywords = kw.length > 0 ? kw : undefined
 
     return {
         title: blog.title,
         description,
-        keywords: kw,
+        keywords,
         alternates: { canonical: url },
         openGraph: {
             title: blog.title,
@@ -86,13 +80,14 @@ export default async function BlogPostPage({ params }: PageProps) {
     if (!blog) notFound()
 
     const toc = extractToc(blog.content)
-    const currentTags = new Set(parseKeywordsToTags(blog.keywords))
+    const currentTags = new Set(parseKeywords(blog.keywords).map((t) => t.toLowerCase()))
     const sameTagBlogs = allBlogs
         .filter((item) => item.slug !== blog.slug)
         .filter((item) => {
             if (currentTags.size === 0) return false
-            const tags = parseKeywordsToTags(item.keywords)
-            return tags.some((tag) => currentTags.has(tag))
+            return parseKeywords(item.keywords).some((tag) =>
+                currentTags.has(tag.toLowerCase()),
+            )
         })
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
@@ -110,11 +105,15 @@ export default async function BlogPostPage({ params }: PageProps) {
     return (
         <>
             <ArticleJsonLd blog={blog} pageUrl={pageUrl} />
-            <main id="blog-post-top" className="pb-4 lg:pb-12">
+            <div id="blog-post-top" className="pb-4 lg:pb-12">
                 <BlogPostShell
                     toc={
                         toc.length > 0 ? (
-                            <ArticleTocSidebar key={blog.slug} items={toc} />
+                            <ArticleTocSidebar
+                                key={blog.slug}
+                                items={toc}
+                                slug={blog.slug}
+                            />
                         ) : undefined
                     }
                 >
@@ -152,6 +151,8 @@ export default async function BlogPostPage({ params }: PageProps) {
                                 img: ArticleZoomableImage,
                                 figure: ArticleFigure,
                                 table: ArticleTable,
+                                Tweet: ArticleTweet,
+                                GitHubRepo: ArticleGitHubRepo,
                             }}
                         />
                     </div>
@@ -205,7 +206,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 {toc.length > 0 ? (
                     <ArticleTocMobileFab key={`${blog.slug}-fab`} items={toc} />
                 ) : null}
-            </main>
+            </div>
 
             <PageViewBeacon path={`/blog/${slug}`} slug={slug} />
         </>

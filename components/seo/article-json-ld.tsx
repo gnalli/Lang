@@ -115,11 +115,11 @@ export function ArticleJsonLd({ blog, pageUrl }: { blog: Blog; pageUrl: string }
       url: publisherUrl,
       ...(logo
         ? {
-            logo: {
-              "@type": "ImageObject",
-              url: logo,
-            },
-          }
+          logo: {
+            "@type": "ImageObject",
+            url: logo,
+          },
+        }
         : {}),
     },
     mainEntityOfPage: {

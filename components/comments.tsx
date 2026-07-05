@@ -1,8 +1,16 @@
 "use client"
 
 import Giscus from "@giscus/react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useSyncExternalStore } from "react"
 import { useTheme } from "next-themes"
+
+function useClientMounted() {
+    return useSyncExternalStore(
+        () => () => {},
+        () => true,
+        () => false,
+    )
+}
 
 function effectiveTheme(resolvedTheme?: string) {
     if (resolvedTheme === "dark" || resolvedTheme === "light") {
@@ -22,11 +30,7 @@ function giscusThemeUrl(theme: "light" | "dark", origin: string) {
 
 export default function Comments() {
     const { resolvedTheme } = useTheme()
-    const [mounted, setMounted] = useState(false)
-
-    useEffect(() => {
-        setMounted(true)
-    }, [])
+    const mounted = useClientMounted()
 
     const theme = useMemo(
         () => (mounted ? effectiveTheme(resolvedTheme) : undefined),

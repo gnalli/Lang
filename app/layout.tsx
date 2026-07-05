@@ -1,10 +1,10 @@
 import "./globals.css"
-import "lxgw-wenkai-webfont/style.css"
+import { lxgwWenkai } from "@/lib/fonts"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { siteConfig, siteAuthors } from "@/lib/config"
 import Header from "@/components/header"
-import FooterActions from "@/components/footer"
+import Footer from "@/components/footer"
 import { ScrollProgressBar } from "@/components/scroll-progress-bar"
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Agentation } from "agentation"
@@ -31,14 +31,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
+    <html lang="zh-CN" suppressHydrationWarning className={lxgwWenkai.variable}>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" type="image/x-icon" />
+        <link rel="prefetch" href="/api/search-index" as="fetch" />
       </head>
-      <body
-        style={{ fontFamily: "LXGW WenKai, sans-serif" }}
-        className="min-w-0 bg-background"
-      >
+      <body className={`${lxgwWenkai.className} min-w-0 bg-background`}>
         {process.env.NODE_ENV === "development" && <Agentation />}
         <ThemeProvider
           attribute="class"
@@ -51,7 +49,7 @@ export default function RootLayout({
               <ScrollProgressBar />
               <Header />
               <main className="flex-1 px-4 sm:px-6">{children}</main>
-              <FooterActions />
+              <Footer />
             </div>
           </TooltipProvider>
         </ThemeProvider>

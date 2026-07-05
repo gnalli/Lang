@@ -15,7 +15,7 @@ export function escapeXml(s: string): string {
     .replace(/'/g, "&apos;")
 }
 
-export type FeedPost = {
+type FeedPost = {
   title: string
   slug: string
   date: string

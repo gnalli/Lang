@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import type { TagCount } from "@/lib/blog-tags"
 import { parseKeywords } from "@/lib/blog-tags"
 import type { TopicPostItem } from "@/lib/blog-sections"
-import { formatDateList } from "@/lib/forma-date"
+import { formatDateList } from "@/lib/format-date"
 import { PostListInlineSummary } from "@/components/blog/post-list-inline-summary"
 import { cn } from "@/lib/utils"
 

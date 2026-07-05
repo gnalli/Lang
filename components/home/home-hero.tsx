@@ -1,4 +1,14 @@
+"use client"
+
 import Image from "next/image"
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "motion/react"
+import * as React from "react"
 import { siteConfig } from "@/lib/config"
 import { SITE_HEADER_OFFSET } from "@/lib/site-header-offset"
 import { cn } from "@/lib/utils"
@@ -39,42 +49,78 @@ function TwitchIcon({ className }: { className?: string }) {
 const iconClass =
   "text-white/85 transition-colors hover:text-white"
 
+/** 额外滚动行程：视差在更长距离内完成，动效更缓 */
+const PARALLAX_SCROLL = "min-h-[52svh] sm:min-h-[58svh]"
+
+/** 滚动进度弹簧：低刚度 + 较大质量，跟随更慢、更顺滑（仅用于前景卡片） */
+const SCROLL_SPRING = { stiffness: 38, damping: 26, mass: 1.4, restDelta: 0.0008 }
+
+/** 背景层额外向上延伸，避免视差/弹簧滞后时在顶部露缝 */
+const HERO_BG_BLEED = "-top-[10%] h-[120%]"
+
 export function HomeHero() {
   const github = siteConfig.social.github
+  const sectionRef = React.useRef<HTMLElement>(null)
+  const reduceMotion = useReducedMotion()
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  })
+
+  const smoothProgress = useSpring(scrollYProgress, SCROLL_SPRING)
+
+  /** 背景须与 scroll 同步；若走 spring，快速回顶时会滞后下移并露出顶部间隙 */
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["-8%", "12%"])
+  const cardY = useTransform(smoothProgress, [0, 1], [18, -26])
 
   return (
     <section
+      ref={sectionRef}
       className={cn(
         "relative left-1/2 mb-10 w-screen max-w-[100vw] -translate-x-1/2 sm:mb-12",
         SITE_HEADER_OFFSET.margin,
+        PARALLAX_SCROLL,
       )}
       aria-label="介绍"
     >
-      <div className={cn("relative overflow-hidden", SITE_HEADER_OFFSET.heroHeight)}>
-        <Image
-          src="/images/editorial-hero.jpg"
-          alt=""
-          fill
-          className="object-cover object-top"
-          sizes="100vw"
-          priority
-        />
-        <div
-          className="absolute inset-0 bg-linear-to-b from-black/15 via-black/5 to-background/90"
+      <div
+        className={cn(
+          "sticky top-0 overflow-hidden",
+          SITE_HEADER_OFFSET.heroHeight,
+        )}
+      >
+        <motion.div
+          className={cn(
+            "absolute inset-x-0 origin-center will-change-transform",
+            HERO_BG_BLEED,
+          )}
+          style={reduceMotion ? undefined : { y: backgroundY, scale: 1.12 }}
           aria-hidden
-        />
+        >
+          <Image
+            src="/images/editorial-hero.jpg"
+            alt=""
+            fill
+            className="object-cover object-top"
+            sizes="100vw"
+            priority
+          />
+          <div className="absolute inset-0 bg-linear-to-b from-black/15 via-black/5 to-background/90" />
+        </motion.div>
 
         <div
           className={cn(
-            "relative mx-auto flex h-full w-full max-w-6xl items-center px-4 pb-8 sm:px-6 sm:pb-10",
+            "relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-4 pb-8 sm:px-6 sm:pb-10",
             SITE_HEADER_OFFSET.padding,
           )}
         >
-          <div
+          <motion.div
             className={cn(
               "w-full max-w-md border border-white/25 p-7 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)] sm:max-w-lg sm:p-9",
               "bg-white/18 backdrop-blur-2xl supports-backdrop-filter:bg-white/12",
             )}
+            style={reduceMotion ? undefined : { y: cardY }}
           >
             <h1 className="text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
               Hi, I&apos;m Lang 👋
@@ -103,7 +149,7 @@ export function HomeHero() {
                 <XIcon className="size-4" />
               </span>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

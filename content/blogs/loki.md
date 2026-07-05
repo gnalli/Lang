@@ -101,12 +101,12 @@ Loki的写入是一个典型的分布式“分发-聚合-刷盘”过程：
 ## 乱序摄取
 自Loki诞生之初，日志条目必须按时间顺序写入Loki。现在，这一限制已被解除。默认情况下，会全局启用乱序写入，但也可以针对集群或租户单独启用/禁用此功能
 - 禁用所有租户的乱序写入
-```text
+```yaml
 limits_config:
     unordered_writes: false
 ```
 - 禁用特定租户的乱序写入
-```text
+```yaml
 runtime_config:
   file: overrides.yaml
  
@@ -117,7 +117,7 @@ overrides:
 ```
 
 Loki通过max_chunk_age来控制可接受的乱序日志范围，并基于最新日志时间动态计算一个滑动窗口，从而在保证写入顺序性的同时兼顾系统性能与数据完整性。max_chunk_age的默认值为2小时。Loki会基于以下公式来计算乱序日志最早可以被接受的时间：
-```text
+```yaml
 time_of_most_recent_line - (max_chunk_age/2)		# 默认1h
 ```
 

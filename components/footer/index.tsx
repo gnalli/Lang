@@ -1,6 +1,4 @@
-"use client"
-
-import * as React from "react"
+import type { ReactNode } from "react"
 import Link from "next/link"
 import { siteConfig } from "@/lib/config"
 import {
@@ -49,26 +47,33 @@ const SOCIAL_LINKS_NAVIGABLE = false
 const socialLinkClass =
   "text-primary-foreground/90 transition-colors hover:text-primary-foreground"
 
-function SocialAnchor({
+function SocialLink({
   href,
   label,
   children,
 }: {
   href: string
   label: string
-  children: React.ReactNode
+  children: ReactNode
 }) {
+  if (SOCIAL_LINKS_NAVIGABLE) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={socialLinkClass}
+        aria-label={label}
+      >
+        {children}
+      </a>
+    )
+  }
+
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={socialLinkClass}
-      aria-label={label}
-      onClick={SOCIAL_LINKS_NAVIGABLE ? undefined : (event) => event.preventDefault()}
-    >
+    <span className={socialLinkClass} aria-label={label}>
       {children}
-    </a>
+    </span>
   )
 }
 
@@ -78,7 +83,7 @@ const footerLink = cn(
 
 const footerHeading = "text-[0.6875rem] font-medium tracking-[0.16em] text-primary-foreground/55 uppercase"
 
-export default function FooterActions() {
+export default function Footer() {
   const { github, twitter, youtube } = siteConfig.social
 
   return (
@@ -95,15 +100,15 @@ export default function FooterActions() {
               </p>
 
               <div className="flex items-center gap-4">
-                <SocialAnchor href={github.url} label="GitHub">
+                <SocialLink href={github.url} label="GitHub">
                   <GitHubIcon className="size-5" />
-                </SocialAnchor>
-                <SocialAnchor href={twitter.url} label="X">
+                </SocialLink>
+                <SocialLink href={twitter.url} label="X">
                   <XIcon className="size-4" />
-                </SocialAnchor>
-                <SocialAnchor href={youtube.url} label="YouTube">
+                </SocialLink>
+                <SocialLink href={youtube.url} label="YouTube">
                   <YouTubeIcon className="size-5" />
-                </SocialAnchor>
+                </SocialLink>
               </div>
             </div>
 

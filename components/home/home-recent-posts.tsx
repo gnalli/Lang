@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { formatDateList } from "@/lib/forma-date"
+import { formatDateList } from "@/lib/format-date"
 import { PostListInlineSummary } from "@/components/blog/post-list-inline-summary"
 import { cn } from "@/lib/utils"
 

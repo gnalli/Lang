@@ -173,7 +173,7 @@ undolog是InnoDB在事务执行过程中生成的日志，它记录的是“数�
 为了解决“新行插入导致的幻读问题”，InnoDB引入了间隙锁。间隙锁锁定的是`索引中两个已存在值之间的“空隙”`。其特点是：不锁定实际存在的行，只锁定“插入空间”。
 
 假设有一张表`test_gap`，主键id上有索引，且目前有三条数据：1、5、10
-```text
+```sql
 CREATE TABLE `test_gap` (
   `id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
@@ -182,7 +182,7 @@ CREATE TABLE `test_gap` (
 INSERT INTO `test_gap` VALUES (1), (5), (10);
 ```
 当执行如下当前读时
-```text
+```sql
 SELECT * FROM t WHERE c = 7 FOR UPDATE;
 ```
 由于7不存在，Mysql会在（5,10）上加间隙锁，阻止其他事务向该区间插入新记录，这样可以有效避免幻读。

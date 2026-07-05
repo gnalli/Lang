@@ -1,5 +1,3 @@
-"use client"
-
 import Image from "next/image"
 import Link from "next/link"
 import { HeaderSearchProvider } from "./header-command-palette"
@@ -12,35 +10,35 @@ const navLink =
 
 export function HeaderNav() {
   return (
-    <HeaderSearchProvider>
-      <nav
-        className="mx-auto flex w-fit max-w-[calc(100vw-1rem)] flex-wrap items-center justify-center gap-x-5 gap-y-2 border border-border/70 bg-background/75 px-3 py-2 shadow-sm backdrop-blur-md supports-backdrop-filter:bg-background/65 max-[375px]:gap-x-4 max-[375px]:px-2.5 sm:gap-x-10 sm:px-6 sm:py-2.5"
-        aria-label="主导航"
-      >
-        <Link href="/" className="shrink-0" aria-label="首页">
-          <div className="relative size-7 overflow-hidden rounded-md bg-transparent sm:size-8">
-            <Image
-              src="/avatar-header.png"
-              alt=""
-              fill
-              className="object-cover"
-              sizes="36px"
-              priority
-            />
-          </div>
-        </Link>
-
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 max-[375px]:gap-x-2.5 sm:gap-x-5">
-          {SITE_NAV_ITEMS.map((item) => (
-            <Link key={item.href} href={item.href} className={navLink}>
-              {item.label}
-            </Link>
-          ))}
-
-          <HeaderMoreMenu />
-          <HeaderThemeToggle />
+    <nav
+      className="mx-auto flex w-fit max-w-[calc(100vw-1rem)] flex-wrap items-center justify-center gap-x-5 gap-y-2 border border-border/70 bg-background/75 px-3 py-2 shadow-sm backdrop-blur-md supports-backdrop-filter:bg-background/65 max-[375px]:gap-x-4 max-[375px]:px-2.5 sm:gap-x-10 sm:px-6 sm:py-2.5"
+      aria-label="主导航"
+    >
+      <Link href="/" className="shrink-0" aria-label="首页">
+        <div className="relative size-7 overflow-hidden rounded-md bg-transparent sm:size-8">
+          <Image
+            src="/avatar-header.png"
+            alt=""
+            fill
+            className="object-cover"
+            sizes="36px"
+            priority
+          />
         </div>
-      </nav>
-    </HeaderSearchProvider>
+      </Link>
+
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 max-[375px]:gap-x-2.5 sm:gap-x-5">
+        {SITE_NAV_ITEMS.map((item) => (
+          <Link key={item.href} href={item.href} className={navLink}>
+            {item.label}
+          </Link>
+        ))}
+
+        <HeaderSearchProvider>
+          <HeaderMoreMenu />
+        </HeaderSearchProvider>
+        <HeaderThemeToggle />
+      </div>
+    </nav>
   )
 }
