@@ -128,23 +128,24 @@ function HeroIntroCard({
   cardY?: MotionValue<number>
 }) {
   const cardClassName = cn(
-    "w-full max-w-md border border-white/25 p-7 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)] sm:max-w-lg sm:p-9",
+    "w-full max-w-[15.5rem] border border-white/25 px-3.5 py-3 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]",
+    "sm:max-w-sm sm:px-4 sm:py-3.5 lg:max-w-md lg:p-7",
     "bg-white/18 backdrop-blur-2xl supports-backdrop-filter:bg-white/12",
   )
 
   const body = (
     <>
-      <h1 className="text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+      <h1 className="text-balance text-xl font-semibold leading-tight tracking-tight text-white sm:text-2xl lg:text-3xl">
         Hi, I&apos;m Lang 👋
       </h1>
-      <p className="mt-4 text-base leading-relaxed text-white/90 sm:text-lg">
+      <p className="mt-1.5 text-sm leading-snug text-white/90 sm:mt-2 sm:text-base lg:mt-3 lg:text-lg">
         Former DevOps Engineer.
       </p>
-      <p className="mt-1 text-base leading-relaxed text-white/90 sm:text-lg">
+      <p className="mt-0 text-sm leading-snug text-white/90 sm:text-base lg:text-lg">
         Now building AI Agents, one prompt at a time.
       </p>
 
-      <div className="mt-7 flex items-center gap-5">
+      <div className="mt-3 flex items-center gap-3.5 sm:mt-3.5 sm:gap-4 lg:mt-5">
         <a
           href={github.url}
           target="_blank"
@@ -152,13 +153,13 @@ function HeroIntroCard({
           className={iconClass}
           aria-label="GitHub"
         >
-          <GitHubIcon className="size-5" />
+          <GitHubIcon className="size-4 sm:size-5" />
         </a>
         <span className={iconClass} aria-hidden>
-          <TwitchIcon className="size-5" />
+          <TwitchIcon className="size-4 sm:size-5" />
         </span>
         <span className={iconClass} aria-hidden>
-          <XIcon className="size-4" />
+          <XIcon className="size-3.5 sm:size-4" />
         </span>
       </div>
     </>

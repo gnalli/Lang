@@ -14,7 +14,7 @@ export const SITE_HEADER_OFFSET = {
   /** Hero 背景层向上下延伸，避免顶/底露兜底色 */
   bgExtend:
     "top-[calc(-1*var(--site-header-height))] -bottom-8 sm:-bottom-10",
-  heroHeight: "h-[min(30rem,52vh)] sm:h-[min(34rem,56vh)]",
+  heroHeight: "h-[min(24rem,44vh)] sm:h-[min(34rem,56vh)]",
   /** 正文标题锚点 scroll-margin，与顶栏 sticky 对齐 */
   headingScrollMargin: "prose-headings:scroll-mt-[var(--site-header-height)]",
   /** 侧栏 TOC sticky：顶栏高度 + 半行间距，避免贴边 */
