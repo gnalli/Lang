@@ -39,7 +39,7 @@ export default async function HomePage() {
   return (
     <>
       <HomeHero />
-      <div className="relative mx-auto w-full max-w-6xl pb-16 sm:pb-20">
+      <div className="relative mx-auto w-full max-w-6xl pb-10 sm:pb-14">
         <WebsiteJsonLd />
         <HomeRecentPosts posts={recentItems} />
         <PageViewBeacon path="/" />

@@ -215,7 +215,7 @@ export function HomeHero() {
     <section
       ref={sectionRef}
       className={cn(
-        "relative left-1/2 mb-10 w-screen max-w-[100vw] -translate-x-1/2 sm:mb-12",
+        "relative left-1/2 mb-6 w-screen max-w-[100vw] -translate-x-1/2 sm:mb-8",
         SITE_HEADER_OFFSET.margin,
         HERO_SECTION_BG,
         useParallax && PARALLAX_SCROLL,

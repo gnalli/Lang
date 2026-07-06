@@ -116,7 +116,7 @@ export function HomeRecentPosts({ posts }: { posts: RecentPostItem[] }) {
 
   return (
     <section
-      className="py-12 sm:py-16 md:py-20"
+      className="py-8 sm:py-12 md:py-16"
       aria-labelledby="recent-posts-heading"
       onMouseLeave={() => setActiveIndex(null)}
     >
