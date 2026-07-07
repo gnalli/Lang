@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "mongo"
 featured: true
-summary: "这篇文章介绍有关mongo的一些基础概念"
+summary: "MongoDB 文档模型与 BSON 存储结构，以及序列化、索引与副本集等核心概念。"
 ---
 
 # 基础概念

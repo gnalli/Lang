@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "kafka"
 featured: true
-summary: "这篇文章介绍有关kafka的一些基础概念"
+summary: "Kafka 发布订阅架构、分区副本与顺序写存储，弄清高吞吐消息管道的设计取舍。"
 ---
 
 # 介绍

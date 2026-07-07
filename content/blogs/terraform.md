@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "Iac"
 featured: true
-summary: "这篇文章介绍有关terraform的一些基础概念"
+summary: "Terraform 声明式 IaC 工作流：HCL 配置、Plan/Apply 与 state 如何管理基础设施。"
 ---
 
 # Terraform介绍

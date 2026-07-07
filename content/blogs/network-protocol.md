@@ -5,7 +5,7 @@ updated: 2026-04-08
 category: ops
 keywords: "网络"
 featured: true
-summary: "这篇文章简单聊一下DNS、HTTP/1、HTTP/2、HTTP/3、QUIC、TLS等网络协议"
+summary: "DNS 递归与迭代解析，HTTP/1→HTTP/3 演进与 QUIC、TLS，串起常见应用层协议脉络。"
 ---
 
 # DNS

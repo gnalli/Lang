@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "docker"
 featured: true
-summary: "这篇文章介绍有关docker的一些基础知识"
+summary: "梳理 Namespace/cgroups 隔离、镜像分层与容器生命周期，理解 Docker 背后的操作系统级虚拟化。"
 ---
 
 # 操作系统级虚拟化

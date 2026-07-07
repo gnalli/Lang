@@ -5,7 +5,7 @@ updated: 2026-04-10
 category: ops
 keywords: "网络"
 featured: true
-summary: "这篇文章介绍udp协议的一些基础知识"
+summary: "UDP 极简报文与无连接语义，对比 TCP，并梳理实时、多播等典型使用场景。"
 ---
 
 # UDP和TCP的区别

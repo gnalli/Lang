@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "victoria生态"
 featured: true
-summary: "这篇文章介绍有关victoriaMetrics的一些基础概念"
+summary: "VictoriaMetrics 作为 Prometheus 长期存储的定位，深入 vmagent 采集链路与集群组件。"
 ---
 
 # victoriaMetrics介绍

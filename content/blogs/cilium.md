@@ -5,7 +5,7 @@ updated: 2026-04-05
 category: ops
 keywords: "网络"
 featured: true
-summary: "这篇文章介绍有关cilium的一些基础知识"
+summary: "从 BPF/eBPF 原理解析 Cilium 的 Kubernetes 网络能力、网络模式与可编程数据平面。"
 ---
 
 # BPF

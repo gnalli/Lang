@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "mysql"
 featured: true
-summary: "这篇文章介绍有关mysql的一些基础概念"
+summary: "MySQL 分层架构与 InnoDB 表空间，聚焦 B+ 树聚簇/二级索引如何支撑关系型查询。"
 ---
 
 # 架构

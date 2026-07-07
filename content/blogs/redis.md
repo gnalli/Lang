@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "redis"
 featured: true
-summary: "这篇文章介绍有关redis的一些基础概念"
+summary: "Redis 事件驱动与 epoll 多路复用，以及常用数据结构与持久化、集群机制概览。"
 ---
 
 # Redis介绍

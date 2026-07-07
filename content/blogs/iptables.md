@@ -5,7 +5,7 @@ updated: 2026-04-06
 category: ops
 keywords: "网络"
 featured: true
-summary: "这篇文章介绍有关iptabels、nftables相关知识"
+summary: "iptables 表链规则与 netfilter 钩子，并对比 nftables 如何解决线性匹配与管理复杂度。"
 ---
 
 # iptables

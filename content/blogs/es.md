@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "elasticsearch"
 featured: true
-summary: "这篇文章介绍有关ElasticSearch的一些基础概念"
+summary: "Elasticsearch 入门：倒排索引、集群与分片副本，以及 Mapping 与分析器如何支撑全文检索。"
 ---
 
 

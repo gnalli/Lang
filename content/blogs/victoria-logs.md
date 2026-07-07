@@ -5,7 +5,7 @@ updated: 2026-04-06
 category: ops
 keywords: "victoria生态"
 featured: true
-summary: "这篇文章介绍有关victoriaLogs的一些基础概念"
+summary: "VictoriaLogs 单二进制日志库架构，写入查询分离与 LogsQL，对比 ELK/Loki 的资源与速度权衡。"
 ---
 
 # victoriaLogs介绍

@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "grafana生态"
 featured: true
-summary: "这篇文章介绍有关loki的一些基础概念"
+summary: "Grafana Loki 仅索引标签的日志架构、写入查询路径与微服务组件，对比 ELK 的轻量方案。"
 ---
 
 # Loki介绍

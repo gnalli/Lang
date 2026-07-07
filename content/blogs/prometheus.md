@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "prometheus生态"
 featured: true
-summary: "这篇文章主要介绍监控系统中的一些基础概念"
+summary: "时序样本、分辨率与四种指标类型，建立 Prometheus 监控体系的共用词汇。"
 ---
 
 # 时间序列和样本

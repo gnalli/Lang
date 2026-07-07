@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "网络"
 featured: true
-summary: "这篇文章介绍有关网络的一些基础知识"
+summary: "OSI 与 TCP/IP 分层、逐层封包解包，以及以太网帧与 ARP 等链路层基础知识。"
 ---
 
 # 网络模型

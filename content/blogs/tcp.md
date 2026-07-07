@@ -5,7 +5,7 @@ category: ops
 updated: 2026-04-09
 keywords: "网络"
 featured: true
-summary: "这篇文章包含tcp协议的一些基础知识"
+summary: "TCP 三次握手、可靠传输与流量/拥塞控制，读懂面向连接字节流协议的关键机制。"
 ---
 
 # TCP协议的特性

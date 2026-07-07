@@ -5,7 +5,7 @@ updated: 2026-04-07
 category: ops
 keywords: "kubernetes"
 featured: true
-summary: "这篇文章介绍有关kubernetes的一些基础概念"
+summary: "Kubernetes 控制平面与节点组件、Pod 模型及初始化容器，搭建容器编排的基础认知框架。"
 ---
 
 # kubernetes介绍
