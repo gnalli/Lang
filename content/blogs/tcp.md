@@ -1,8 +1,8 @@
 ---
 title: tcp协议
-date: 2026-04-09
+date: 2026-04-02
 category: ops
-updated: 2026-04-09
+updated: 2026-04-02
 keywords: "网络"
 featured: true
 summary: "TCP 三次握手、可靠传输与流量/拥塞控制，读懂面向连接字节流协议的关键机制。"
