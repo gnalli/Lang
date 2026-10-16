@@ -8,6 +8,10 @@ type BlogSectionConfig = {
   title: string
   description: string
   href: `/${BlogCategory}`
+  /** 首页栏目卡片上的短名 */
+  shortLabel: string
+  /** 首页栏目卡片的一句说明，不带站名 */
+  lead: string
   /** 分类 tag 排序时置顶（如运维页的「网络」） */
   primaryTag?: string
   /** 英文前缀 + 中文后缀分开展示，避免混排高度不齐（如 AI教程） */
@@ -20,6 +24,8 @@ export const BLOG_SECTIONS: Record<BlogCategory, BlogSectionConfig> = {
     title: "运维教程",
     description: `运维相关教程与笔记 · ${siteConfig.site.title.default}`,
     href: "/ops",
+    shortLabel: "运维",
+    lead: "云原生、网络与中间件",
     primaryTag: "网络",
   },
   ai: {
@@ -28,12 +34,16 @@ export const BLOG_SECTIONS: Record<BlogCategory, BlogSectionConfig> = {
     titleParts: { en: "AI", zh: "教程" },
     description: `AI 应用、Agent 与实践经验 · ${siteConfig.site.title.default}`,
     href: "/ai",
+    shortLabel: "AI",
+    lead: "Agent 与应用实践",
   },
   notes: {
     category: "notes",
     title: "随记",
     description: `随想与短篇笔记 · ${siteConfig.site.title.default}`,
     href: "/notes",
+    shortLabel: "随记",
+    lead: "短篇与随想",
   },
 }
 

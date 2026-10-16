@@ -2,21 +2,13 @@
 
 import * as React from "react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
-import { Button } from "@/components/ui/button"
+import { Drawer } from "vaul"
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
 import { cn } from "@/lib/utils"
 
 type TrendPoint = {
@@ -41,22 +33,50 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-/** 图表区高度：竖屏上限 ~260px；横屏随视口收缩，避免顶满屏幕 */
-const chartPanelClass = cn(
-  "w-full [&>div]:h-full [&>div]:w-full",
-  "h-[clamp(9rem,calc(100svh-12rem),16.25rem)] max-h-[45svh] min-h-[9rem]",
-  "sm:h-[clamp(10rem,calc(100svh-11rem),17.5rem)] sm:max-h-[50svh]",
-)
+/** 紧凑档大约 31rem。vaul 的字符串吸附点按 parseInt 读像素，不能写 rem。 */
+const PEEK_REM = 31
+
+function readHeaderPx() {
+  const root = getComputedStyle(document.documentElement)
+  const font = Number.parseFloat(root.fontSize) || 16
+  const raw = root.getPropertyValue("--site-header-height").trim()
+  if (raw.endsWith("rem")) return Number.parseFloat(raw) * font
+  if (raw.endsWith("px")) return Number.parseFloat(raw)
+  return 4 * font
+}
+
+function readSizes() {
+  const font = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+  const expanded = Math.max(320, Math.round(window.innerHeight - readHeaderPx()))
+  const peek = Math.min(Math.round(PEEK_REM * font), expanded - 48)
+  return {
+    peek: `${Math.max(240, peek)}px`,
+    expanded: `${expanded}px`,
+  }
+}
+
+function useSheetSizes() {
+  const [sizes, setSizes] = React.useState({ peek: "496px", expanded: "736px" })
+
+  React.useLayoutEffect(() => {
+    const update = () => setSizes(readSizes())
+    update()
+    window.addEventListener("resize", update)
+    return () => window.removeEventListener("resize", update)
+  }, [])
+
+  return sizes
+}
 
 function ChartLegend() {
   return (
-    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+    <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
       <span className="inline-flex items-center gap-1.5">
-        <span className="size-2 rounded-full bg-foreground" aria-hidden />
+        <span className="size-1.5 rounded-full bg-foreground" aria-hidden />
         PV
       </span>
       <span className="inline-flex items-center gap-1.5">
-        <span className="size-2 rounded-full bg-muted-foreground" aria-hidden />
+        <span className="size-1.5 rounded-full bg-muted-foreground" aria-hidden />
         UV
       </span>
     </div>
@@ -71,14 +91,19 @@ function ChartPanel({
   className?: string
 }) {
   return (
-    <div
-      className={cn(
-        "rounded-xl border border-border/60 bg-muted/25 px-2 py-2 dark:bg-muted/15",
-        className,
-      )}
-    >
+    <div className={cn("min-h-0 min-w-0 flex-1 overflow-hidden rounded-2xl bg-muted", className)}>
       {children}
     </div>
+  )
+}
+
+function ChartStatus({ children }: { children: React.ReactNode }) {
+  return (
+    <ChartPanel>
+      <div className="flex h-full min-h-36 items-center justify-center px-4 text-center text-xs leading-relaxed text-muted-foreground">
+        {children}
+      </div>
+    </ChartPanel>
   )
 }
 
@@ -89,8 +114,36 @@ export function HeaderAnalyticsDrawer({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
+  const { peek, expanded: expandedPx } = useSheetSizes()
+  const sizesRef = React.useRef({ peek, expanded: expandedPx })
+  const modeRef = React.useRef<"peek" | "tall">("peek")
+  const [snap, setSnap] = React.useState<number | string | null>(peek)
   const [payload, setPayload] = React.useState<TrendsPayload | null>(null)
   const [loading, setLoading] = React.useState(false)
+  const expanded = snap === expandedPx || snap === 1
+  const sheetHeight = expanded ? expandedPx : peek
+
+  React.useLayoutEffect(() => {
+    if (!open) return
+    modeRef.current = "peek"
+    setSnap(sizesRef.current.peek)
+  }, [open])
+
+  React.useLayoutEffect(() => {
+    sizesRef.current = { peek, expanded: expandedPx }
+    setSnap(modeRef.current === "tall" ? expandedPx : peek)
+  }, [peek, expandedPx])
+
+  function handleSnap(value: number | string | null) {
+    const next = sizesRef.current
+    if (value === 1 || value === next.expanded) {
+      modeRef.current = "tall"
+      setSnap(next.expanded)
+      return
+    }
+    modeRef.current = "peek"
+    setSnap(value ?? next.peek)
+  }
 
   React.useEffect(() => {
     if (!open) return
@@ -102,8 +155,7 @@ export function HeaderAnalyticsDrawer({
         if (!cancelled) setPayload(body)
       })
       .catch(() => {
-        if (!cancelled)
-          setPayload({ ok: false, reason: "network", series: [] })
+        if (!cancelled) setPayload({ ok: false, reason: "network", series: [] })
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -114,64 +166,71 @@ export function HeaderAnalyticsDrawer({
   }, [open])
 
   const series = payload?.series ?? []
-  const showConfigureHint =
-    payload?.ok === false && payload.reason === "not_configured"
-  const showGenericError =
-    payload?.ok === false && payload.reason !== "not_configured"
+  const showConfigureHint = payload?.ok === false && payload.reason === "not_configured"
+  const showGenericError = payload?.ok === false && payload.reason !== "not_configured"
 
   return (
-    <Drawer direction="bottom" open={open} onOpenChange={onOpenChange}>
-      <DrawerContent
-        className={cn(
-          "mx-auto w-full max-w-6xl border-0 bg-transparent p-0 before:hidden",
-          "pb-[env(safe-area-inset-bottom,0px)]",
-          "data-[vaul-drawer-direction=bottom]:max-h-[min(92svh,640px)]",
-        )}
-      >
-        <div
+    <Drawer.Root
+      open={open}
+      onOpenChange={onOpenChange}
+      snapPoints={[peek, expandedPx]}
+      activeSnapPoint={snap}
+      setActiveSnapPoint={handleSnap}
+      fadeFromIndex={1}
+    >
+      <Drawer.Portal>
+        <Drawer.Overlay
+          className="fixed inset-0 z-50 bg-foreground/15 motion-reduce:animate-none"
+          onClick={() => onOpenChange(false)}
+        />
+        <Drawer.Content
           className={cn(
-            "overflow-hidden rounded-t-2xl border border-b-0 border-border/70",
-            "bg-background/95 shadow-[0_-12px_48px_-16px_rgba(0,0,0,0.28)]",
-            "backdrop-blur-xl supports-backdrop-filter:bg-background/88",
+            "fixed top-0 right-3 left-3 z-50 flex h-dvh flex-col bg-transparent text-popover-foreground shadow-none outline-none",
+            "motion-reduce:animate-none",
           )}
         >
-          <DrawerHeader className="space-y-3 border-b border-border/50 px-5 pb-4 pt-2 text-left">
-            <div className="space-y-1">
-              <DrawerTitle className="text-base font-semibold tracking-tight">
-                全站访问趋势
-              </DrawerTitle>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                近 14 日 PV / UV
-              </p>
-            </div>
-            <ChartLegend />
-          </DrawerHeader>
+          <div
+            className={cn(
+              "flex w-full shrink-0 flex-col overflow-hidden rounded-t-3xl border border-border bg-popover shadow-lg",
+              "pb-[env(safe-area-inset-bottom,0px)]",
+              "transition-[height] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
+            )}
+            style={{ height: sheetHeight }}
+          >
+          <Drawer.Handle
+            className="mt-3 mb-1 shrink-0"
+            style={{ background: "var(--border)" }}
+          />
+          <div className="shrink-0 px-4 pt-1 text-center">
+            <Drawer.Title className="text-sm font-semibold tracking-tight text-foreground">
+              全站访问趋势
+            </Drawer.Title>
+            <Drawer.Description className="text-xs text-muted-foreground">
+              近 14 日 PV / UV。向上拖可放大。
+            </Drawer.Description>
+          </div>
 
-          <div className="px-4 py-3 sm:px-5 sm:py-4">
+          <div className="shrink-0 px-4 pt-3">
+            <ChartLegend />
+          </div>
+
+          <div className="flex min-h-0 flex-1 flex-col px-3 pt-3 pb-4">
             {loading ? (
-              <ChartPanel className={chartPanelClass}>
-                <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                  加载中…
-                </div>
-              </ChartPanel>
+              <ChartStatus>加载中…</ChartStatus>
             ) : showConfigureHint ? (
-              <ChartPanel className={chartPanelClass}>
-                <div className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center text-sm text-muted-foreground">
-                  <p>Supabase 连接失败，请检查相关配置…</p>
-                </div>
-              </ChartPanel>
+              <ChartStatus>Supabase 连接失败，请检查相关配置…</ChartStatus>
             ) : showGenericError ? (
-              <ChartPanel className={chartPanelClass}>
-                <div className="flex h-full items-center justify-center px-4 text-center text-sm text-muted-foreground">
-                  趋势数据暂时无法加载，请稍后重试。
-                </div>
-              </ChartPanel>
+              <ChartStatus>趋势数据暂时无法加载，请稍后重试。</ChartStatus>
             ) : (
-              <ChartPanel>
-                <ChartContainer config={chartConfig} className={chartPanelClass}>
+              <ChartPanel className="px-1 py-2">
+                <ChartContainer
+                  config={chartConfig}
+                  initialDimension={{ width: 320, height: expanded ? 360 : 200 }}
+                  className="aspect-auto h-full min-h-36 w-full"
+                >
                   <LineChart
                     data={series}
-                    margin={{ left: 0, right: 8, top: 4, bottom: 0 }}
+                    margin={{ left: 0, right: 8, top: 8, bottom: 0 }}
                     accessibilityLayer
                   >
                     <CartesianGrid
@@ -220,16 +279,9 @@ export function HeaderAnalyticsDrawer({
               </ChartPanel>
             )}
           </div>
-
-          <DrawerFooter className="flex-row justify-end gap-2 border-t border-border/50 px-4 py-3 sm:px-5">
-            <DrawerClose asChild>
-              <Button type="button" variant="outline" size="sm" className="min-h-10 px-4">
-                关闭
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </div>
-      </DrawerContent>
-    </Drawer>
+          </div>
+        </Drawer.Content>
+      </Drawer.Portal>
+    </Drawer.Root>
   )
 }

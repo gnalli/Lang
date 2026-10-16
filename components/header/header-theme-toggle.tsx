@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import { headerIconButtonClass } from "./nav-link-class"
 
 export function HeaderThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
@@ -18,7 +19,7 @@ export function HeaderThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="inline-flex shrink-0 items-center justify-center text-foreground transition-[color,transform] duration-200 ease-out hover:-translate-y-px hover:text-foreground/65 motion-reduce:transition-none motion-reduce:hover:translate-y-0 max-[375px]:scale-90"
+      className={headerIconButtonClass}
       aria-label={isDark ? "切换到浅色模式" : "切换到深色模式"}
     >
       {isDark ? (

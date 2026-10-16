@@ -1,19 +1,15 @@
 "use client"
 
-import Image from "next/image"
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-  type MotionValue,
-} from "motion/react"
-import * as React from "react"
-import { useSyncExternalStore } from "react"
+import dynamic from "next/dynamic"
+import { motion, useReducedMotion } from "motion/react"
 import { siteConfig } from "@/lib/config"
 import { SITE_HEADER_OFFSET } from "@/lib/site-header-offset"
 import { cn } from "@/lib/utils"
+
+const HeroParticles = dynamic(
+  () => import("./hero-particles").then((m) => m.HeroParticles),
+  { ssr: false },
+)
 
 function GitHubIcon({ className }: { className?: string }) {
   return (
@@ -37,115 +33,42 @@ function XIcon({ className }: { className?: string }) {
   )
 }
 
-function TwitchIcon({ className }: { className?: string }) {
+const iconClass = "text-foreground/60 transition-colors hover:text-foreground"
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0 },
+}
+
+function HeroText({ reduceMotion }: { reduceMotion: boolean }) {
+  const github = siteConfig.social.github
+  const twitter = siteConfig.social.twitter
+  const item = (delay: number) =>
+    reduceMotion
+      ? {}
+      : {
+        variants: fadeUp,
+        initial: "hidden",
+        animate: "show",
+        transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const },
+      }
+
   return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <path
-        fill="currentColor"
-        d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0 1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"
-      />
-    </svg>
-  )
-}
-
-const iconClass =
-  "text-white/85 transition-colors hover:text-white"
-
-const PARALLAX_SCROLL = "sm:min-h-[58svh]"
-
-const SCROLL_SPRING = { stiffness: 38, damping: 26, mass: 1.4, restDelta: 0.0008 }
-
-const HERO_FALLBACK_BG = "bg-[#1e2621]"
-
-/** 视差滚动区（sticky 下方）与页面底色一致，避免露出深色条 */
-const HERO_SECTION_BG = "bg-background"
-
-function useMinWidthSm() {
-  return useSyncExternalStore(
-    (onStoreChange) => {
-      const mq = window.matchMedia("(min-width: 640px)")
-      mq.addEventListener("change", onStoreChange)
-      return () => mq.removeEventListener("change", onStoreChange)
-    },
-    () => window.matchMedia("(min-width: 640px)").matches,
-    () => false,
-  )
-}
-
-function HeroGradient() {
-  return (
-    <div className="absolute inset-0 bg-linear-to-b from-black/15 via-black/5 to-background" />
-  )
-}
-
-function HeroBackground({
-  parallaxY,
-}: {
-  parallaxY?: MotionValue<string>
-}) {
-  const bleed = cn(
-    "absolute inset-x-0 overflow-hidden",
-    SITE_HEADER_OFFSET.bgExtend,
-  )
-
-  const image = (
-    <Image
-      src="/images/editorial-hero.jpg"
-      alt=""
-      fill
-      className="object-cover object-[center_22%] sm:object-[center_18%]"
-      sizes="100vw"
-      priority
-    />
-  )
-
-  if (parallaxY) {
-    return (
-      <motion.div
-        className={cn(bleed, "origin-center will-change-transform")}
-        style={{ y: parallaxY, scale: 1.14 }}
-        aria-hidden
+    <div data-hero-text="" className="relative z-10 max-w-md">
+      <motion.h1
+        {...item(0.2)}
+        className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl"
       >
-        {image}
-        <HeroGradient />
+        Hi there 👋
+      </motion.h1>
+      <motion.div
+        {...item(0.35)}
+        className="mt-4 space-y-0.5 text-base leading-relaxed text-foreground/70 sm:mt-5 sm:text-lg"
+      >
+        <p>Former DevOps Engineer.</p>
+        <p>Now an unemployed OPC making AI slop.</p>
       </motion.div>
-    )
-  }
-
-  return (
-    <div className={cn(bleed, "scale-110")} aria-hidden>
-      {image}
-      <HeroGradient />
-    </div>
-  )
-}
-
-function HeroIntroCard({
-  github,
-  cardY,
-}: {
-  github: { url: string }
-  cardY?: MotionValue<number>
-}) {
-  const cardClassName = cn(
-    "w-full max-w-[15.5rem] border border-white/25 px-3.5 py-3 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]",
-    "sm:max-w-sm sm:px-4 sm:py-3.5 lg:max-w-md lg:p-7",
-    "bg-white/18 backdrop-blur-2xl supports-backdrop-filter:bg-white/12",
-  )
-
-  const body = (
-    <>
-      <h1 className="text-balance text-xl font-semibold leading-tight tracking-tight text-white sm:text-2xl lg:text-3xl">
-        Hi, I&apos;m Lang 👋
-      </h1>
-      <p className="mt-1.5 text-sm leading-snug text-white/90 sm:mt-2 sm:text-base lg:mt-3 lg:text-lg">
-        Former DevOps Engineer.
-      </p>
-      <p className="mt-0 text-sm leading-snug text-white/90 sm:text-base lg:text-lg">
-        Now building AI Agents, one prompt at a time.
-      </p>
-
-      <div className="mt-3 flex items-center gap-3.5 sm:mt-3.5 sm:gap-4 lg:mt-5">
+      <motion.div {...item(0.5)} className="mt-6 flex items-center gap-4 sm:mt-8 sm:gap-5">
         <a
           href={github.url}
           target="_blank"
@@ -153,98 +76,63 @@ function HeroIntroCard({
           className={iconClass}
           aria-label="GitHub"
         >
-          <GitHubIcon className="size-4 sm:size-5" />
+          <GitHubIcon className="size-5" />
         </a>
-        <span className={iconClass} aria-hidden>
-          <TwitchIcon className="size-4 sm:size-5" />
-        </span>
-        <span className={iconClass} aria-hidden>
-          <XIcon className="size-3.5 sm:size-4" />
-        </span>
-      </div>
-    </>
-  )
-
-  if (cardY) {
-    return (
-      <motion.div className={cardClassName} style={{ y: cardY }}>
-        {body}
+        <a
+          href={twitter.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={iconClass}
+          aria-label="X"
+        >
+          <XIcon className="size-4" />
+        </a>
       </motion.div>
-    )
-  }
-
-  return <div className={cardClassName}>{body}</div>
-}
-
-function HeroContent({
-  github,
-  cardY,
-}: {
-  github: { url: string }
-  cardY?: MotionValue<number>
-}) {
-  return (
-    <div
-      className={cn(
-        "relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-4 pb-8 sm:px-6 sm:pb-10",
-        SITE_HEADER_OFFSET.padding,
-      )}
-    >
-      <HeroIntroCard github={github} cardY={cardY} />
     </div>
   )
 }
 
+function ScrollCue() {
+  return (
+    <a
+      href="#recent-posts-heading"
+      className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-foreground/70 transition-colors hover:text-foreground sm:bottom-10"
+      aria-label="滚动到最新文章"
+    >
+      <span>Scroll</span>
+      <span className="relative block h-9 w-px overflow-hidden bg-foreground/20">
+        <span className="absolute inset-x-0 top-0 h-1/2 animate-[hero-scroll-cue_1.8s_ease-in-out_infinite] bg-foreground/70 motion-reduce:animate-none" />
+      </span>
+    </a>
+  )
+}
+
 export function HomeHero() {
-  const github = siteConfig.social.github
-  const sectionRef = React.useRef<HTMLElement>(null)
-  const reduceMotion = useReducedMotion()
-  const isDesktop = useMinWidthSm()
-  const useParallax = isDesktop && !reduceMotion
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  })
-
-  const smoothProgress = useSpring(scrollYProgress, SCROLL_SPRING)
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "10%"])
-  const cardY = useTransform(smoothProgress, [0, 1], [18, -26])
+  const reduceMotion = useReducedMotion() ?? false
 
   return (
     <section
-      ref={sectionRef}
+      data-home-hero
       className={cn(
-        "relative left-1/2 mb-6 w-screen max-w-[100vw] -translate-x-1/2 sm:mb-8",
+        "relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 overflow-hidden bg-background text-foreground",
         SITE_HEADER_OFFSET.margin,
-        HERO_SECTION_BG,
-        useParallax && PARALLAX_SCROLL,
+        SITE_HEADER_OFFSET.heroHeight,
       )}
       aria-label="介绍"
     >
-      {useParallax ? (
-        <div
-          className={cn(
-            "sticky top-0 overflow-hidden translate-z-0",
-            HERO_FALLBACK_BG,
-            SITE_HEADER_OFFSET.heroHeight,
-          )}
-        >
-          <HeroBackground parallaxY={backgroundY} />
-          <HeroContent github={github} cardY={cardY} />
-        </div>
-      ) : (
-        <div
-          className={cn(
-            "relative overflow-hidden",
-            HERO_FALLBACK_BG,
-            SITE_HEADER_OFFSET.heroHeight,
-          )}
-        >
-          <HeroBackground />
-          <HeroContent github={github} />
-        </div>
-      )}
+      <div className="absolute inset-0 mask-[linear-gradient(to_bottom,black_78%,transparent)]">
+        <HeroParticles reduceMotion={reduceMotion} />
+      </div>
+      <div
+        data-hero-content=""
+        className={cn(
+          "pointer-events-none relative mx-auto flex h-full w-full max-w-6xl items-end px-4 pb-32 sm:items-center sm:px-6 sm:pb-10 [&_a]:pointer-events-auto",
+          SITE_HEADER_OFFSET.padding,
+        )}
+      >
+        <HeroText reduceMotion={reduceMotion} />
+      </div>
+      <ScrollCue />
     </section>
   )
 }

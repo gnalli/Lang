@@ -2,9 +2,9 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 import { formatDateList } from "@/lib/format-date"
-import { PostListInlineSummary } from "@/components/blog/post-list-inline-summary"
+import { SITE_HEADER_OFFSET } from "@/lib/site-header-offset"
 import { cn } from "@/lib/utils"
 
 export type RecentPostItem = {
@@ -34,53 +34,67 @@ function PostMeta({ post }: { post: RecentPostItem }) {
       className="mt-8 space-y-3"
     >
       {post.tags && post.tags.length > 0 ? (
-        <p className="text-sm leading-relaxed text-muted-foreground">
+        <p className="text-sm leading-relaxed text-background/70">
           {post.tags.map((tag, index) => (
             <React.Fragment key={tag}>
               {index > 0 ? (
-                <span className="mx-1.5 text-muted-foreground/45">·</span>
+                <span className="mx-1.5 text-background/45">·</span>
               ) : null}
               <span>{tag}</span>
             </React.Fragment>
           ))}
         </p>
       ) : null}
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-background/70">
         {post.wordCount.toLocaleString("zh-CN")} 字
       </p>
+      {post.summary?.trim() ? (
+        <p className="hidden text-sm leading-relaxed text-background/70 md:block">
+          {post.summary.trim()}
+        </p>
+      ) : null}
     </motion.div>
   )
 }
 
+/** 底边过了成形线才算这一行可以悬停。没有遮罩时（减少动效）整列都可以。 */
+function rowPastReveal(row: HTMLElement) {
+  const host = row.closest<HTMLElement>("[data-particle-host]")
+  if (!host) return true
+  const reveal = host.getAttribute("data-particle-reveal")
+  if (reveal == null || reveal === "full") return true
+  const line = host.getBoundingClientRect().top + Number(reveal)
+  return row.getBoundingClientRect().bottom <= line + 0.5
+}
+
 function PostRow({
   post,
+  index,
   active,
   onActivate,
 }: {
   post: RecentPostItem
+  index: number
   active: boolean
-  onActivate: () => void
+  onActivate: (row: HTMLElement) => void
 }) {
-  const reduceMotion = useReducedMotion()
-
   return (
-    <li className="border-b border-foreground/15 last:border-b-0">
+    <li className="border-b border-background/15 last:border-b-0">
       <Link
         href={`/blog/${post.slug}`}
-        onMouseEnter={onActivate}
-        onFocus={onActivate}
+        data-recent-index={index}
+        onMouseEnter={(event) => onActivate(event.currentTarget)}
+        onFocus={(event) => onActivate(event.currentTarget)}
         className={cn(
-          "group/row grid grid-cols-[5.5rem_1fr] gap-x-4 no-underline transition-colors duration-300 sm:grid-cols-[6.5rem_1fr] sm:gap-x-6",
-          active
-            ? "bg-primary px-4 py-6 text-primary-foreground sm:px-5 sm:py-7"
-            : "py-6 text-foreground sm:py-7",
+          "group/row grid grid-cols-[4.75rem_1fr] gap-x-3 py-5 no-underline transition-colors duration-300 sm:grid-cols-[6.5rem_1fr] sm:gap-x-6 sm:py-7",
+          active ? "bg-recent-row text-foreground" : "text-background",
         )}
       >
         <time
           dateTime={post.date}
           className={cn(
-            "pt-0.5 text-sm tabular-nums",
-            active ? "text-primary-foreground/85" : "text-muted-foreground",
+            "pt-0.5 text-sm tabular-nums transition-[translate,color] duration-300 motion-reduce:translate-none motion-reduce:transition-none",
+            active ? "translate-x-2 text-foreground/70" : "text-background/70",
           )}
         >
           {formatDateList(post.date)}
@@ -88,19 +102,12 @@ function PostRow({
         <div className="min-w-0">
           <h3
             className={cn(
-              "text-pretty font-semibold leading-snug transition-colors",
-              active
-                ? "text-lg text-primary-foreground sm:text-xl"
-                : "text-base text-foreground sm:text-lg",
+              "origin-bottom-left text-pretty text-base font-semibold leading-snug transition-[transform,color] duration-300 motion-reduce:transform-none motion-reduce:transition-none sm:text-lg",
+              active ? "scale-110 text-foreground" : "text-background",
             )}
           >
             {post.title}
           </h3>
-          <PostListInlineSummary
-            summary={post.summary}
-            active={active}
-            reduceMotion={reduceMotion}
-          />
         </div>
       </Link>
     </li>
@@ -110,7 +117,57 @@ function PostRow({
 export function HomeRecentPosts({ posts }: { posts: RecentPostItem[] }) {
   const items = posts.slice(0, DISPLAY_COUNT)
   const [activeIndex, setActiveIndex] = React.useState<number | null>(null)
+  const listRef = React.useRef<HTMLUListElement>(null)
   const activePost = activeIndex !== null ? items[activeIndex] : null
+
+  const activateRow = React.useCallback((row: HTMLElement) => {
+    if (!rowPastReveal(row)) {
+      setActiveIndex(null)
+      return
+    }
+    const index = Number(row.dataset.recentIndex)
+    if (Number.isNaN(index)) return
+    setActiveIndex(index)
+  }, [])
+
+  React.useEffect(() => {
+    const root = listRef.current
+    if (!root) return
+    let frame = 0
+    const syncHover = () => {
+      const links = root.querySelectorAll<HTMLElement>("a[data-recent-index]")
+      for (const link of links) {
+        const pointing = link.matches(":hover") || link === document.activeElement
+        if (pointing && rowPastReveal(link)) {
+          activateRow(link)
+          return
+        }
+      }
+      setActiveIndex((current) => {
+        if (current === null) return null
+        const link = root.querySelector<HTMLElement>(`a[data-recent-index="${current}"]`)
+        if (!link || !rowPastReveal(link)) return null
+        return current
+      })
+    }
+    const schedule = () => {
+      if (frame) return
+      frame = requestAnimationFrame(() => {
+        frame = 0
+        syncHover()
+      })
+    }
+
+    schedule()
+    const host = root.closest("[data-particle-host]")
+    host?.addEventListener("particlescroll", schedule)
+    window.addEventListener("resize", schedule)
+    return () => {
+      cancelAnimationFrame(frame)
+      host?.removeEventListener("particlescroll", schedule)
+      window.removeEventListener("resize", schedule)
+    }
+  }, [activateRow])
 
   if (items.length === 0) return null
 
@@ -122,32 +179,35 @@ export function HomeRecentPosts({ posts }: { posts: RecentPostItem[] }) {
     >
       <div
         className={cn(
-          "grid gap-y-12 sm:gap-y-14",
+          "grid gap-y-8 sm:gap-y-14",
           "md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:grid-rows-[auto_1fr] md:items-start md:gap-x-12 md:gap-y-0",
           "lg:gap-x-16 xl:gap-x-20",
         )}
       >
         <h2
           id="recent-posts-heading"
-          className="text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl md:col-start-1 md:row-start-1 md:pr-4"
+          className={cn(
+            "text-balance text-2xl font-semibold tracking-tight text-background sm:text-3xl md:col-start-1 md:row-start-1 md:pr-4",
+            SITE_HEADER_OFFSET.anchorScrollMargin,
+          )}
         >
-          近期博文
+          近期文章
         </h2>
 
         <div
           className="hidden min-w-0 md:col-start-2 md:row-start-1 md:block md:pt-1"
           aria-hidden
         >
-          <div className="grid grid-cols-[5.5rem_1fr] gap-x-4 border-b border-foreground/15 pb-3 text-[0.6875rem] font-medium tracking-[0.14em] text-muted-foreground uppercase sm:grid-cols-[6.5rem_1fr] sm:gap-x-6">
+          <div className="grid grid-cols-[5.5rem_1fr] gap-x-4 border-b border-background/15 pb-3 text-[0.6875rem] font-medium tracking-[0.14em] text-background/60 uppercase sm:grid-cols-[6.5rem_1fr] sm:gap-x-6">
             <span>日期</span>
             <span>标题</span>
           </div>
         </div>
 
         <div className="md:col-start-1 md:row-start-2 md:mt-2 md:pr-4 lg:mt-4">
-          <blockquote className="text-pretty text-base leading-relaxed text-muted-foreground sm:text-[1.05rem] sm:leading-8">
+          <blockquote className="text-pretty text-base leading-relaxed text-background/70 sm:text-[1.05rem] sm:leading-8">
             <p>{KNOWLEDGE_QUOTE.text}</p>
-            <footer className="mt-3 text-sm text-muted-foreground/80">
+            <footer className="mt-3 text-sm text-background/60">
               ——{KNOWLEDGE_QUOTE.source}
             </footer>
           </blockquote>
@@ -158,21 +218,14 @@ export function HomeRecentPosts({ posts }: { posts: RecentPostItem[] }) {
         </div>
 
         <div className="min-w-0 md:col-start-2 md:row-start-2">
-          <div
-            className="grid grid-cols-[5.5rem_1fr] gap-x-4 border-b border-foreground/15 pb-3 text-[0.6875rem] font-medium tracking-[0.14em] text-muted-foreground uppercase sm:grid-cols-[6.5rem_1fr] sm:gap-x-6 md:hidden"
-            aria-hidden
-          >
-            <span>日期</span>
-            <span>标题</span>
-          </div>
-
-          <ul role="list" className="md:mt-0">
+          <ul ref={listRef} role="list" className="md:mt-0">
             {items.map((post, index) => (
               <PostRow
                 key={post.slug}
                 post={post}
+                index={index}
                 active={index === activeIndex}
-                onActivate={() => setActiveIndex(index)}
+                onActivate={activateRow}
               />
             ))}
           </ul>

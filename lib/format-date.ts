@@ -20,7 +20,7 @@ export function formatDotMonthDay(date: string) {
   return `${m}.${day}`
 }
 
-/** 列表日期（如 `4/10/2026`），用于首页近期博文、运维教程等 */
+/** 列表日期（如 `4/10/2026`），用于首页近期文章、运维教程等 */
 export function formatDateList(date: string) {
   const d = new Date(date)
   if (Number.isNaN(d.getTime())) return date

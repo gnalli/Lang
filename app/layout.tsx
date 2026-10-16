@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { siteConfig, siteAuthors } from "@/lib/config"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { FooterSwitch } from "@/components/footer/footer-switch"
 import { ScrollProgressBar } from "@/components/scroll-progress-bar"
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Agentation } from "agentation"
@@ -49,7 +50,7 @@ export default function RootLayout({
               <ScrollProgressBar />
               <Header />
               <main className="flex-1 px-4 sm:px-6">{children}</main>
-              <Footer />
+              <FooterSwitch home={<Footer />} page={<Footer variant="page" />} />
             </div>
           </TooltipProvider>
         </ThemeProvider>

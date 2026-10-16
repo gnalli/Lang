@@ -152,7 +152,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
 ```
 
-重启开发服务器或重新部署后，博文页会显示阅读数，顶栏「更多」菜单可查看近 14 日趋势（需 Supabase 有数据）。
+重启开发服务器或重新部署后，博文页会显示阅读数，顶栏访问趋势按钮可查看近 14 日趋势（需 Supabase 有数据）。
 
 ### 4. 可选维护
 

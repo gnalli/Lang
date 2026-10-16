@@ -39,6 +39,16 @@
     --color-card: var(--card);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
+    --color-article-card: var(--article-card);
+    --color-article-card-foreground: var(--article-card-foreground);
+    --color-article-card-border: var(--article-card-border);
+    --color-article-enter: var(--article-enter);
+    --color-article-enter-foreground: var(--article-enter-foreground);
+    --color-article-enter-hover: var(--article-enter-hover);
+    --color-article-mark: var(--article-mark);
+    --color-recent-row: var(--recent-row);
+    --color-footer: var(--footer);
+    --color-footer-foreground: var(--footer-foreground);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -51,6 +61,20 @@
 :root {
     --background: #f8f4ee;
     --foreground: #252525;
+    /* 亮色文章卡：#333333 压在纸色上，暖调弥散阴影悬浮 */
+    --article-card: #333333;
+    --article-card-foreground: #f8f4ee;
+    --article-card-border: transparent;
+    --article-card-shadow: 0 20px 50px rgb(158 122 77 / 0.06);
+    --article-enter: #f8f4ee;
+    --article-enter-foreground: #252525;
+    --article-enter-hover: color-mix(in srgb, #f8f4ee 86%, #333333);
+    --article-mark: var(--article-enter);
+    /* 近期文章右栏悬停：亮色纸色，暗色 #252525 */
+    --recent-row: #f8f4ee;
+    /* 首页页脚跟上方作品块相反。作品是 bg-foreground，页脚取 background。 */
+    --footer: var(--background);
+    --footer-foreground: var(--foreground);
     --card: #fefefb;
     --card-foreground: #252525;
     --popover: #fefefb;
@@ -82,9 +106,8 @@
     --sidebar-border: #e8e0d4;
     --sidebar-ring: #364437;
     /**
-     * Sticky Header 总高（外壳 padding + 导航栏）。
-     * 改 Header 样式时须同步 `lib/site-header-offset.ts` 及 Hero / TOC / 404 引用处。
-     * 当前对应：header pt-1.5 pb-1 sm:pt-2 sm:pb-1 + nav py-1.5 sm:py-2 + min-h-9 行
+     * Sticky Header 高度，顶栏外壳直接使用。
+     * Hero / TOC / 404 经 `lib/site-header-offset.ts` 引用。
      */
     --site-header-height: 4rem;
 }
@@ -98,6 +121,19 @@
 .dark {
     --background: #252525;
     --foreground: #f8f4ee;
+    /* 暗色文章卡：纸色 #f8f4ee 压在墨色上 */
+    --article-card: #f8f4ee;
+    --article-card-foreground: #252525;
+    --article-card-border: transparent;
+    --article-card-shadow: none;
+    --article-enter: #252525;
+    --article-enter-foreground: #f8f4ee;
+    --article-enter-hover: color-mix(in srgb, #252525 86%, #f8f4ee);
+    --article-mark: var(--article-enter);
+    --recent-row: #252525;
+    /* 暗色作品块是纸色，页脚换成墨色，仍跟上方相反。 */
+    --footer: var(--background);
+    --footer-foreground: var(--foreground);
     --card: #2c2e2c;
     --card-foreground: #f8f4ee;
     --popover: #2c2e2c;
@@ -129,6 +165,17 @@
     --sidebar-ring: #f8f4ee;
 }
 
+/* 内页页脚，不跟首页作品块走。文字用对侧色，否则同色底上看不见。 */
+[data-footer="page"] {
+    --footer: #252525;
+    --footer-foreground: #f8f4ee;
+}
+
+.dark [data-footer="page"] {
+    --footer: #f8f4ee;
+    --footer-foreground: #252525;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -138,6 +185,32 @@
   }
   html {
     scrollbar-gutter: stable;
+  }
+}
+
+/* 不进 @layer：要压过顶栏链接的 text-foreground 工具类。暗色模式变量对调，不用再写一套。 */
+header[data-ink] a,
+header[data-ink] button,
+header[data-ink] span {
+  color: var(--background);
+}
+header[data-ink] a:hover,
+header[data-ink] button:hover {
+  color: var(--background);
+}
+
+.article-card {
+  box-shadow: var(--article-card-shadow);
+}
+.article-enter {
+  transition: background-color 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.article-card:is(:hover, :focus-visible) .article-enter {
+  background-color: var(--article-enter-hover);
+}
+@media (prefers-reduced-motion: reduce) {
+  .article-enter {
+    transition: none;
   }
 }
 
@@ -255,4 +328,9 @@ html.dark .article-tweet .react-tweet-theme {
     #223540,
     #1a2a33
   );
+}
+/* 首页 Hero 底部滚动提示 */
+@keyframes hero-scroll-cue {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
 }

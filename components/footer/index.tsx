@@ -30,22 +30,8 @@ function XIcon({ className }: { className?: string }) {
   )
 }
 
-function YouTubeIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <path
-        fill="currentColor"
-        d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
-      />
-    </svg>
-  )
-}
-
-/** 设为 true 后，社交图标在新标签页打开 config 中的外链 */
-const SOCIAL_LINKS_NAVIGABLE = false
-
 const socialLinkClass =
-  "text-primary-foreground/90 transition-colors hover:text-primary-foreground"
+  "text-footer-foreground/90 transition-colors hover:text-footer-foreground"
 
 function SocialLink({
   href,
@@ -56,46 +42,38 @@ function SocialLink({
   label: string
   children: ReactNode
 }) {
-  if (SOCIAL_LINKS_NAVIGABLE) {
-    return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={socialLinkClass}
-        aria-label={label}
-      >
-        {children}
-      </a>
-    )
-  }
-
   return (
-    <span className={socialLinkClass} aria-label={label}>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={socialLinkClass}
+      aria-label={label}
+    >
       {children}
-    </span>
+    </a>
   )
 }
 
 const footerLink = cn(
-  "text-sm text-primary-foreground/90 transition-colors hover:text-primary-foreground",
+  "text-sm text-footer-foreground/90 transition-colors hover:text-footer-foreground",
 )
 
-const footerHeading = "text-[0.6875rem] font-medium tracking-[0.16em] text-primary-foreground/55 uppercase"
+const footerHeading = "text-[0.6875rem] font-medium tracking-[0.16em] text-footer-foreground/55 uppercase"
 
-export default function Footer() {
-  const { github, twitter, youtube } = siteConfig.social
+export default function Footer({ variant = "home" }: { variant?: "home" | "page" }) {
+  const { github, twitter } = siteConfig.social
 
   return (
-    <footer className="mt-16 sm:mt-20">
-      <div className="w-full bg-primary pb-[env(safe-area-inset-bottom,0px)] text-primary-foreground">
+    <footer className="mt-16 sm:mt-20" data-footer={variant === "page" ? "page" : undefined}>
+      <div className="w-full bg-footer pb-[env(safe-area-inset-bottom,0px)] text-footer-foreground">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12 lg:py-14">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-12 xl:gap-16">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-12 xl:gap-16">
             <div className="space-y-6">
-              <p className="text-3xl font-semibold tracking-tight text-primary-foreground sm:text-4xl md:text-5xl">
+              <p className="text-3xl font-semibold tracking-tight text-footer-foreground sm:text-4xl md:text-5xl">
                 {siteConfig.site.title.default}
               </p>
-              <p className="max-w-md text-sm leading-relaxed text-primary-foreground/75 sm:text-base">
+              <p className="max-w-md text-sm leading-relaxed text-footer-foreground/75 sm:text-base">
                 专注AI应用与运维实践，分享AI工具、教程。
               </p>
 
@@ -106,13 +84,10 @@ export default function Footer() {
                 <SocialLink href={twitter.url} label="X">
                   <XIcon className="size-4" />
                 </SocialLink>
-                <SocialLink href={youtube.url} label="YouTube">
-                  <YouTubeIcon className="size-5" />
-                </SocialLink>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-6 lg:justify-self-end lg:max-w-lg xl:max-w-xl">
+            <div className="grid grid-cols-3 gap-x-3 gap-y-8 sm:gap-6 lg:max-w-lg lg:justify-self-end xl:max-w-xl">
               <div>
                 <p className={footerHeading}>导航</p>
                 <ul className="mt-4 space-y-2.5">
@@ -127,7 +102,7 @@ export default function Footer() {
               </div>
 
               <div>
-                <p className="text-[0.6875rem] font-medium tracking-[0.16em] text-primary-foreground/55">
+                <p className="text-[0.6875rem] font-medium tracking-[0.16em] text-footer-foreground/55">
                   Feeds
                 </p>
                 <ul className="mt-4 space-y-2.5">

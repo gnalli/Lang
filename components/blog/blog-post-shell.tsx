@@ -11,8 +11,6 @@ export const BLOG_POST_GRID = {
     template: "minmax(0,54rem) 12.5rem",
     /** 正文与目录列间距 */
     gap: "lg:gap-x-10",
-    /** 整体左内边距（略小于原先 1fr 留白，正文稍向左靠） */
-    inset: "lg:pl-12",
 } as const
 
 type BlogPostShellProps = {
@@ -24,7 +22,7 @@ type BlogPostShellProps = {
 export function BlogPostShell({ children, toc, className }: BlogPostShellProps) {
     if (!toc) {
         return (
-            <article className={cn("mx-auto w-full min-w-0 max-w-216", className)}> 
+            <article className={cn("w-full min-w-0 max-w-216", className)}> 
                 {children}
             </article>
         )
@@ -35,7 +33,7 @@ export function BlogPostShell({ children, toc, className }: BlogPostShellProps) 
             className={cn(
                 "grid w-full grid-cols-1 gap-y-10",
                 "lg:grid-cols-[minmax(0,54rem)_12.5rem]",
-                "lg:items-stretch lg:justify-start lg:gap-x-10 lg:pl-12",
+                "lg:items-stretch lg:justify-start lg:gap-x-10",
                 className,
             )}
         >

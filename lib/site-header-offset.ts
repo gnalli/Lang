@@ -1,22 +1,19 @@
 /**
  * Sticky Header 占位与 scroll 偏移。
  *
- * 须与 `app/globals.css` 的 `--site-header-height` 保持一致；改 Header 高度时请同步：
- * 1. `app/globals.css` → `--site-header-height`（mobile / sm 两档）
- * 2. `components/header/index.tsx` → 外壳 `pt-*` / `pb-*`
- * 3. `components/header/header-nav.tsx` → 导航 `py-*`、`min-h-9`、头像尺寸
- *
- * 估算：外壳 padding + 导航 border + 导航 py×2 + 行高（min-h-9）≈ 当前 4rem / 4.25rem
+ * 顶栏外壳（`components/header/header-surface.tsx`）直接用 `h-(--site-header-height)`，
+ * 改高度只需改 `app/globals.css` 的 `--site-header-height`（mobile / sm 两档），
+ * 并确认 `header-nav.tsx` 的头像与主题按钮仍能放下。
  */
 export const SITE_HEADER_OFFSET = {
   margin: "-mt-[var(--site-header-height)]",
   padding: "pt-[var(--site-header-height)]",
-  /** Hero 背景层向上下延伸，避免顶/底露兜底色 */
-  bgExtend:
-    "top-[calc(-1*var(--site-header-height))] -bottom-8 sm:-bottom-10",
-  heroHeight: "h-[min(24rem,44vh)] sm:h-[min(34rem,56vh)]",
+  /** 首页 Hero 铺满视口。section 用负 margin 顶到视口上沿；矮视口兜底 30rem。 */
+  heroHeight: "h-svh min-h-[30rem]",
   /** 正文标题锚点 scroll-margin，与顶栏 sticky 对齐 */
   headingScrollMargin: "prose-headings:scroll-mt-[var(--site-header-height)]",
+  /** 页内锚点（首页栏目、作品），避开 sticky 顶栏 */
+  anchorScrollMargin: "scroll-mt-[var(--site-header-height)]",
   /** 侧栏 TOC sticky：顶栏高度 + 半行间距，避免贴边 */
   tocStickyTop: "top-[calc(var(--site-header-height)+0.5rem)]",
   /**

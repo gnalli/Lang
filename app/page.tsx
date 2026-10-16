@@ -2,6 +2,9 @@ import { allBlogs } from "content-collections"
 import type { Metadata } from "next"
 import { HomeHero } from "@/components/home/home-hero"
 import { HomeRecentPosts } from "@/components/home/home-recent-posts"
+import { HomeShelf, type HomeSectionCard } from "@/components/home/home-shelf"
+import { ParticleScroll } from "@/components/home/particle-scroll"
+import { BLOG_SECTIONS, resolveBlogCategory } from "@/lib/blog-sections"
 import { parseKeywords } from "@/lib/blog-tags"
 import { PageViewBeacon } from "@/components/analytics/page-view-beacon"
 import { WebsiteJsonLd } from "@/components/seo/website-json-ld"
@@ -27,6 +30,17 @@ export default async function HomePage() {
   const sorted = [...allBlogs].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   )
+  const sections: HomeSectionCard[] = (["ai", "ops", "notes"] as const).map((category) => {
+    const section = BLOG_SECTIONS[category]
+    const posts = sorted.filter((blog) => resolveBlogCategory(blog.category) === category)
+    return {
+      href: section.href,
+      label: section.shortLabel,
+      lead: section.lead,
+      count: posts.length,
+      latestTitle: posts[0]?.title ?? null,
+    }
+  })
   const recentItems = sorted.slice(0, 10).map((b) => ({
     slug: b.slug,
     title: b.title,
@@ -39,11 +53,19 @@ export default async function HomePage() {
   return (
     <>
       <HomeHero />
-      <div className="relative mx-auto w-full max-w-6xl pb-10 sm:pb-14">
-        <WebsiteJsonLd />
-        <HomeRecentPosts posts={recentItems} />
-        <PageViewBeacon path="/" />
+      <div
+        data-home-ink=""
+        className="relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 bg-foreground text-background"
+      >
+        <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-6">
+          <WebsiteJsonLd />
+          <ParticleScroll>
+            <HomeRecentPosts posts={recentItems} />
+          </ParticleScroll>
+          <PageViewBeacon path="/" />
+        </div>
       </div>
+      <HomeShelf sections={sections} />
     </>
   )
 }

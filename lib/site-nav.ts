@@ -1,8 +1,8 @@
 export const SITE_NAV_ITEMS = [
-  { href: "/ai", label: "AI" },
-  { href: "/ops", label: "运维" },
-  { href: "/notes", label: "随记" },
+  { href: "/#articles", label: "文章" },
+  { href: "/#works", label: "作品" },
   { href: "/archive", label: "归档" },
+  { href: "/about", label: "关于" },
 ] as const
 
 export const SITE_FOOTER_SITEMAP = [

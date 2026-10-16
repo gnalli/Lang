@@ -18,7 +18,7 @@
 6. [全局骨架](#6-全局骨架)
 7. [Header 与导航](#7-header-与导航)
 8. [Footer](#8-footer)
-9. [首页 Hero](#9-首页-hero)
+9. [首页 Hero 与 Particle Scroll](#9-首页-hero-与-particle-scroll)
 10. [文章列表模式（共享）](#10-文章列表模式共享)
 11. [博文阅读页](#11-博文阅读页)
 12. [目录（TOC）系统](#12-目录toc系统)
@@ -71,11 +71,11 @@
 
 | 令牌 | Hex / 值 | 语义用途 |
 |------|----------|----------|
-| `--background` | `#f8f4ee` | 页面底色、Hero 渐变终点 |
+| `--background` | `#f8f4ee` | 页面底色 |
 | `--foreground` | `#252525` | 正文、标题 |
 | `--card` | `#fefefb` | 卡片、代码块外壳 |
 | `--popover` | `#fefefb` | 下拉、抽屉面板 |
-| `--primary` | `#364437` | 链接色、列表 hover 反色底、Footer 底栏、TOC 高亮 |
+| `--primary` | `#364437` | 链接色、列表 hover 反色底、TOC 高亮 |
 | `--primary-foreground` | `#fefefb` | 主色上的文字 |
 | `--secondary` | `#f0ebe3` | 次要表面 |
 | `--muted` | `#f3ede4` | 代码块背景、行内 code 底 |
@@ -84,6 +84,10 @@
 | `--border` | `#e8e0d4` | 边框、分隔线、列表表头下划线 |
 | `--destructive` | `#85181d` | 错误态（少用） |
 | `--ring` | `#364437` | focus ring |
+| `--article-card` | `#333333` | 首页文章卡，文字 `#f8f4ee`。暖调弥散阴影 `rgb(158 122 77 / 0.06)` |
+| `--article-enter` | `#f8f4ee` | 文章卡「进入」，文字 `#252525`。悬停 `color-mix` 混入卡片色 |
+| `--article-mark` | 同 `--article-enter` | 文章卡右上角书签 |
+| `--footer` | `var(--background)`（`#f8f4ee`） | 首页页脚，与上方作品块相反 |
 
 ### 2.2 深色模式色板
 
@@ -98,6 +102,10 @@
 | `--muted-foreground` | `#a8a89e` | |
 | `--border` | `#f8f4ee1a` | 约 10% 透明度描边 |
 | `--input` | `#f8f4ee26` | |
+| `--article-card` | `#f8f4ee` | 首页文章卡，文字 `#252525`。无投影 |
+| `--article-enter` | `#252525` | 文章卡「进入」，文字 `#f8f4ee`。悬停 `color-mix` 混入卡片色 |
+| `--article-mark` | 同 `--article-enter` | 文章卡右上角书签 |
+| `--footer` | `var(--background)`（`#252525`） | 首页页脚，与上方作品块相反 |
 
 ### 2.3 圆角
 
@@ -120,8 +128,7 @@
 | 元素 | 浅色 | 深色 | 文件 |
 |------|------|------|------|
 | 阅读进度条 | `teal-600` | `teal-400` | `scroll-progress-bar.tsx` |
-| Hero 遮罩渐变 | `from-black/15 via-black/5 to-background` | 同结构 | `home-hero.tsx` |
-| Hero 兜底色 | `#1e2621`（`HERO_FALLBACK_BG`） | 同 | `home-hero.tsx` |
+| Hero 粒子 | `--foreground` + `--chart-2` 点缀（运行时读取） | 同，混合方式改为发光 | `hero-particles.tsx` |
 | Tweet 卡片底 | `#eef7fc` | `#1a2a33` | `globals.css` `.article-tweet` |
 | Shiki 代码 | `github-light` / `github-dark` | 随 `html.dark` 切换 | `content-collections.ts` |
 
@@ -142,7 +149,7 @@
 --site-header-height: 4.25rem;   /* ≥ 640px */
 ```
 
-**估算公式**：外壳 `pt/pb` + 导航 `border` + 导航 `py×2` + 行内容高度 ≈ 当前两档 rem 值。
+顶栏外壳直接用 `h-(--site-header-height)`，改高度只改这一处。
 
 配套常量：`lib/site-header-offset.ts` → `SITE_HEADER_OFFSET`（禁止在其它文件硬编码 `scroll-mt-20` 等魔法数）。
 
@@ -171,13 +178,14 @@ Fallback：`PingFang SC` → `Hiragino Sans GB` → `Microsoft YaHei` → `sans-
 | 博文 H1（MDX 内） | `1.65rem` → `sm:1.85rem` | `semibold` | prose |
 | 博文 H2 | `text-xl` | `semibold` | prose |
 | 博文 H3 | `text-lg` | `semibold` | prose |
-| 区块标题 | `text-2xl` → `sm:3xl` | `semibold` | 「近期博文」 |
+| 区块标题 | `text-2xl` → `sm:3xl` | `semibold` | 「近期文章」 |
 | 列表标题（默认） | `text-base` → `sm:text-lg` | `semibold` | 文章列表行 |
 | 列表标题（active） | `text-lg` → `sm:text-xl` | `semibold` | hover 反色行 |
 | 正文 | `text-base` → `md:[1.0625rem]` | normal | 博文 MDX 容器 |
 | 正文段落 | — | — | `leading-[1.75]` |
-| 主导航 | `text-sm` → `sm:text-base` | normal | Header |
-| 超窄导航 | `max-[375px]:text-[0.8125rem]` | — | ≤375px |
+| 主导航 | `text-base` | normal | Header 链接 |
+| 超窄导航 | `max-[375px]:text-sm` | — | ≤375px |
+| 顶栏品牌 | `text-lg` | `semibold` | 「Lang.」，≥420px |
 | 栏目标签 | `text-[0.6875rem]` | `medium` | 列表「日期/标题」表头 |
 | TOC 链接 | `text-sm` | normal | `leading-snug` |
 | 代码块 | `0.75rem` → `sm:0.8125rem` | mono | `pre` |
@@ -225,7 +233,7 @@ Fallback：`PingFang SC` → `Hiragino Sans GB` → `Microsoft YaHei` → `sans-
 | 层级 | 类名 |
 |------|------|
 | `layout` main | `px-4 sm:px-6` |
-| 首页内容区 | `max-w-6xl mx-auto` |
+| 首页近期文章 | 破出 `main` 的水平留白后，与顶栏同一套 `max-w-6xl mx-auto px-4 sm:px-6`，左缘对齐头像，右缘对齐主题按钮 |
 | 分类 / 404 | `max-w-3xl mx-auto` |
 | 归档 | `max-w-3xl` + 页内 `px-4 sm:px-6` |
 | Header 居中 | 外层 `px-2` |
@@ -260,11 +268,12 @@ Fallback：`PingFang SC` → `Hiragino Sans GB` → `Microsoft YaHei` → `sans-
 ```text
 grid-cols-[minmax(0,54rem)_12.5rem]
 gap-x-10
-pl-12
 gap-y-10（单列堆叠时）
 ```
 
-- 无 TOC 时：正文 `max-w-216 mx-auto`
+外层破出 `main` 的水平留白，用和顶栏相同的 `max-w-6xl mx-auto px-4 sm:px-6`。正文列左缘对齐头像。
+
+- 无 TOC 时：正文 `max-w-216`，左缘与有目录时的正文列相同
 - TOC 列：`pointer-events-none` 包裹，内部 `pointer-events-auto` 恢复交互
 - `< lg`：单列 + `ArticleTocMobileFab`
 
@@ -273,6 +282,7 @@ gap-y-10（单列堆叠时）
 ```text
 grid-cols-[5.5rem_1fr]     → sm: [6.5rem_1fr]
 gap-x-4                    → sm: gap-x-6
+首页近期文章手机端更窄：`4.75rem` / `gap-x-3`，`sm` 起与上面相同
 border-b border-foreground/15
 ```
 
@@ -292,7 +302,7 @@ md:gap-x-12 lg:gap-x-16 xl:gap-x-20
 | 断点 | px | 项目内典型变化 |
 |------|-----|----------------|
 | `max-[375px]` | ≤375 | 导航字号、gap 压缩 |
-| `sm` | 640 | Header 高度 4.25rem、Hero 视差、字号升档 |
+| `sm` | 640 | Header 高度 4.25rem、Hero 粒子布局切换、字号升档 |
 | `md` | 768 | 首页双栏、引文/列表分列 |
 | `lg` | 1024 | 博文 TOC 侧栏、Footer 双列 |
 | `xl` | 1280 | 首页列间距加大 |
@@ -306,7 +316,7 @@ md:gap-x-12 lg:gap-x-16 xl:gap-x-20
 | z-index | 元素 |
 |---------|------|
 | `z-60` | 顶部阅读进度条 |
-| `z-50` | Sticky Header、「更多」下拉、打赏 QR 弹层 |
+| `z-50` | Sticky Header、打赏 QR 弹层 |
 | `z-40` | 移动端 TOC FAB |
 | `z-30` | 侧栏 TOC `sticky` |
 | `-z-1` | TOC 装饰竖线（相对链接） |
@@ -315,18 +325,16 @@ md:gap-x-12 lg:gap-x-16 xl:gap-x-20
 
 | 类型 | 配方 | 用于 |
 |------|------|------|
-| **毛玻璃胶囊** | `bg-background/75 backdrop-blur-md border border-border/70 shadow-sm` + `supports-backdrop-filter:bg-background/65` | Header `nav` |
-| **毛玻璃卡片** | `bg-white/18 backdrop-blur-2xl border border-white/25` | Hero 介绍卡 |
+| **首页顶栏** | 滚动后跟下方区块同色实底，无边框。其它页面才用毛玻璃 | Header |
 | **实色卡片** | `bg-card border border-border shadow-sm` | 代码块、404 内框 |
-| **Popover** | `bg-popover/90 backdrop-blur-xl border border-border/70 shadow-md` | 「更多」菜单 |
+| **Popover** | `bg-popover/90 backdrop-blur-xl border border-border/70 shadow-md` | 浮层底 |
 | **反色行** | `bg-primary text-primary-foreground` | 列表 hover active |
-| **Primary 底栏** | `bg-primary text-primary-foreground` | Footer |
+| **页脚** | 首页始终与上方作品块相反：作品 `bg-foreground`，页脚 `bg-background`（亮色 `#f8f4ee`、暗色 `#252525`）。内页亮色 `#252525`、暗色 `#f8f4ee`（`data-footer="page"`），文字用对侧色 | Footer |
 
 ### 5.3 阴影
 
 | 元素 | 阴影 |
 |------|------|
-| Hero 介绍卡 | `shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]` |
 | 移动 TOC 抽屉 | `shadow-[-12px_0_40px_-8px_rgba(0,0,0,0.45)]`（左侧投影） |
 | 打赏弹层 | `shadow-lg` |
 
@@ -339,7 +347,7 @@ md:gap-x-12 lg:gap-x-16 xl:gap-x-20
 ├─ Header ─ sticky top-0, z-50, 透明背景 ────────────────────┤
 ├─ main.flex-1.px-4.sm:px-6 ───────────────────────────────────┤
 │    └── 各页面内容（自带 max-w / py）                            │
-├─ Footer ─ mt-16.sm:mt-20, bg-primary ────────────────────────┤
+├─ Footer ─ mt-16.sm:mt-20, bg-footer ───────────────────────────┤
 └─ GoogleAnalytics / ThemeProvider / TooltipProvider ──────────┘
 ```
 
@@ -354,81 +362,65 @@ md:gap-x-12 lg:gap-x-16 xl:gap-x-20
 ### 7.1 结构树
 
 ```text
-header.sticky.top-0.z-50
-  └── nav[aria-label=主导航]
-        ├── Link[首页] → 头像 size-6 sm:size-7, rounded-md
+HeaderSurface (client) → header.sticky.top-0.z-50.h-(--site-header-height)
+  └── nav[aria-label=主导航]  mx-auto h-full max-w-6xl px-4 sm:px-6 justify-between
+        ├── Link[首页] → 头像 size-7 sm:size-8 rounded-md ring-1 ring-border + 「Lang.」（≥420px 显示）
         └── div.flex（链接组）
-              ├── SITE_NAV_ITEMS × 4
+              ├── 搜索（图标，在「文章」前）
+              ├── SITE_NAV_ITEMS × 4（文章、作品、归档、关于）
               └── HeaderNavActions (client)
-                    ├── 更多
+                    ├── 访问趋势（图标）
                     └── 主题切换
 ```
 
-导航数据：`lib/site-nav.ts` → `SITE_NAV_ITEMS`（AI、运维、随记、归档）。
+导航数据：`lib/site-nav.ts` → `SITE_NAV_ITEMS`。文章、作品链到首页 `/#articles`、`/#works`。左缘、右缘与 `max-w-6xl` 内容区对齐。
 
-### 7.2 Header 外壳尺寸
+### 7.2 外壳 `HeaderSurface`
 
-`components/header/index.tsx`：
+| 状态 | 样式 |
+|------|------|
+| 页面顶部（`scrollY ≤ 8`） | `border-transparent bg-transparent`，与首页 Hero / 页面底色融为一体 |
+| 首页滚动后，下方是 Hero 或文章区 | 实色 `bg-background`，无边框、无模糊 |
+| 首页滚动后，下方是近期文章或作品 | 实色 `bg-foreground`，无边框、无模糊。同时加 `data-ink`，顶栏文字改成 `background`，否则墨色上看不见 |
+| 其它页面滚动后 | `border-b border-border/70 bg-background/70 backdrop-blur-md supports-backdrop-filter:bg-background/60` |
 
-```text
-px-2
-pt-1.5 pb-1  →  sm:pt-2 sm:pb-1
-flex justify-center
-```
+过渡：`transition-[background-color,border-color] duration-300 motion-reduce:transition-none`。
 
-### 7.3 导航胶囊 `nav`
+### 7.3 导航链接样式
 
-```text
-mx-auto w-fit max-w-[calc(100vw-1rem)]
-flex flex-wrap items-center justify-center
-gap-x-4 gap-y-1  →  max-[375px]:gap-x-3  →  sm:gap-x-8
-px-2.5 py-1.5    →  max-[375px]:px-2     →  sm:px-5 sm:py-2
-border border-border/70
-bg-background/75 backdrop-blur-md shadow-sm
-supports-backdrop-filter:bg-background/65
-```
-
-### 7.4 导航链接样式（规范原文）
-
-主导航、`更多` 按钮、主题切换按钮应共用同一套链接交互（当前实现于 `header-nav.tsx` / `header-more-menu.tsx` / `header-theme-toggle.tsx`）：
+主导航文字链接共用 `components/header/nav-link-class.ts` 的 `headerNavLinkClass`：
 
 ```text
-text-sm leading-snug text-foreground
-transition-[color,transform] duration-200 ease-out
-hover:-translate-y-px hover:text-foreground/65
-motion-reduce:transition-none motion-reduce:hover:translate-y-0
-max-[375px]:text-[0.8125rem] sm:text-base
+text-base leading-none text-foreground/70 hover:text-foreground
+transition-colors duration-200 motion-reduce:transition-none
+max-[375px]:text-sm
 ```
 
-主题切换图标：`size-4`，`strokeWidth={1.75}`；超窄屏 `max-[375px]:scale-90`。
+品牌「Lang.」：`text-lg font-semibold tracking-tight`，`≥420px` 显示。
 
-### 7.5 链接组内间距（等距规则）
+搜索、访问趋势、主题切换共用 `headerIconButtonClass`：`size-8`，无边框，超窄屏 `size-7`；图标 `size-4`，`strokeWidth={1.75}`。搜索打开命令面板，访问趋势打开底部抽屉（动态 import，无 SSR）。
+
+### 7.4 链接组内间距（等距规则）
 
 ```text
 gap-x-3 max-[375px]:gap-x-2.5 sm:gap-x-5
 ```
 
-**适用于**：AI / 运维 / 随记 / 归档 / 更多 / 主题切换 — 全部同级视觉节奏。  
+**适用于**：搜索 / 文章 / 作品 / 归档 / 关于 / 访问趋势 / 主题切换 — 全部同级视觉节奏。  
 `HeaderNavActions` 容器使用**相同** gap，不要用更小的 `gap-x-1`。
 
-### 7.6 「更多」菜单
+### 7.5 图标按钮
 
-| 属性 | 值 |
-|------|-----|
-| 触发 | 精细指针：`pointerenter` 打开 / `pointerleave` 延迟 120ms 关闭；触屏：点击切换 |
-| 定位 | Portal 到 `menuGroupRef`；`absolute top-full`；`-right-2.5 sm:-right-5` 抵消 nav 右 padding |
-| 面板 | `min-w-28 border border-border/70 bg-popover/90 p-1 shadow-md backdrop-blur-xl` |
-| 面板 | `min-w-28 border border-border/70 bg-popover/90 p-1 shadow-md backdrop-blur-xl` |
-| 菜单项 | `min-h-9 px-2.5 text-sm gap-1.5`；`hover:bg-foreground/10`；`touch-manipulation` |
-| 图标 | Lucide `size-4 opacity-70 strokeWidth={1.75}` |
-| 动作 | 搜索 → 命令面板（§16）；访问趋势 → 分析抽屉（§23） |
+搜索、访问趋势、主题切换是同一套无边框图标按钮，不再收进下拉菜单。搜索仍可用 `Ctrl+K` / `⌘K`。访问趋势面板见 §23。
 
-### 7.7 Server / Client 边界
+### 7.6 Server / Client 边界
 
 | Server | Client |
 |--------|--------|
-| `header/index.tsx` | `header-nav-actions.tsx` |
-| `header-nav.tsx` | `header-more-menu.tsx` |
+| `header/index.tsx` | `header-surface.tsx`（滚动状态，children 仍由服务端渲染） |
+| `header-nav.tsx` | `header-nav-actions.tsx` |
+| | `header-search-button.tsx` |
+| | `header-analytics-button.tsx` |
 | | `header-theme-toggle.tsx` |
 | | `header-command-palette.tsx` |
 | | `header-analytics-drawer.tsx`（动态 import） |
@@ -441,21 +433,27 @@ gap-x-3 max-[375px]:gap-x-2.5 sm:gap-x-5
 
 ```text
 footer.mt-16.sm:mt-20
-  └── div.bg-primary.text-primary-foreground
+  └── div.bg-footer.text-footer-foreground
+        /* 首页：跟上方作品块相反。作品 bg-foreground，页脚 background
+           亮色 #f8f4ee / 文字 #252525，暗色 #252525 / 文字 #f8f4ee
+           内页 data-footer="page"：亮色 #252525 / 文字 #f8f4ee，暗色 #f8f4ee / 文字 #252525 */
         └── max-w-6xl mx-auto px-4 py-10 sm:px-6 sm:py-12 lg:py-14
               └── lg:grid-cols-[1fr_1fr] gap-10 lg:gap-12 xl:gap-16
 ```
+
+根布局用 `FooterSwitch` 按路径选择：`/` 渲染首页页脚，其它路径渲染带 `data-footer="page"` 的同一份页脚。页脚本体仍是 Server Component。
+
+首页页脚底色跟正上方内容块相反。现在上方是作品：作品用 `#252525` 时页脚用 `#f8f4ee`，作品用 `#f8f4ee` 时页脚用 `#252525`。实现上作品是 `bg-foreground`，首页 `--footer` 取 `var(--background)`。作品块改色时，页脚跟着对调。
 
 ### 8.2 左侧品牌区
 
 - 标题：`text-3xl sm:4xl md:5xl font-semibold tracking-tight`
 - 简介：`text-sm sm:text-base leading-relaxed text-primary-foreground/75`，`max-w-md`
-- 社交图标：`gap-4`；GitHub `size-5`，X `size-4`，YouTube `size-5`
-- `SOCIAL_LINKS_NAVIGABLE = false` 时为 `<span>` 不可点（装饰）
+- 社交图标：`gap-4`；GitHub `size-5`，X `size-4`。新标签打开 `siteConfig.social` 里的 GitHub 与 X（`rel="noopener noreferrer"`，带 `aria-label`）
 
 ### 8.3 右侧链接区
 
-三列 `grid-cols-2 sm:grid-cols-3`：
+三列 `grid-cols-3`，窄屏也并排，不把「联系」单独折到下一行：
 
 | 列 | 标题样式 | 链接样式 |
 |----|----------|----------|
@@ -472,62 +470,103 @@ footerLink    = text-sm text-primary-foreground/90 hover:text-primary-foreground
 
 ---
 
-## 9. 首页 Hero
+## 9. 首页 Hero 与 Particle Scroll
 
-文件：`components/home/home-hero.tsx`
+文件：`components/home/home-hero.tsx`（壳 + 文案）、`components/home/hero-particles.tsx`（three.js 粒子）、`components/home/particle-scroll.tsx`（正文沙化）。
 
 ### 9.1 区块几何
 
 ```text
-section: relative left-1/2 w-screen -translate-x-1/2
-         mb-10 sm:mb-12
-         -mt-[var(--site-header-height)]   /* SITE_HEADER_OFFSET.margin */
-         bg-background                      /* HERO_SECTION_BG，防露缝 */
-         sm:min-h-[58svh]                   /* 仅桌面视差时 */
+section: relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 overflow-hidden
+         -mt-[var(--site-header-height)]   /* SITE_HEADER_OFFSET.margin，顶到视口上沿 */
+         h-svh min-h-[30rem]                /* SITE_HEADER_OFFSET.heroHeight，铺满首屏 */
+         bg-background text-foreground      /* 纸色。暗色模式 foreground / background 对调，Hero 变成墨色 */
 ```
 
-Hero 可视高度：`h-[min(30rem,52vh)] sm:h-[min(34rem,56vh)]`。
+图层自下而上：粒子画布（外层 `mask` 底部 22% 渐隐，避免粒子在 Hero 下沿被切）→ 文案 → 滚动提示。粒子后面不加色晕。
 
-### 9.2 背景图
+### 9.2 粒子对象
 
-- 资源：`/images/editorial-hero.jpg`
-- `object-cover`；`object-[center_22%] sm:object-[center_18%]`
--  bleed：`top: calc(-1 * var(--site-header-height))`，`bottom: -2rem sm:-2.5rem`
-- 桌面视差：`scale: 1.14`，`backgroundY: 0% → 10%`
-- 静态（手机）：`scale-110`，无视差
+四种程序生成的形态循环变形，每种停留 4.2s，变形 2.4s：
 
-### 9.3 渐变遮罩
+| 序号 | 形态 | 生成 |
+|------|------|------|
+| 0 | 球体 | 斐波那契球面，半径 1.15 |
+| 1 | 环面结 | (2,3) torus knot，管径 0.11 |
+| 2 | 螺旋星系 | 三条旋臂，绕 x 轴倾斜 0.95rad |
+| 3 | 洛伦兹吸引子 | σ=10, ρ=28, β=8/3 积分轨迹 |
 
-`bg-linear-to-b from-black/15 via-black/5 to-background` — 底部必须落到 `background` 令牌。
+- 粒子数：桌面 15000，手机 8000。相机 `fov 35`、`z 6`，`OBJECT_SIZE = 2.7`。
+- 桌面：物体在右侧，右缘对齐顶栏最右的主题图标（Hero 内容区右缘再往里 8px）。每种形态按自转时水平面上的半径（99.5% 分位）和透视放大单独算横向偏移，变形时偏移跟着插值，所以哪种形态都不越线。外接直径取内容区宽 42%、视口高 60%、文案右侧可用宽度三者中较小的一个。手机（宽 < 640）：居中放在顶栏和文案之间，宽度不超过视口的 72%，高度落在这段空隙里，不压住文案。
+- 颜色：`--foreground` 为主色（压在纸色 Hero 上才看得见），约四分之一粒子用 `--chart-2` 点缀；运行时读取 CSS 变量，切换主题即时更新。
+- 混合：浅色模式 Hero 是纸色，用 `NormalBlending`、不透明度 0.6；深色模式 Hero 是墨色，用 `AdditiveBlending`、不透明度 0.9。远处粒子按深度衰减到 18%。
 
-### 9.4 介绍卡片
+### 9.3 Hero 动效
 
-```text
-max-w-md sm:max-w-lg
-border border-white/25 p-7 sm:p-9
-bg-white/18 backdrop-blur-2xl supports-backdrop-filter:bg-white/12
-shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]
-```
+| 行为 | 说明 |
+|------|------|
+| 入场 | 粒子从环形散落位置聚拢成球，约 2.2s |
+| 变形 | 按 seed 错开，变形中途向外炸开 0.55 再收拢 |
+| 自转 | y 轴 0.12rad/s，x 轴固定前倾 0.18 |
+| 鼠标 | 仅 `pointerType === "mouse"`：半径 0.6 内粒子被推开、前凸；整体随指针偏转（y ±0.35，x ±0.15） |
+| 滚动 | 按 Hero 滚出比例，粒子像沙一样向下坠落、横向散开并淡出 |
+| 暂停 | 离开视口或标签页隐藏时不渲染 |
+| 减少动效 | 直接显示球体静态帧，不挂指针事件，文字无入场 |
+| 无 WebGL | 不渲染粒子，只留底色与文案 |
 
-- 标题：`text-2xl sm:text-3xl font-semibold text-white`
-- 副文：`text-base sm:text-lg text-white/90 leading-relaxed`
-- 社交：`gap-5`；图标 `text-white/85 hover:text-white`
+### 9.4 文案
 
-### 9.5 视差参数（仅 `sm+` 且非 `prefers-reduced-motion`）
+- 布局：`max-w-6xl` 容器内左对齐；桌面垂直居中，手机 `items-end pb-32`，和底部滚动提示分开。
+- 标题：`Hi there 👋`。`text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] text-foreground`
+- 副文：两行，`Former DevOps Engineer.` / `Now an unemployed OPC making AI slop.`。`text-base sm:text-lg text-foreground/70`
+- 社交：`gap-4 sm:gap-5`；GitHub、X 都是外链（`target="_blank"`，`rel="noopener noreferrer"`），地址读 `siteConfig.social.github.url`、`siteConfig.social.twitter.url`。GitHub `size-5`，X `size-4`。`text-foreground/60 hover:text-foreground`
+- 入场：`motion` fade-up，`0.8s`，依次延迟 0.2 / 0.35 / 0.5s。
+- 滚动提示：底部居中「Scroll」+ 竖线（手机 `bottom-6`，`sm` 起 `bottom-10`），亮条走 `hero-scroll-cue` 关键帧（`globals.css`），`motion-reduce:animate-none`，链接到 `#recent-posts-heading`（标题带 `scroll-mt`，不会钻进顶栏）。
+
+### 9.5 Particle Scroll（正文沙化）
+
+首页有三段 `<ParticleScroll>`：`app/page.tsx` 包住近期文章，`home-shelf.tsx` 里文章和作品各一段。视口 70% 处是成形线：线以上是真实 DOM（可点击、可 hover），线以下化成沙，向上滚动时逐行、逐粒归位。沙粒颜色来自文字和卡片，区块底色本身不进遮罩。
+
+着色器参考 canvas-ui 的 `particle-scroll-react`。那版依赖实验性 HTML-in-Canvas API（只有开了实验开关的 Chrome 可用），并要求内容放进独立滚动容器，所以没有直接安装。这里改成：
+
+1. **栅格化**：把子树的背景色、边框、文字（逐字 `Range.getClientRects` + `fillText`）画进离屏 canvas，作为沙粒颜色纹理。有 `border-radius` 时背景和边框按圆角画，角外留透明，沙不会铺出直角。图片按元素框和 `object-fit` 画进沙；还没加载完就先不画，加载后再拍一次。描边图标（`path`、`line`、`circle`、`rect`）按 `viewBox` 画进沙，书签这类 Lucide 图标才能粒子化。字体加载完、尺寸变化、子树增删时重拍（防抖 160ms）。主题切换在 class 变更的同一轮重拍并立刻画上，不等下一帧，也不被悬停锁挡住。指针在区块里，以及离开后的 400ms 内，不重拍尺寸和子树，也不清成形进度。离开并过了这段时间后，若悬停期间文字变过，即使宽高相同也重拍一次；否则宽高相同就跳过，避免悬停收起时把整段文字再拍一遍。
+2. **遮罩**：第一条未成形行以下，用 `mask-image` 把 DOM 隐去（12px 渐隐），交给粒子。
+3. **粒子**：WebGL2 点精灵。画布是内容的兄弟节点，`absolute`、`z-20`、`pointer-events-none`，宽等于视口，高等于视口加上下各 30% 的余量，每帧用 `translate3d` 挪到视口上方余量处，随文档一起滚动。不能用 `fixed`：浏览器的合成器滚动比主线程画沙快，快速滚动时 DOM 和遮罩先滚上去，沙还按旧位置画，中间露出一条区块底色。外层 `overflow-y: clip`：画布不撑长页面，沙也不落进相邻区块；横向不裁，沙可以散出内容列。只处理与画布（含下方散开余量）相交的行。滚动惯性只拖文字和边缘的沙，卡片底色的沙不跟着下坠。行越过成形线还没归位时，越过得越远归位越快。
+4. **区块结束**：底边还在视口外时，成形线停在 70%。底边进入视口之后才往下推，再滚过「70% 线到视口底」的一半，这一段才全部成形。近期文章、文章、作品各自算，不互相等。整页接近页脚时同样下推，滚到页脚时也不会剩沙。
 
 | 参数 | 值 |
 |------|-----|
-| Scroll spring | `stiffness: 38, damping: 26, mass: 1.4, restDelta: 0.0008` |
-| 卡片 Y | `18px → -26px`（随滚动） |
-| 内容区 padding-top | `pt-[var(--site-header-height)]` |
+| point / band | 0.7 / 380px |
+| density / size | 2px / 1.25px |
+| spread / gravity / swirl | 200px / 0.35 / 60px |
+| stagger / fade | 0.7 / 0.85 |
+| settle / smoothing | 1.1s / 0.5s |
 
-手机：**禁用** sticky 视差，使用静态 Hero（避免顶底露缝）。
+卡片底是大块纯色，和区块底色对调，散开后才看得清卡片。纯色区域大约留七成沙粒，位移约为文字的 0.14 倍，所以卡片之间的空隙还在，沙也不会沉成一堆；文字和边缘仍用上面的 spread。一行归位时底色沙粒补全，再交还给 DOM。
+
+降级：减少动效或无 WebGL2 时不挂引擎、不加遮罩，就是普通 DOM。
+
+### 9.6 Hero 与正文的衔接
+
+- 首页只有两种底色，交替使用：Hero、文章是 `bg-background`（纸色）；近期文章、作品是 `bg-foreground`（墨色）。暗色模式这两个变量对调，四段跟着反过来。
+- Hero 粒子滚动时向下坠落；正文顶部几行在首屏就处于半散开状态，沙粒漂进 Hero 下沿。
+
+### 9.7 首页下层（文章 / 作品）
+
+文件：`components/home/home-shelf.tsx`。放在近期文章下面。底色写在 `<section>` 上，`ParticleScroll` 只包里面的文字和分行，所以底色和近期文章一样始终在，不会等沙成形才出现。两段成形线和近期文章相同。满宽破出 `main` 的水平留白（与 Hero 同一套 `left-1/2 w-screen -translate-x-1/2`）。底部 `-mb-16 sm:-mb-20` 抵消 Footer 的上外边距，避免夹出一条页面底色。接近页脚时随页尾成形线一起还原。
+
+| 块 | 锚点 | 底色 | 内容 |
+|----|------|------|------|
+| 文章 | `#articles` | `bg-background` | `min-h-svh`。左栏标题 + 引文（曹丕《典论·论文》），右栏三张竖向卡片，均分高度。桌面端第一张卡片顶与引文对齐（标题单独一行，引文和卡片同一行，都留 `mt-8`）。卡片 `bg-article-card`：浅色 `#333333`（暖调弥散阴影，文字 `#f8f4ee`），暗色 `#f8f4ee`（文字 `#252525`）。左上序号和栏名，右上书签与「进入」同色（亮 `#f8f4ee`、暗 `#252525`，描边会进沙），底栏是篇数（没有文章时写「暂无文章」）和直角的「进入 →」。悬停不改卡片底色，按钮用 `color-mix` 在 250ms 贝塞尔下变色；底边过了成形线（`data-particle-reveal`）之后才上移 4px，还跨在线上时不动。完整成形后再悬停，引文下方以和近期文章标签、字数相同的淡入（`mt-8`，`text-sm`，0.28s）展示该板块篇数；未成形时不出现。列比与近期文章相同。链到 `/ai`、`/ops`、`/notes` |
+| 作品 | `#works` | `bg-foreground` | 桌面端至少一屏高（`min-h-svh`）。左栏是名字和摘要，贴着顶部，条目之间没有分隔线；悬停整行时名称和摘要一起轻微下压，没有下划线。右栏只有产品截图，没有卡片、标题和 more。亮色、暗色各一张（`siteConfig.works[].image.light`、`image.dark`），随主题切换。桌面端图片靠右，宽度约为右列的 78%，画幅 4:3，比原先略窄、略高，顶边略高于区块高度的 1/3，下方留空，右缘仍与文章区卡片对齐，点图片去 `moreHref`（`/products/[slug]` 或站外链接）。悬停左栏某一条，且图片底边已经过了成形线时，右栏才按指针做 3D 倾斜；还在沙里时不倾斜、也不换图片。截图按画面画进沙，成形线切过时跟着化开。手机端不撑满一屏：上下排，图片跟在列表下面，与文字同宽、左对齐。moreHref 是 `/products/[slug]` 时才生成详情页，站外链接不生成；详情页正文还没做。 |
+
+和上面交替：文章接 Hero 的纸色，作品接近期文章的墨色。区块底色只用这两种。文章卡片浅色 `#333333`、暗色 `#f8f4ee`。暗色近期文章右栏悬停是 `#252525`。首页页脚跟上方作品块相反：亮色 `#f8f4ee`、暗色 `#252525`。悬停只在卡片完整成形后上移 4px，桌面端第一张卡片顶与引文对齐。锚点用 `SITE_HEADER_OFFSET.anchorScrollMargin`。
 
 ---
 
 ## 10. 文章列表模式（共享）
 
-用于：首页近期博文、分类页列表、归档列表。
+用于：首页近期文章、分类页列表、归档列表。
 
 ### 10.1 行结构
 
@@ -558,9 +597,9 @@ li.border-b.border-foreground/15.last:border-b-0
 
 ### 10.4 首页特有
 
-- 展示 10 篇（`DISPLAY_COUNT`）
-- 左栏引文 + `PostMeta`（标签 `·` 分隔 + 字数）
-- 表头：`text-[0.6875rem] tracking-[0.14em] uppercase text-muted-foreground`
+- 展示 10 篇（`DISPLAY_COUNT`）。右栏悬停 `--recent-row`：亮色纸色，暗色 `#252525`。行高不变。标题用 `scale-110`、`origin-bottom-left` 放大，不占额外高度。日期只在 active 时 `translate-x-2`（8px）向右，`transition-[translate,color] duration-300`，`motion-reduce:translate-none` 时不位移。摘要在左栏 `PostMeta`，不插进右栏，避免把成形线附近的下一行顶进沙里。底边过了成形线（`data-particle-reveal`）才进入悬停；还在沙里时不改变这一行。线滚过、指针已经在上面时再补上悬停
+- 左栏引文 + `PostMeta`（标签 `·` 分隔 + 字数 + 摘要）
+- 表头：`text-[0.6875rem] tracking-[0.14em] uppercase text-muted-foreground`。只在 `md` 及以上显示；手机不放「日期 / 标题」行。标题 `#recent-posts-heading` 用 `SITE_HEADER_OFFSET.anchorScrollMargin`。日期列手机 `4.75rem`、`gap-x-3`、行 `py-5`。
 
 ### 10.5 分类页特有
 
@@ -821,7 +860,7 @@ Focus：`focus-visible:ring-2 focus-visible:ring-ring/30`。
 
 ### 16.2 命令面板
 
-- 唤起：`Ctrl+K` / `⌘K`；或「更多 → 搜索」
+- 唤起：`Ctrl+K` / `⌘K`；或顶栏搜索按钮
 - 对话框：`sm:max-w-xl`
 - 占位符：`支持 Ctrl+K / ⌘K 唤醒，输入关键词搜索标题/内容…`
 - 结果上限 8 条；`title` boost ×3，`keywords` boost ×2
@@ -856,7 +895,8 @@ Focus：`focus-visible:ring-2 focus-visible:ring-ring/30`。
 
 - Motion：`useReducedMotion()` → 跳过 initial/exit 或设 `false`
 - CSS：`motion-reduce:transition-none`、`motion-safe:*` 前缀
-- Hero：减少动效时禁用视差分支
+- Hero：减少动效时粒子直接成形、静态渲染一帧，文字不做入场动画
+- Particle Scroll：减少动效时不启用，正文为普通 DOM
 
 ---
 
@@ -876,7 +916,7 @@ Focus：`focus-visible:ring-2 focus-visible:ring-ring/30`。
 | 导航 | `nav[aria-label="主导航"]` |
 | 目录 | `nav[aria-label="文章目录"]`；当前项 `aria-current="location"` |
 | 主题按钮 | `aria-label` 随模式切换中英文描述 |
-| 更多 | `aria-expanded`、`aria-haspopup="menu"`；菜单项 `role="menuitem"` |
+| 搜索 / 访问趋势 | 无边框图标按钮，`aria-label` 为「搜索」「访问趋势」 |
 | 装饰图 | `alt=""` + `aria-hidden` 或 `role="img" aria-hidden` |
 | 触屏目标 | 关键按钮 `min-h-11`；`touch-manipulation` |
 | 安全区 | Footer `pb-[env(safe-area-inset-bottom)]`；FAB/抽屉适配 `safe-area-inset-*` |
@@ -911,7 +951,7 @@ MDX 管道：`remark-gfm` → `rehypeNormalizeCodeLanguage` → `rehype-pretty-c
 app/           路由与 API
 components/
   header/      顶栏（Server 壳 + Client 岛）
-  footer/      页脚（Server）
+  footer/      页脚（Server）；footer-switch 按路径选择首页或内页
   home/        首页区块
   blog/        阅读体验（TOC、代码、MDX 组件）
   topic/       分类页
@@ -944,7 +984,7 @@ lib/
 - 默认 Server Component；仅当需要 hooks / 事件 / 浏览器 API 时加 `"use client"`
 - 跨页偏移、prose 类名放 `lib/`，不散落 magic number
 - 列表行样式改一处时，**同步检查**首页、分类、归档三处
-- 动态重组件：`next/dynamic` + `{ ssr: false }`（分析抽屉）
+- 动态重组件：`next/dynamic` + `{ ssr: false }`（访问趋势面板）
 
 ### 21.4 UI 库
 
@@ -1039,64 +1079,57 @@ Access-Control-Allow-Origin: *
 ## 23. 访问趋势图表
 
 文件：`components/header/header-analytics-drawer.tsx`  
-入口：Header → **更多** → **访问趋势**（`header-more-menu.tsx` 内 `dynamic()` 懒加载，无 SSR）。
+入口：顶栏访问趋势按钮（`header-analytics-button.tsx` 内 `dynamic()` 懒加载，无 SSR）。
 
 数据：`GET /api/analytics/site-trends`（近 14 日 PV / UV；依赖 Supabase，未配置时返回 `ok: false`）。
 
 ### 23.1 信息架构
 
 ```text
-HeaderMoreMenu
-  └── HeaderAnalyticsDrawer (bottom Drawer)
-        ├── DrawerHeader：标题 + 副标题 + 图例
-        ├── ChartPanel：折线图 / 加载 / 错误
-        └── DrawerFooter：关闭按钮
+HeaderAnalyticsButton
+  └── HeaderAnalyticsDrawer (底部 Drawer，vaul snap points)
+        ├── 把手
+        ├── 标题 + 副标题
+        ├── ChartLegend
+        └── ChartPanel：折线图 / 加载 / 错误（中间弹性高度）
 ```
 
-### 23.2 抽屉外壳（Bottom Sheet）
+### 23.2 面板外壳
+
+从底部拉起的抽屉，不改 `components/ui/drawer.tsx`（目录抽屉还在用它）。直接用 `vaul`：字符串吸附点会被 `parseInt` 读成像素，所以两档都在运行时换成 px。紧凑档约 `31rem`，并且比全高档至少矮 48px。全高档是 `100dvh` 减去 `--site-header-height`，顶边贴着顶栏下沿，不盖住顶栏。打开时停在紧凑档，向上拖到全高档，图表区跟着变高。宽度贴底铺开，左右各留 `0.75rem`（`right-3 left-3`）。
+
+外层 `Drawer.Content` 是给 vaul 做位移的透明壳（`h-dvh`，无底色、无阴影）。圆角、边框、底色和阴影只写在内层面板上。外层若带 `bg-popover`，方盒会填进圆角缺口，阴影也变成直角。
 
 | 属性 | 类名 / 值 |
 |------|-----------|
-| 方向 | `direction="bottom"`（Vaul Drawer） |
-| 最大高度 | `max-h-[min(92svh,640px)]` |
-| 外层 | `max-w-6xl mx-auto`，`bg-transparent`，`before:hidden`（去掉默认把手层） |
-| 内面板 | `rounded-t-2xl`，`border border-b-0 border-border/70` |
-| 表面 | `bg-background/95 backdrop-blur-xl supports-backdrop-filter:bg-background/88` |
-| 顶阴影 | `shadow-[0_-12px_48px_-16px_rgba(0,0,0,0.28)]` |
-| 底安全区 | `pb-[env(safe-area-inset-bottom)]` |
+| 组件 | `vaul` 的 `Drawer.Root` / `Overlay` / `Content` / `Handle` |
+| 吸附 | `[peekPx, expandedPx]`，`fadeFromIndex={1}`（到全高遮罩才显现） |
+| 宽度 | `right-3 left-3`，贴底全宽 |
+| 表面 | 内层 `bg-popover`，`rounded-t-3xl`，`border-border`，`shadow-lg`，`overflow-hidden` |
+| 遮罩 | `bg-foreground/15`；紧凑档由 vaul 把透明度收到 0，仍可点击 |
+| 减少动效 | `motion-reduce:animate-none` |
 
 ### 23.3 标题区
 
 ```text
-DrawerTitle: text-base font-semibold tracking-tight → 「全站访问趋势」
-副标题:      text-xs text-muted-foreground → 「近 14 日 PV / UV」
-分隔:        border-b border-border/50
-内边距:      px-5 pb-4 pt-2
+Drawer.Title: text-sm font-semibold tracking-tight text-center → 「全站访问趋势」
+副标题:       text-xs text-muted-foreground text-center → 「近 14 日 PV / UV。向上拖可放大。」
 ```
 
 **图例**（`ChartLegend`，非 Recharts 内置 legend）：
 
 | 系列 | 色块 | 数据键 |
 |------|------|--------|
-| PV | `size-2 rounded-full bg-foreground` | `pv` |
-| UV | `size-2 rounded-full bg-muted-foreground` | `uv` |
+| PV | `size-1.5 rounded-full bg-foreground` | `pv` |
+| UV | `size-1.5 rounded-full bg-muted-foreground` | `uv` |
 
-图例文字：`text-xs text-muted-foreground`，`gap-4`。
+图例文字：`text-[11px] text-muted-foreground`，`gap-3`。
 
 ### 23.4 图表区 `ChartPanel`
 
-容器配方（与代码块顶栏类似）：
-
 ```text
-rounded-xl border border-border/60 bg-muted/25 dark:bg-muted/15
-px-2 py-2（外层内容区 px-4 py-3 sm:px-5 sm:py-4）
-```
-
-**高度**（响应式 clamp，避免小屏顶满屏）：
-
-```text
-h-[clamp(9rem,calc(100svh-12rem),16.25rem)] max-h-[45svh] min-h-[9rem]
-sm:h-[clamp(10rem,calc(100svh-11rem),17.5rem)] sm:max-h-[50svh]
+rounded-2xl bg-muted overflow-hidden
+图表：aspect-auto h-full min-h-36 w-full，占标题以下的剩余高度，底部留 `pb-4`
 ```
 
 ### 23.5 折线图规格（Recharts + shadcn Chart）
@@ -1129,43 +1162,31 @@ uv: { label: "UV", color: "var(--muted-foreground)" }
 | `ok: false` 其他 | 「趋势数据暂时无法加载，请稍后重试。」 |
 | `ok: true` | 渲染 `LineChart` |
 
-打开抽屉时才 `fetch`；关闭不预取；`open` 变化时取消进行中的请求。
+打开面板时才 `fetch`；关闭不预取；`open` 变化时取消进行中的请求。
 
-### 23.7 页脚操作
+### 23.7 关闭
 
-```text
-DrawerFooter: flex-row justify-end border-t border-border/50 px-4 py-3 sm:px-5
-关闭按钮: Button variant=outline size=sm min-h-10 px-4
-```
+没有关闭按钮。点抽屉以外的区域（含左右留白和遮罩）会关掉：遮罩自己接 `onClick`，因为 vaul 补丁把 Radix Dialog 设成了非模态，点外面不会自动关。按 Esc，或从紧凑档向下拖，也会关闭。
 
 ### 23.8 结构示意图
 
 ```text
-                    viewport top
-                         │
-    ┌────────────────────┴────────────────────┐
-    │  （半透明遮罩，Vaul 默认）                  │
-    │                                           │
-    │   ┌─────────────────────────────────┐     │
-    │   │ 全站访问趋势          [图例 PV UV] │     │  ← DrawerHeader
-    │   │ 近 14 日 PV / UV                  │     │
-    │   ├─────────────────────────────────┤     │
-    │   │ ┌─────────────────────────────┐ │     │
-    │   │ │     ╱‾‾╲    PV (foreground)│ │     │  ← ChartPanel
-    │   │ │    ╱    ╲___               │ │     │
-    │   │ │   ╱  UV (muted)            │ │     │
-    │   │ └─────────────────────────────┘ │     │
-    │   ├─────────────────────────────────┤     │
-    │   │                        [ 关闭 ] │     │  ← DrawerFooter
-    │   └─────────────────────────────────┘     │
-    └───────────────────────────────────────────┘
-                    safe-area bottom
+              viewport
+   ┌──────────────────────────┐
+   │         ─────            │  ← 把手，顶角 rounded-t-3xl
+   │       全站访问趋势        │  ← 标题和副标题居中；紧凑档约 31rem，左右各留 0.75rem
+   │    近 14 日 PV / UV       │
+   │ PV · UV                   │
+   │ ┌──────────────────────┐ │
+   │ │       折线图          │ │  ← 剩余高度；拖到全高后变长
+   │ └──────────────────────┘ │
+   └──────────────────────────┘
 ```
 
 ### 23.9 改图表时的检查清单
 
 - [ ] 浅色 / 深色下 PV、UV 线与网格可区分
-- [ ] 横屏手机图表高度未超出 `max-h-[45svh]`
+- [ ] 打开停在紧凑档；向上拖到顶栏下沿，图表变高；贴底全宽，左右各留 0.75rem；顶角是圆角，阴影跟着圆角走
 - [ ] 未配置 Supabase 时文案友好、不抛客户端异常
 - [ ] 图例色块与 `chartConfig` 一致
 - [ ] 懒加载包体积：仅「访问趋势」点击后加载 Recharts 相关 chunk
@@ -1281,7 +1302,7 @@ aria-hidden
 
 | 层 | z-index | 说明 |
 |----|---------|------|
-| 打赏弹层 | `z-50` | 与 Header、更多菜单同级 |
+| 打赏弹层 | `z-50` | 与 Header 同级 |
 | 侧栏 TOC sticky | `z-30` | 低于打赏弹层 |
 | 移动 TOC FAB | `z-40` | 不在此功能路径 |
 
@@ -1315,8 +1336,7 @@ aria-hidden
 - [ ] `lib/site-header-offset.ts` 注释所列文件
 - [ ] 首页 Hero 顶部 / 底部无露缝（**手机 + 桌面**）
 - [ ] 博文 `scroll-margin`、TOC sticky、404 高度
-- [ ] 「更多」菜单右缘与 nav `px-2.5 sm:px-5` 对齐
-- [ ] 导航项与主题切换 **等距**（`gap-x-3 sm:gap-x-5`）
+- [ ] 搜索在「文章」前；搜索、导航项、访问趋势、主题切换 **等距**（`gap-x-3 max-[375px]:gap-x-2.5 sm:gap-x-5`）
 
 ### 25.2 列表页
 
@@ -1342,7 +1362,7 @@ aria-hidden
 
 - [ ] `public/giscus/` 双主题与 `globals.css` 同步
 - [ ] 评论区切换明暗模式无 iframe 闪白
-- [ ] 访问趋势抽屉：未配置 / 加载 / 成功三态 UI 正常
+- [ ] 访问趋势面板：未配置 / 加载 / 成功三态 UI 正常
 - [ ] 图表 PV/UV 线在深浅色下可辨
 - [ ] 打赏 QR 替换后比例与边框正常；hover 桥接区不丢焦点
 
@@ -1358,7 +1378,6 @@ aria-hidden
 
 - Google Analytics ID 写于 `layout.tsx`
 - Agentation 仅 `development`
-- Footer 社交链接占位（`SOCIAL_LINKS_NAVIGABLE`）
 - `featured` frontmatter 未接入 UI
 - CDN 域 `cdn.cnlang.net` 于 `next.config.mjs` 白名单
 
@@ -1372,12 +1391,13 @@ aria-hidden
 | Header 偏移 | `lib/site-header-offset.ts` |
 | 导航 | `components/header/header-nav.tsx` |
 | 列表交互 | `components/home/home-recent-posts.tsx` |
+| 首页下层 | `components/home/home-shelf.tsx` |
 | 正文排版 | `lib/blog-article-prose.ts` |
 | 打赏弹层 | `components/blog/article-toc-sidebar-actions.tsx` |
 | TOC 目录 | `components/blog/article-toc-fumadocs.tsx` |
 | Giscus | `components/comments.tsx`、`public/giscus/*.css` |
 | 访问趋势 | `components/header/header-analytics-drawer.tsx` |
-| Hero | `components/home/home-hero.tsx` |
+| Hero | `components/home/home-hero.tsx`、`components/home/hero-particles.tsx`、`components/home/particle-scroll.tsx` |
 | 按钮 | `components/ui/button.tsx` |
 
 ---

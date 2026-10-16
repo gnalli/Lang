@@ -28,14 +28,11 @@ export const siteConfig = {
     },
     social: {
         github: {
-            url: 'https://github.com/gnalli',
+            url: 'https://github.com/iferrnil/',
             username: 'gnalli',
         },
         twitter: {
-            url: 'https://x.com',
-        },
-        youtube: {
-            url: 'https://www.youtube.com',
+            url: 'https://x.com/0xlang_AI',
         },
     },
     /** 侧边栏打赏弹层（填入收款码图片路径后替换占位符） */
@@ -46,6 +43,23 @@ export const siteConfig = {
         /** 支付宝收款码，例如 `/images/donate-alipay.png` */
         alipayImage: '/zfb.jpg',
     },
+    /**
+     * 首页「作品」。改这里即可，不必发新文章。
+     * moreHref 自己指定：站内 `/products/slug` 会生成详情页，站外链接只跳转、不生成页面。
+     * image.light / image.dark 各一张，随主题切换。
+     */
+    works: [
+        {
+            name: "AI News Radar",
+            summary: "自托管实时 AI 资讯雷达",
+            href: 'https://github.com/iferrnil/ai-news-radar',
+            moreHref: 'https://github.com/iferrnil/ai-news-radar',
+            image: {
+                light: '/images/works/ai-rader-light.png',
+                dark: '/images/works/ai-rader-dark.png',
+            },
+        },
+    ],
     seo: {
         metadataBase: new URL('https://www.cnlang.net/'),
         alternates: {

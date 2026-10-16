@@ -11,11 +11,13 @@ export function PostListInlineSummary({
   active,
   reduceMotion,
   className,
+  activeClassName = "text-primary-foreground/80",
 }: {
   summary?: string | null
   active: boolean
   reduceMotion: boolean | null
   className?: string
+  activeClassName?: string
 }) {
   const text = summary?.trim()
   if (!text) return null
@@ -40,7 +42,10 @@ export function PostListInlineSummary({
               animate={{ opacity: 1, height: "auto", marginTop: 12 }}
               exit={reduceMotion ? undefined : { opacity: 0, height: 0, marginTop: 0 }}
               transition={{ duration: 0.32, ease: easeOut }}
-              className="overflow-hidden text-sm leading-relaxed text-primary-foreground/80"
+              className={cn(
+                "overflow-hidden text-sm leading-relaxed",
+                activeClassName,
+              )}
             >
               {text}
             </motion.p>
