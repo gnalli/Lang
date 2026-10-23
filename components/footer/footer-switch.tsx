@@ -12,5 +12,5 @@ export function FooterSwitch({
   page: ReactNode
 }) {
   const pathname = usePathname()
-  return pathname === "/" ? home : page
+  return pathname === "/" || pathname === "" ? home : page;
 }
