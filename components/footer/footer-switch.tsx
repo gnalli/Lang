@@ -12,5 +12,6 @@ export function FooterSwitch({
   page: ReactNode
 }) {
   const pathname = usePathname()
-  return pathname === "/" || pathname === "" ? home : page;
+  console.log("当前的 pathname 实际上是:", pathname) // 看看到底打印了啥
+  return pathname === "/" ? home : page;
 }
