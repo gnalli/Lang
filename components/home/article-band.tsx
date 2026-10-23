@@ -112,12 +112,7 @@ export function ArticleBand({ sections }: { sections: HomeSectionCard[] }) {
                   aria-hidden
                 />
               </div>
-              <div className="mt-4 flex items-center justify-end border-t border-article-card-foreground/15 pt-3 sm:mt-6 sm:pt-4">
-                <span className="article-enter inline-flex shrink-0 items-center bg-article-enter px-3 py-1 text-xs text-article-enter-foreground transition-opacity hover:opacity-80 cursor-pointer">
-                  进入 →
-                </span>
-              </div>
-              {/* <div className="mt-4 flex items-center justify-end gap-4 border-t border-article-card-foreground/15 pt-3 sm:mt-6 sm:pt-4">
+              <div className="mt-4 flex items-center justify-between gap-4 border-t border-article-card-foreground/15 pt-3 sm:mt-6 sm:pt-4">
                 <p className="text-sm text-article-card-foreground/55">
                   {section.count > 0 ? `${section.count} 篇` : "暂无文章"}
                   <span className="ml-1.5" aria-hidden>
@@ -127,7 +122,7 @@ export function ArticleBand({ sections }: { sections: HomeSectionCard[] }) {
                 <span className="article-enter inline-flex shrink-0 items-center bg-article-enter px-3 py-1 text-xs text-article-enter-foreground">
                   进入 →
                 </span>
-              </div> */}
+              </div>
             </Link>
           </li>
         ))}

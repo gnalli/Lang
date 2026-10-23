@@ -24,7 +24,7 @@
 
 ## 框架约定
 
-- 默认 Server Component。只有 state、事件或浏览器 API 才加 `"use client"`，并收成叶子组件。Header 的 `index.tsx`、`header-nav.tsx` 和页脚是 Server Component；`footer-switch.tsx` 按路径选择首页或内页页脚。`header-surface.tsx`（滚动状态，以 children 包住服务端导航）、搜索、访问趋势、主题是 Client Component。
+- 默认 Server Component。只有 state、事件或浏览器 API 才加 `"use client"`，并收成叶子组件。Header 的 `index.tsx`、`header-nav.tsx` 和页脚是 Server Component；`app/(home)/layout.tsx` 与 `app/(pages)/layout.tsx` 分别渲染首页和内页页脚。`header-surface.tsx`（滚动状态，以 children 包住服务端导航）、搜索、访问趋势、主题是 Client Component。
 - `params` / `searchParams` 是 Promise，使用前 `await`。
 - `export const revalidate = 120` 必须是字面量，不能引用常量。
 - 颜色用语义令牌（`bg-background`、`text-muted-foreground`、`border-border`）。不要新写 `bg-zinc-500` 或手写 `dark:` 颜色。已有例外记在 `DESIGN.md`（进度条、Tweet）。

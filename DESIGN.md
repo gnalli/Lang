@@ -441,7 +441,7 @@ footer.mt-16.sm:mt-20
               └── lg:grid-cols-[1fr_1fr] gap-10 lg:gap-12 xl:gap-16
 ```
 
-根布局用 `FooterSwitch` 按路径选择：`/` 渲染首页页脚，其它路径渲染带 `data-footer="page"` 的同一份页脚。页脚本体仍是 Server Component。
+根布局共享顶栏；`app/(home)/layout.tsx` 输出首页页脚，`app/(pages)/layout.tsx` 输出带 `data-footer="page"` 的内页页脚。两个路由组都保留相同的 `<main>` 容器。静态首屏直接输出正确的页脚，客户端导航随路由组切换。
 
 首页页脚底色跟正上方内容块相反。现在上方是作品：作品用 `#252525` 时页脚用 `#f8f4ee`，作品用 `#f8f4ee` 时页脚用 `#252525`。实现上作品是 `bg-foreground`，首页 `--footer` 取 `var(--background)`。作品块改色时，页脚跟着对调。
 
@@ -525,7 +525,7 @@ section: relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 overflow-hidd
 
 ### 9.5 Particle Scroll（正文沙化）
 
-首页有三段 `<ParticleScroll>`：`app/page.tsx` 包住近期文章，`home-shelf.tsx` 里文章和作品各一段。视口 70% 处是成形线：线以上是真实 DOM（可点击、可 hover），线以下化成沙，向上滚动时逐行、逐粒归位。沙粒颜色来自文字和卡片，区块底色本身不进遮罩。
+首页有三段 `<ParticleScroll>`：`app/(home)/page.tsx` 包住近期文章，`home-shelf.tsx` 里文章和作品各一段。视口 70% 处是成形线：线以上是真实 DOM（可点击、可 hover），线以下化成沙，向上滚动时逐行、逐粒归位。沙粒颜色来自文字和卡片，区块底色本身不进遮罩。
 
 着色器参考 canvas-ui 的 `particle-scroll-react`。那版依赖实验性 HTML-in-Canvas API（只有开了实验开关的 Chrome 可用），并要求内容放进独立滚动容器，所以没有直接安装。这里改成：
 
@@ -557,7 +557,7 @@ section: relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 overflow-hidd
 
 | 块 | 锚点 | 底色 | 内容 |
 |----|------|------|------|
-| 文章 | `#articles` | `bg-background` | `min-h-svh`。左栏标题 + 引文（曹丕《典论·论文》），右栏三张竖向卡片，均分高度。桌面端第一张卡片顶与引文对齐（标题单独一行，引文和卡片同一行，都留 `mt-8`）。卡片 `bg-article-card`：浅色 `#333333`（暖调弥散阴影，文字 `#f8f4ee`），暗色 `#f8f4ee`（文字 `#252525`）。左上序号和栏名，右上书签与「进入」同色（亮 `#f8f4ee`、暗 `#252525`，描边会进沙），底栏是篇数（没有文章时写「暂无文章」）和直角的「进入 →」。悬停不改卡片底色，按钮用 `color-mix` 在 250ms 贝塞尔下变色；底边过了成形线（`data-particle-reveal`）之后才上移 4px，还跨在线上时不动。完整成形后再悬停，引文下方以和近期文章标签、字数相同的淡入（`mt-8`，`text-sm`，0.28s）展示该板块篇数；未成形时不出现。列比与近期文章相同。链到 `/ai`、`/ops`、`/notes` |
+| 文章 | `#articles` | `bg-background` | `min-h-svh`。左栏标题 + 引文（曹丕《典论·论文》），右栏三张竖向卡片，均分高度。桌面端第一张卡片顶与引文对齐（标题单独一行，引文和卡片同一行，都留 `mt-8`）。卡片 `bg-article-card`：浅色 `#333333`（暖调弥散阴影，文字 `#f8f4ee`），暗色 `#f8f4ee`（文字 `#252525`）。左上序号和栏名，右上书签与「进入」同色（亮 `#f8f4ee`、暗 `#252525`，描边会进沙），底栏以分隔线隔开，右侧是直角的「进入 →」。悬停不改卡片底色，按钮用 `color-mix` 在 250ms 贝塞尔下变色；底边过了成形线（`data-particle-reveal`）之后才上移 4px，还跨在线上时不动。完整成形后再悬停，引文下方以和近期文章标签、字数相同的淡入（`mt-8`，`text-sm`，0.28s）展示该板块篇数；未成形时不出现。列比与近期文章相同。链到 `/ai`、`/ops`、`/notes` |
 | 作品 | `#works` | `bg-foreground` | 桌面端至少一屏高（`min-h-svh`）。左栏是名字和摘要，贴着顶部，条目之间没有分隔线；悬停整行时名称和摘要一起轻微下压，没有下划线。右栏只有产品截图，没有卡片、标题和 more。亮色、暗色各一张（`siteConfig.works[].image.light`、`image.dark`），随主题切换。桌面端图片靠右，宽度约为右列的 78%，画幅 4:3，比原先略窄、略高，顶边略高于区块高度的 1/3，下方留空，右缘仍与文章区卡片对齐，点图片去 `moreHref`（`/products/[slug]` 或站外链接）。悬停左栏某一条，且图片底边已经过了成形线时，右栏才按指针做 3D 倾斜；还在沙里时不倾斜、也不换图片。截图按画面画进沙，成形线切过时跟着化开。手机端不撑满一屏：上下排，图片跟在列表下面，与文字同宽、左对齐。moreHref 是 `/products/[slug]` 时才生成详情页，站外链接不生成；详情页正文还没做。 |
 
 和上面交替：文章接 Hero 的纸色，作品接近期文章的墨色。区块底色只用这两种。文章卡片浅色 `#333333`、暗色 `#f8f4ee`。暗色近期文章右栏悬停是 `#252525`。首页页脚跟上方作品块相反：亮色 `#f8f4ee`、暗色 `#252525`。悬停只在卡片完整成形后上移 4px，桌面端第一张卡片顶与引文对齐。锚点用 `SITE_HEADER_OFFSET.anchorScrollMargin`。
@@ -617,7 +617,7 @@ li.border-b.border-foreground/15.last:border-b-0
 
 ## 11. 博文阅读页
 
-路由：`app/blog/[slug]/page.tsx`
+路由：`app/(pages)/blog/[slug]/page.tsx`
 
 ### 11.1 页面结构
 
@@ -948,10 +948,10 @@ MDX 管道：`remark-gfm` → `rehypeNormalizeCodeLanguage` → `rehype-pretty-c
 ### 21.1 目录
 
 ```text
-app/           路由与 API
+app/           路由与 API；(home) 与 (pages) 各自提供对应页脚的布局
 components/
   header/      顶栏（Server 壳 + Client 岛）
-  footer/      页脚（Server）；footer-switch 按路径选择首页或内页
+  footer/      页脚（Server）；首页与内页由路由组布局分别渲染
   home/        首页区块
   blog/        阅读体验（TOC、代码、MDX 组件）
   topic/       分类页
@@ -997,7 +997,7 @@ lib/
 ## 22. Giscus 评论区
 
 文件：`components/comments.tsx`  
-挂载：博文页 MDX 正文与上下篇导航之后，`mt-12` 容器内（`app/blog/[slug]/page.tsx`）。
+挂载：博文页 MDX 正文与上下篇导航之后，`mt-12` 容器内（`app/(pages)/blog/[slug]/page.tsx`）。
 
 ### 22.1 职责与数据源
 
