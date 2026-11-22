@@ -1,7 +1,7 @@
 "use client"
 
 import Giscus from "@giscus/react"
-import { useEffect, useMemo, useSyncExternalStore } from "react"
+import { useMemo, useSyncExternalStore } from "react"
 import { useTheme } from "next-themes"
 
 function useClientMounted() {
@@ -42,31 +42,12 @@ export default function Comments() {
         return giscusThemeUrl(theme, window.location.origin)
     }, [mounted, theme])
 
-    useEffect(() => {
-        if (!giscusTheme) return
-
-        const iframe = document.querySelector<HTMLIFrameElement>("iframe.giscus-frame")
-        if (!iframe?.contentWindow) return
-
-        iframe.contentWindow.postMessage(
-            {
-                giscus: {
-                    setConfig: {
-                        theme: giscusTheme,
-                    },
-                },
-            },
-            "https://giscus.app",
-        )
-    }, [giscusTheme])
-
     if (!giscusTheme) {
         return <div id="comments" className="min-h-48" aria-busy="true" />
     }
 
     return (
         <Giscus
-            key={giscusTheme}
             id="comments"
             repo="gnalli/Lang"
             repoId="R_kgDOR4-pxA"

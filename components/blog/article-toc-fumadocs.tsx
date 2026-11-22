@@ -228,7 +228,7 @@ type FumadocsTocProps = {
     items: TocItem[]
     className?: string
     showHeader?: boolean
-    onItemNavigate?: () => void
+    onItemNavigate?: (id: string) => void
     /** auto：仅随滚动展开当前一级下的子标题；always：始终展示全部 */
     subItemsVisibility?: "auto" | "always"
 }
@@ -370,20 +370,7 @@ export function ArticleTocFumadocs({
                                     onClick={(e) => {
                                         if (!onItemNavigate) return
                                         e.preventDefault()
-                                        const id = item.id
-                                        onItemNavigate()
-                                        window.setTimeout(() => {
-                                            document.getElementById(id)?.scrollIntoView({
-                                                behavior: "smooth",
-                                                block: "start",
-                                            })
-                                            const { pathname, search } = window.location
-                                            window.history.replaceState(
-                                                null,
-                                                "",
-                                                `${pathname}${search}#${id}`,
-                                            )
-                                        }, 120)
+                                        onItemNavigate(item.id)
                                     }}
                                     className={cn(
                                         "relative block py-1.5 text-sm leading-snug",

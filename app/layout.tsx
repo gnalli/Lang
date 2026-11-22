@@ -1,5 +1,5 @@
 import "./globals.css"
-import { lxgwWenkai } from "@/lib/fonts"
+import "./fonts/wenkai/faces.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { siteConfig, siteAuthors } from "@/lib/config"
@@ -30,12 +30,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="zh-CN" suppressHydrationWarning className={lxgwWenkai.variable}>
+    <html lang="zh-CN" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" type="image/x-icon" />
-        <link rel="prefetch" href="/api/search-index" as="fetch" />
+        <link
+          rel="preload"
+          href="/fonts/wenkai/interface.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
       </head>
-      <body className={`${lxgwWenkai.className} min-w-0 bg-background`}>
+      <body className="min-w-0 bg-background">
         {process.env.NODE_ENV === "development" && <Agentation />}
         <ThemeProvider
           attribute="class"
@@ -51,7 +56,9 @@ export default function RootLayout({
             </div>
           </TooltipProvider>
         </ThemeProvider>
-        <GoogleAnalytics gaId="G-GHZR0G837X" />
+        {process.env.NODE_ENV === "production" && (
+          <GoogleAnalytics gaId="G-GHZR0G837X" />
+        )}
       </body>
     </html>
   )

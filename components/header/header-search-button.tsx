@@ -13,14 +13,16 @@ export function HeaderSearch() {
 }
 
 function HeaderSearchButton() {
-  const { openPalette } = useHeaderSearch()
+  const { openPalette, preload } = useHeaderSearch()
 
   return (
     <button
       type="button"
       className={headerIconButtonClass}
       aria-label="搜索"
-      onClick={openPalette}
+      onPointerEnter={(event) => { if (event.pointerType === "mouse") preload() }}
+      onFocus={(event) => { if (event.currentTarget.matches(":focus-visible")) preload() }}
+      onClick={(event) => openPalette(event.currentTarget)}
     >
       <Search className="size-4" strokeWidth={1.75} aria-hidden />
     </button>

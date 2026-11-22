@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { AnimatePresence, motion } from "motion/react"
 import { formatDateList } from "@/lib/format-date"
 import { SITE_HEADER_OFFSET } from "@/lib/site-header-offset"
 import { cn } from "@/lib/utils"
@@ -11,9 +10,8 @@ export type RecentPostItem = {
   slug: string
   title: string
   date: string
+  tags: string[]
   wordCount: number
-  summary?: string | null
-  tags?: string[]
 }
 
 const DISPLAY_COUNT = 10
@@ -21,40 +19,6 @@ const DISPLAY_COUNT = 10
 const KNOWLEDGE_QUOTE = {
   text: "古者因事设教，教即所记；后世因教设学，学即所传。至于史官记其典章政教、综一代之变，垂诸竹帛，则凡事之所见闻、思之所蓄，皆可寓诸文字，以俟来者之求焉。",
   source: "章学诚，《文史通义》",
-}
-
-function PostMeta({ post }: { post: RecentPostItem }) {
-  return (
-    <motion.div
-      key={post.slug}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
-      transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="mt-8 space-y-3"
-    >
-      {post.tags && post.tags.length > 0 ? (
-        <p className="text-sm leading-relaxed text-background/70">
-          {post.tags.map((tag, index) => (
-            <React.Fragment key={tag}>
-              {index > 0 ? (
-                <span className="mx-1.5 text-background/45">·</span>
-              ) : null}
-              <span>{tag}</span>
-            </React.Fragment>
-          ))}
-        </p>
-      ) : null}
-      <p className="text-sm text-background/70">
-        {post.wordCount.toLocaleString("zh-CN")} 字
-      </p>
-      {post.summary?.trim() ? (
-        <p className="hidden text-sm leading-relaxed text-background/70 md:block">
-          {post.summary.trim()}
-        </p>
-      ) : null}
-    </motion.div>
-  )
 }
 
 /** 底边过了成形线才算这一行可以悬停。没有遮罩时（减少动效）整列都可以。 */
@@ -117,8 +81,8 @@ function PostRow({
 export function HomeRecentPosts({ posts }: { posts: RecentPostItem[] }) {
   const items = posts.slice(0, DISPLAY_COUNT)
   const [activeIndex, setActiveIndex] = React.useState<number | null>(null)
+  const activePost = activeIndex === null ? null : items[activeIndex]
   const listRef = React.useRef<HTMLUListElement>(null)
-  const activePost = activeIndex !== null ? items[activeIndex] : null
 
   const activateRow = React.useCallback((row: HTMLElement) => {
     if (!rowPastReveal(row)) {
@@ -130,26 +94,17 @@ export function HomeRecentPosts({ posts }: { posts: RecentPostItem[] }) {
     setActiveIndex(index)
   }, [])
 
+  const syncHover = React.useCallback(() => {
+    const root = listRef.current
+    const row = root?.querySelector<HTMLElement>("a:focus-visible") ?? root?.querySelector<HTMLElement>("a:hover")
+    if (row) activateRow(row)
+    else setActiveIndex(null)
+  }, [activateRow])
+
   React.useEffect(() => {
     const root = listRef.current
     if (!root) return
     let frame = 0
-    const syncHover = () => {
-      const links = root.querySelectorAll<HTMLElement>("a[data-recent-index]")
-      for (const link of links) {
-        const pointing = link.matches(":hover") || link === document.activeElement
-        if (pointing && rowPastReveal(link)) {
-          activateRow(link)
-          return
-        }
-      }
-      setActiveIndex((current) => {
-        if (current === null) return null
-        const link = root.querySelector<HTMLElement>(`a[data-recent-index="${current}"]`)
-        if (!link || !rowPastReveal(link)) return null
-        return current
-      })
-    }
     const schedule = () => {
       if (frame) return
       frame = requestAnimationFrame(() => {
@@ -167,7 +122,7 @@ export function HomeRecentPosts({ posts }: { posts: RecentPostItem[] }) {
       host?.removeEventListener("particlescroll", schedule)
       window.removeEventListener("resize", schedule)
     }
-  }, [activateRow])
+  }, [syncHover])
 
   if (items.length === 0) return null
 
@@ -175,7 +130,6 @@ export function HomeRecentPosts({ posts }: { posts: RecentPostItem[] }) {
     <section
       className="py-8 sm:py-12 md:py-16"
       aria-labelledby="recent-posts-heading"
-      onMouseLeave={() => setActiveIndex(null)}
     >
       <div
         className={cn(
@@ -211,14 +165,18 @@ export function HomeRecentPosts({ posts }: { posts: RecentPostItem[] }) {
               ——{KNOWLEDGE_QUOTE.source}
             </footer>
           </blockquote>
-
-          <AnimatePresence mode="wait">
-            {activePost ? <PostMeta key={activePost.slug} post={activePost} /> : null}
-          </AnimatePresence>
+          <div className="min-h-24 [@media(hover:none)]:min-h-0 md:min-h-0">
+            {activePost && (
+              <div className="space-y-3 pt-8 text-sm leading-relaxed text-background/70">
+                {activePost.tags.length > 0 && <p>{activePost.tags.join(" · ")}</p>}
+                <p>{activePost.wordCount.toLocaleString("zh-CN")} 字</p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="min-w-0 md:col-start-2 md:row-start-2">
-          <ul ref={listRef} role="list" className="md:mt-0">
+          <ul onMouseLeave={syncHover} onBlur={() => queueMicrotask(syncHover)} ref={listRef} role="list" className="md:mt-0">
             {items.map((post, index) => (
               <PostRow
                 key={post.slug}

@@ -31,7 +31,7 @@ function XIcon({ className }: { className?: string }) {
 }
 
 const socialLinkClass =
-  "text-footer-foreground/90 transition-colors hover:text-footer-foreground"
+  "inline-flex items-center justify-center max-sm:size-11 text-footer-foreground/90 transition-colors hover:text-footer-foreground"
 
 function SocialLink({
   href,
@@ -56,7 +56,7 @@ function SocialLink({
 }
 
 const footerLink = cn(
-  "text-sm text-footer-foreground/90 transition-colors hover:text-footer-foreground",
+  "inline-flex items-center max-sm:min-h-11 text-sm text-footer-foreground/90 transition-colors hover:text-footer-foreground",
 )
 
 const footerHeading = "text-[0.6875rem] font-medium tracking-[0.16em] text-footer-foreground/55 uppercase"
@@ -65,8 +65,14 @@ export default function Footer({ variant = "home" }: { variant?: "home" | "page"
   const { github, twitter } = siteConfig.social
 
   return (
-    <footer className="mt-16 sm:mt-20" data-footer={variant === "page" ? "page" : undefined}>
-      <div className="w-full bg-footer pb-[env(safe-area-inset-bottom,0px)] text-footer-foreground">
+    <footer
+      data-footer={variant}
+      className={cn(
+        "text-footer-foreground",
+        variant === "home" ? "bg-footer" : "mt-16 bg-footer sm:mt-20",
+      )}
+    >
+      <div className="w-full pb-[env(safe-area-inset-bottom,0px)]">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12 lg:py-14">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-12 xl:gap-16">
             <div className="space-y-6">
@@ -90,7 +96,7 @@ export default function Footer({ variant = "home" }: { variant?: "home" | "page"
             <div className="grid grid-cols-3 gap-x-3 gap-y-8 sm:gap-6 lg:max-w-lg lg:justify-self-end xl:max-w-xl">
               <div>
                 <p className={footerHeading}>导航</p>
-                <ul className="mt-4 space-y-2.5">
+                <ul className="mt-2 sm:mt-4 sm:space-y-2.5">
                   {SITE_FOOTER_SITEMAP.map((item) => (
                     <li key={item.href}>
                       <Link href={item.href} prefetch={false} className={footerLink}>
@@ -105,7 +111,7 @@ export default function Footer({ variant = "home" }: { variant?: "home" | "page"
                 <p className="text-[0.6875rem] font-medium tracking-[0.16em] text-footer-foreground/55">
                   Feeds
                 </p>
-                <ul className="mt-4 space-y-2.5">
+                <ul className="mt-2 sm:mt-4 sm:space-y-2.5">
                   {SITE_FOOTER_LEGAL.map((item) => (
                     <li key={item.href}>
                       <Link href={item.href} prefetch={false} className={footerLink}>
@@ -118,7 +124,7 @@ export default function Footer({ variant = "home" }: { variant?: "home" | "page"
 
               <div>
                 <p className={footerHeading}>联系</p>
-                <ul className="mt-4 space-y-2.5">
+                <ul className="mt-2 sm:mt-4 sm:space-y-2.5">
                   {SITE_FOOTER_CONTACT.map((item) => (
                     <li key={item.href}>
                       <Link href={item.href} prefetch={false} className={footerLink}>

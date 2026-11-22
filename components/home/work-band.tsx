@@ -1,28 +1,14 @@
 "use client"
 
-import { useLayoutEffect, useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState, useSyncExternalStore } from "react"
+import { useTheme } from "next-themes"
 import Image from "next/image"
 import Link from "next/link"
 import { useReducedMotion } from "motion/react"
 import { siteConfig } from "@/lib/config"
 import { cn } from "@/lib/utils"
 
-/** 底边过了成形线才允许 3D。沙里的卡片必须是平面，倾斜会被栅格化成错位的色块。 */
-function isSettled(el: HTMLElement) {
-  const host = el.closest<HTMLElement>("[data-particle-host]")
-  if (!host) return true
-  const reveal = host.getAttribute("data-particle-reveal")
-  if (reveal == null || reveal === "full") return true
-  const line = host.getBoundingClientRect().top + Number(reveal)
-  return el.getBoundingClientRect().bottom <= line + 0.5
-}
-
-function markSettled(root: HTMLElement) {
-  for (const el of root.querySelectorAll<HTMLElement>("[data-settle-lift]")) {
-    if (isSettled(el)) el.setAttribute("data-settled", "")
-    else el.removeAttribute("data-settled")
-  }
-}
+const subscribeToMount = () => () => {}
 
 function WorkImageLink({
   href,
@@ -57,6 +43,8 @@ function WorkImageLink({
 }
 
 export function WorkBand() {
+  const { resolvedTheme } = useTheme()
+  const mounted = useSyncExternalStore(subscribeToMount, () => true, () => false)
   const works = siteConfig.works
   const reduce = useReducedMotion()
   const rootRef = useRef<HTMLDivElement>(null)
@@ -70,7 +58,7 @@ export function WorkBand() {
   const applyTilt = (clientX: number, clientY: number) => {
     const node = tiltRef.current
     if (!node) return
-    if (reduce || !enteredRef.current || !isSettled(node)) {
+    if (reduce || !enteredRef.current) {
       node.style.transform = "rotateX(0deg) rotateY(0deg)"
       return
     }
@@ -81,9 +69,9 @@ export function WorkBand() {
     node.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`
   }
 
-  const select = (index: number, row: HTMLElement, clientX: number, clientY: number) => {
+  const select = (index: number, clientX: number, clientY: number) => {
     const image = tiltRef.current
-    if (!image || !isSettled(row) || !isSettled(image)) return
+    if (!image) return
     enteredRef.current = true
     setActive(index)
     setEntered(true)
@@ -100,17 +88,10 @@ export function WorkBand() {
   useLayoutEffect(() => {
     const root = rootRef.current
     if (!root) return
-    let frame = 0
     const apply = () => {
-      markSettled(root)
       const tilt = tiltRef.current
       if (!tilt) return
-      const pop = entered && reduce === false && tilt.hasAttribute("data-settled")
-      if (entered && !tilt.hasAttribute("data-settled")) {
-        enteredRef.current = false
-        tiltAngles.current = { x: 0, y: 0 }
-        setEntered(false)
-      }
+      const pop = entered && reduce === false
       if (!pop) tilt.style.transform = "rotateX(0deg) rotateY(0deg)"
       else {
         const { x, y } = tiltAngles.current
@@ -121,21 +102,7 @@ export function WorkBand() {
         el.style.transform = `translateZ(${z}px)`
       }
     }
-    const schedule = () => {
-      if (frame) return
-      frame = requestAnimationFrame(() => {
-        frame = 0
-        apply()
-      })
-    }
-    schedule()
     apply()
-    const host = root.closest<HTMLElement>("[data-particle-host]")
-    host?.addEventListener("particlescroll", schedule)
-    return () => {
-      if (frame) cancelAnimationFrame(frame)
-      host?.removeEventListener("particlescroll", schedule)
-    }
   }, [entered, active, reduce])
 
   const tilt = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -148,7 +115,7 @@ export function WorkBand() {
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 sm:px-6 md:min-h-svh">
       <div
         ref={rootRef}
-        className="grid flex-1 content-start items-start gap-y-8 md:min-h-svh md:content-stretch md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-x-12 lg:gap-x-16 xl:gap-x-20"
+        className="grid flex-1 content-start items-start gap-y-4 md:min-h-svh md:content-stretch md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-x-12 lg:gap-x-16 xl:gap-x-20"
         onMouseMove={tilt}
         onMouseLeave={leave}
         onBlur={(event) => {
@@ -164,10 +131,7 @@ export function WorkBand() {
           >
             作品
           </h2>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-background/70 sm:text-base">
-            做过的网站，和还在做的东西。
-          </p>
-          <ul className="mt-10">
+          <ul className="mt-4 sm:mt-8">
             {works.map((item, index) => {
               const on = entered && active === index
               return (
@@ -176,11 +140,10 @@ export function WorkBand() {
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    data-settle-lift=""
                     onMouseEnter={(event) =>
-                      select(index, event.currentTarget, event.clientX, event.clientY)
+                      select(index, event.clientX, event.clientY)
                     }
-                    onFocus={(event) => select(index, event.currentTarget, 0, 0)}
+                    onFocus={() => select(index, 0, 0)}
                     className="block origin-left py-5 no-underline outline-none transition-transform duration-200 ease-out hover:translate-y-px hover:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-background motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 sm:py-6"
                   >
                     <h3
@@ -207,7 +170,7 @@ export function WorkBand() {
             style={{ perspective: "1000px" }}
             onMouseEnter={(event) => {
               const image = tiltRef.current
-              if (!image || !isSettled(image)) return
+              if (!image) return
               enteredRef.current = true
               setEntered(true)
               applyTilt(event.clientX, event.clientY)
@@ -215,25 +178,19 @@ export function WorkBand() {
           >
             <div
               ref={tiltRef}
-              data-settle-lift=""
               className="relative transition-transform duration-200 ease-linear motion-reduce:transition-none"
               style={{ transformStyle: "preserve-3d" }}
             >
               <WorkImageLink href={work.moreHref} label={`${work.name} 的截图`}>
-                <Image
-                  src={work.image.light}
-                  alt=""
-                  fill
-                  sizes="(min-width: 768px) 40rem, 100vw"
-                  className="object-cover dark:opacity-0"
-                />
-                <Image
-                  src={work.image.dark}
-                  alt=""
-                  fill
-                  sizes="(min-width: 768px) 40rem, 100vw"
-                  className="object-cover opacity-0 dark:opacity-100"
-                />
+                {mounted && (resolvedTheme === "light" || resolvedTheme === "dark") && (
+                  <Image
+                    src={work.image[resolvedTheme]}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1152px) 490px, (min-width: 768px) calc(47vw - 48px), (min-width: 640px) calc(100vw - 48px), calc(100vw - 32px)"
+                    className="object-cover"
+                  />
+                )}
               </WorkImageLink>
             </div>
           </div>

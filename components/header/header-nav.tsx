@@ -11,7 +11,7 @@ export function HeaderNav() {
       className="mx-auto flex h-full w-full max-w-6xl items-center justify-between gap-x-4 px-4 sm:px-6"
       aria-label="主导航"
     >
-      <Link href="/" className="group flex shrink-0 items-center gap-2.5" aria-label="首页">
+      <Link href="/" className="group flex min-h-11 shrink-0 items-center gap-2.5" aria-label="首页">
         <span className="relative size-7 overflow-hidden rounded-md ring-1 ring-border sm:size-8">
           <Image
             src="/avatar-header.png"

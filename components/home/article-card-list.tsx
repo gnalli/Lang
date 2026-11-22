@@ -21,12 +21,9 @@ function syncSettled(root: HTMLElement) {
 export function ArticleCardList({
   className,
   children,
-  onSync,
 }: {
   className?: string
   children: ReactNode
-  /** 成形线刷新之后调用，用来对齐悬停态。 */
-  onSync?: () => void
 }) {
   const ref = useRef<HTMLUListElement>(null)
 
@@ -39,7 +36,6 @@ export function ArticleCardList({
       frame = requestAnimationFrame(() => {
         frame = 0
         syncSettled(root)
-        onSync?.()
       })
     }
 
@@ -52,7 +48,7 @@ export function ArticleCardList({
       host?.removeEventListener("particlescroll", schedule)
       window.removeEventListener("resize", schedule)
     }
-  }, [onSync])
+  }, [])
 
   return (
     <ul ref={ref} className={className}>

@@ -40,6 +40,7 @@ npm run analyze  # 构建并打开 bundle 分析报告（@next/bundle-analyzer�
 | `components/` | UI 与业务组件 |
 | `lib/` | 站点配置、工具函数 |
 | `public/` | 静态资源（图标、收款码、Giscus 主题 CSS 等） |
+| `scripts/` | 字体分片生成脚本（`subset-wenkai.py`） |
 | `content-collections.ts` | 文章集合与 MDX 编译管道 |
 | `data/` | Supabase 等数据库迁移 SQL |
 
@@ -86,7 +87,9 @@ npm run analyze  # 构建并打开 bundle 分析报告（@next/bundle-analyzer�
 - **`donate`**：侧边栏打赏文案与收款码图片路径（如 `/wx.jpg`、`/zfb.jpg`，文件放在 `public/`）
 - **`seo`**：生产域名 `metadataBase`、Open Graph、robots 等
 
-**图标**：`public/favicon.ico`（路径 `/favicon.ico`）；根布局通过 `<link rel="icon">` 引用，避免 `metadata.icons` 与 `metadataBase` 在本地拼错域名。
+**图标**：`app/favicon.ico` 与 `public/apple-icon.png`，由 Next.js Metadata API 统一输出。
+
+**字体**：正文字体（霞鹜文楷 GB2312 子集）按 `unicode-range` 切分为静态 WOFF2 存放在 `public/fonts/wenkai/`，由 `app/fonts/wenkai/faces.css` 加载并预加载首屏分片。新增大量生僻字需重新分片时，在 `npm run build` 后执行 `python3 scripts/subset-wenkai.py`（需 `fonttools` 与 `brotli`）。
 
 **Giscus 主题**：`public/giscus/site-light.css`、`site-dark.css`，与站点暖色 editorial 风格一致；可在 CSS 中隐藏品牌文案等。
 
@@ -109,54 +112,9 @@ npm run analyze  # 构建并打开 bundle 分析报告（@next/bundle-analyzer�
 
 启用博文 PV/UV 与顶栏趋势图前，需在 Supabase 项目中执行迁移脚本。
 
-### 1. 创建 Supabase 项目
-
-在 [Supabase](https://supabase.com/) 控制台新建项目，记下 **Project URL** 与 **service_role** 密钥（Settings → API）。
-
-### 2. 执行迁移 SQL
-
-脚本路径：**`data/supabase_analytics_full_migration.sql`**（幂等，可重复执行）。
-
-任选一种方式：
-
-**Supabase Dashboard（推荐）**
-
-1. 打开项目 → **SQL Editor** → **New query**
-2. 将 `data/supabase_analytics_full_migration.sql` 全文粘贴进编辑器
-3. 点击 **Run** 执行
-
-**Supabase CLI / psql**
-
-```bash
-# 需已安装 supabase CLI 并 link 到项目，或使用数据库连接串
-supabase db execute --file data/supabase_analytics_full_migration.sql
-
-# 或使用 psql（连接串见 Supabase → Settings → Database）
-psql "$DATABASE_URL" -f data/supabase_analytics_full_migration.sql
-```
-
-脚本会创建：
-
-- `page_views` — 浏览明细（`POST /api/analytics/page-view` 写入）
-- `blog_page_view_stats` — 按 slug 聚合 PV/UV 的视图
-- `blog_slug_pv_totals` — slug 累计 PV（排行榜与博文页阅读数）
-
-**安全说明**：仅通过服务端 `SUPABASE_SERVICE_ROLE_KEY` 读写；**切勿**将 service_role 暴露到浏览器或 `NEXT_PUBLIC_*` 变量。
-
-### 3. 配置环境变量
-
-在项目根目录 `.env` 中填入（参见 `.env.example`）：
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
-```
-
-重启开发服务器或重新部署后，博文页会显示阅读数，顶栏访问趋势按钮可查看近 14 日趋势（需 Supabase 有数据）。
-
-### 4. 可选维护
-
-迁移文件末尾含注释示例：历史数据回填累计表、定期清理过旧 `page_views` 明细。按需于 SQL Editor 中手动执行。
+1. 在 [Supabase](https://supabase.com/) 创建项目，获取 **Project URL** 与 **service_role** 密钥（Settings → API）。
+2. 在 Supabase SQL Editor（或 `supabase db execute` / `psql`）中执行幂等迁移脚本 **`data/supabase_analytics_full_migration.sql`**，创建 `page_views` 表与 PV/UV 汇总视图（脚本末尾附历史回填与清理示例）。
+3. 在 `.env` 配置 `NEXT_PUBLIC_SUPABASE_URL` 与 `SUPABASE_SERVICE_ROLE_KEY`（**切勿**加 `NEXT_PUBLIC_` 前缀），重启后即生效。
 
 ## 持续集成
 

@@ -540,7 +540,9 @@ function createEngine(content: HTMLElement, output: HTMLCanvasElement, config: O
   let raf = 0
   let running = false
   let destroyed = false
-  let near = true
+  let near = false
+  let fontsReady = false
+  let capturePending = true
 
   const setMask = (y: number | null) => {
     const next = y === null ? -1 : Math.round(y)
@@ -571,6 +573,10 @@ function createEngine(content: HTMLElement, output: HTMLCanvasElement, config: O
 
   const snapshot = (immediate = false) => {
     if (destroyed) return
+    if (!near || !fontsReady) {
+      capturePending = true
+      return
+    }
     // 悬停和收起那几百毫秒里行高会变。这段时间重拍会把悬停底色拍进沙，也会卡主线程。
     // 换主题必须立刻拍，不能被这把锁挡住，否则线以下还是上一套卡片底色。
     if (!immediate && layoutLocked()) {
@@ -605,6 +611,7 @@ function createEngine(content: HTMLElement, output: HTMLCanvasElement, config: O
       }
       return
     }
+    capturePending = false
     themeCaptureFailed = false
     gl.bindTexture(gl.TEXTURE_2D, contentTex)
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true)
@@ -872,7 +879,8 @@ function createEngine(content: HTMLElement, output: HTMLCanvasElement, config: O
   const intersection = new IntersectionObserver(
     (entries) => {
       near = entries[entries.length - 1]?.isIntersecting ?? true
-      if (near) start()
+      if (near && capturePending) snapshot(true)
+      else if (near) start()
     },
     { rootMargin: `0px 0px ${config.spread + 200}px 0px` },
   )
@@ -881,7 +889,8 @@ function createEngine(content: HTMLElement, output: HTMLCanvasElement, config: O
   syncCanvasSize()
   placeNow()
   document.fonts.ready.then(() => {
-    if (!destroyed) snapshot()
+    fontsReady = true
+    if (!destroyed && near) snapshot(true)
   })
 
   return () => {

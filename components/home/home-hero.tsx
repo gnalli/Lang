@@ -33,7 +33,7 @@ function XIcon({ className }: { className?: string }) {
   )
 }
 
-const iconClass = "text-foreground/60 transition-colors hover:text-foreground"
+const iconClass = "inline-flex items-center justify-center max-sm:size-11 text-foreground/60 transition-colors hover:text-foreground"
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -43,23 +43,27 @@ const fadeUp = {
 function HeroText({ reduceMotion }: { reduceMotion: boolean }) {
   const github = siteConfig.social.github
   const twitter = siteConfig.social.twitter
-  const item = (delay: number) =>
-    reduceMotion
-      ? {}
-      : {
-        variants: fadeUp,
-        initial: "hidden",
-        animate: "show",
-        transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const },
-      }
+  const item = (delay: number) => ({
+    variants: fadeUp,
+    initial: "hidden",
+    animate: "show",
+    transition: {
+      duration: reduceMotion ? 0 : 0.8,
+      delay: reduceMotion ? 0 : delay,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  })
 
   return (
-    <div data-hero-text="" className="relative z-10 max-w-md">
+    <div
+      data-hero-text=""
+      className="relative z-10 max-w-md lg:ml-12 motion-reduce:[&>*]:transform-none! motion-reduce:[&>*]:opacity-100!"
+    >
       <motion.h1
         {...item(0.2)}
         className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl"
       >
-        Hi there 👋
+        Hi, I’m Lang <span className="inline-block align-[0.04em] text-[0.75em]">👋</span>
       </motion.h1>
       <motion.div
         {...item(0.35)}
@@ -68,7 +72,7 @@ function HeroText({ reduceMotion }: { reduceMotion: boolean }) {
         <p>Former DevOps Engineer.</p>
         <p>Now an unemployed OPC making AI slop.</p>
       </motion.div>
-      <motion.div {...item(0.5)} className="mt-6 flex items-center gap-4 sm:mt-8 sm:gap-5">
+      <motion.div {...item(0.5)} className="mt-6 flex items-center gap-1 sm:gap-5">
         <a
           href={github.url}
           target="_blank"
@@ -92,21 +96,6 @@ function HeroText({ reduceMotion }: { reduceMotion: boolean }) {
   )
 }
 
-function ScrollCue() {
-  return (
-    <a
-      href="#recent-posts-heading"
-      className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-foreground/70 transition-colors hover:text-foreground sm:bottom-10"
-      aria-label="滚动到最新文章"
-    >
-      <span>Scroll</span>
-      <span className="relative block h-9 w-px overflow-hidden bg-foreground/20">
-        <span className="absolute inset-x-0 top-0 h-1/2 animate-[hero-scroll-cue_1.8s_ease-in-out_infinite] bg-foreground/70 motion-reduce:animate-none" />
-      </span>
-    </a>
-  )
-}
-
 export function HomeHero() {
   const reduceMotion = useReducedMotion() ?? false
 
@@ -126,13 +115,12 @@ export function HomeHero() {
       <div
         data-hero-content=""
         className={cn(
-          "pointer-events-none relative mx-auto flex h-full w-full max-w-6xl items-end px-4 pb-32 sm:items-center sm:px-6 sm:pb-10 [&_a]:pointer-events-auto",
+          "pointer-events-none relative mx-auto flex h-full w-full max-w-6xl items-end px-4 pb-16 sm:items-center sm:px-6 sm:pb-10 [&_a]:pointer-events-auto",
           SITE_HEADER_OFFSET.padding,
         )}
       >
         <HeroText reduceMotion={reduceMotion} />
       </div>
-      <ScrollCue />
     </section>
   )
 }

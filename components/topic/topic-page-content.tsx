@@ -79,7 +79,7 @@ function TopicPostRow({
         onMouseEnter={onActivate}
         onFocus={onActivate}
         className={cn(
-          "group/row relative grid grid-cols-[5.5rem_1fr] gap-x-4 no-underline transition-colors duration-300 sm:grid-cols-[6.5rem_1fr] sm:gap-x-6",
+          "group/row relative grid grid-cols-1 gap-y-1.5 no-underline transition-colors duration-300 sm:grid-cols-[6.5rem_1fr] sm:gap-x-6",
           active
             ? "bg-primary px-4 py-6 text-primary-foreground sm:px-5 sm:py-7"
             : "py-6 text-foreground sm:py-7",
@@ -110,7 +110,7 @@ function TopicPostRow({
           {formatDateList(post.date)}
         </time>
 
-        <div className="min-w-0 pr-12 sm:pr-16">
+        <div className="min-w-0 sm:pr-16">
           <h2
             className={cn(
               "text-pretty font-semibold leading-snug transition-colors",
@@ -206,9 +206,9 @@ export function TopicPageContent({
         ))}
       </nav>
 
-      <div className="mt-14 sm:mt-18">
+      <div className="mt-8 sm:mt-18">
         <div
-          className="grid grid-cols-[5.5rem_1fr] gap-x-4 border-b border-foreground/15 pb-3 text-[0.6875rem] font-medium tracking-[0.14em] text-muted-foreground uppercase sm:grid-cols-[6.5rem_1fr] sm:gap-x-6"
+          className="hidden sm:grid grid-cols-[5.5rem_1fr] gap-x-4 border-b border-foreground/15 pb-3 text-[0.6875rem] font-medium tracking-[0.14em] text-muted-foreground uppercase sm:grid-cols-[6.5rem_1fr] sm:gap-x-6"
           aria-hidden
         >
           <span>日期</span>

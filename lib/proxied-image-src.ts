@@ -29,7 +29,7 @@ export function isProxyableImageUrl(src: string): boolean {
     if (!t || !/^https:\/\//i.test(t)) return false
     try {
         const u = new URL(t)
-        return allowedImageHosts().has(u.hostname.toLowerCase())
+        return !u.username && !u.password && !u.port && allowedImageHosts().has(u.hostname.toLowerCase())
     } catch {
         return false
     }

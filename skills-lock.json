@@ -1,15 +1,22 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "agentation": {
       "source": "benjitaylor/agentation",
       "sourceType": "github",
-      "computedHash": "6ba2c955bee6ab3e9c7781b2553e3574b4c9ec35e539437d0831bfe368de8550"
+      "computedHash": "d1879568e2898e9586cc9cc1c02ba972d6f45e9fd4837ef1101fc04714a9dca6"
+    },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "commit": "b49177d32788f2dc585c42831d845dacf1ebed2c",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "08bd5bf141cb507f46bd8347890cd985865606f15adf88295ed3a73bc9ad5d96"
     },
     "shadcn": {
       "source": "shadcn/ui",
       "sourceType": "github",
-      "computedHash": "507f011a70e8b3ae242bdc0bb5b39fd91a1d4049a0f3c281991ccf84973d591c"
+      "computedHash": "d9896e875cbe333ff4eb9e38f930a00898bc01033b423ba565cbca732454eeb7"
     }
   }
 }

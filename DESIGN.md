@@ -29,12 +29,10 @@
 17. [动效规范](#17-动效规范)
 18. [主题与暗色模式](#18-主题与暗色模式)
 19. [无障碍（a11y）](#19-无障碍a11y)
-20. [内容模型](#20-内容模型)
-21. [工程约定](#21-工程约定)
-22. [Giscus 评论区](#22-giscus-评论区)
-23. [访问趋势图表](#23-访问趋势图表)
-24. [打赏弹层](#24-打赏弹层)
-25. [变更检查清单](#25-变更检查清单)
+20. [Giscus 评论区](#20-giscus-评论区)
+21. [访问趋势图表](#21-访问趋势图表)
+22. [打赏弹层](#22-打赏弹层)
+23. [变更检查清单](#23-变更检查清单)
 
 ---
 
@@ -84,9 +82,6 @@
 | `--border` | `#e8e0d4` | 边框、分隔线、列表表头下划线 |
 | `--destructive` | `#85181d` | 错误态（少用） |
 | `--ring` | `#364437` | focus ring |
-| `--article-card` | `#333333` | 首页文章卡，文字 `#f8f4ee`。暖调弥散阴影 `rgb(158 122 77 / 0.06)` |
-| `--article-enter` | `#f8f4ee` | 文章卡「进入」，文字 `#252525`。悬停 `color-mix` 混入卡片色 |
-| `--article-mark` | 同 `--article-enter` | 文章卡右上角书签 |
 | `--footer` | `var(--background)`（`#f8f4ee`） | 首页页脚，与上方作品块相反 |
 
 ### 2.2 深色模式色板
@@ -102,9 +97,6 @@
 | `--muted-foreground` | `#a8a89e` | |
 | `--border` | `#f8f4ee1a` | 约 10% 透明度描边 |
 | `--input` | `#f8f4ee26` | |
-| `--article-card` | `#f8f4ee` | 首页文章卡，文字 `#252525`。无投影 |
-| `--article-enter` | `#252525` | 文章卡「进入」，文字 `#f8f4ee`。悬停 `color-mix` 混入卡片色 |
-| `--article-mark` | 同 `--article-enter` | 文章卡右上角书签 |
 | `--footer` | `var(--background)`（`#252525`） | 首页页脚，与上方作品块相反 |
 
 ### 2.3 圆角
@@ -128,7 +120,7 @@
 | 元素 | 浅色 | 深色 | 文件 |
 |------|------|------|------|
 | 阅读进度条 | `teal-600` | `teal-400` | `scroll-progress-bar.tsx` |
-| Hero 粒子 | `--foreground` + `--chart-2` 点缀（运行时读取） | 同，混合方式改为发光 | `hero-particles.tsx` |
+| Hero 粒子 | `--hero-petal` + `--hero-pollen` 点缀（运行时读取） | 同，配色随主题切换 | `hero-particles.tsx` |
 | Tweet 卡片底 | `#eef7fc` | `#1a2a33` | `globals.css` `.article-tweet` |
 | Shiki 代码 | `github-light` / `github-dark` | 随 `html.dark` 切换 | `content-collections.ts` |
 
@@ -161,12 +153,12 @@
 
 | 角色 | 字体 | 加载 |
 |------|------|------|
-| 正文 | 霞鹜文楷（LXGW WenKai）GB2312 子集 | `lib/fonts.ts` → `next/font/local`，WOFF2 自托管 |
+| 正文 | 霞鹜文楷（LXGW WenKai）GB2312 子集 | `app/fonts/wenkai/faces.css` + `public/fonts/wenkai/*.woff2`，按 unicode-range 自托管加载，首屏预加载 `interface.woff2` |
 | 英文混排标题 | `font-sans`（系统 UI 栈） | 局部用于 AI 等 |
 | 代码 | `font-mono` | `pre`、行内 code |
 
-Fallback：`PingFang SC` → `Hiragino Sans GB` → `Microsoft YaHei` → `sans-serif`  
-`display: swap`；`html` 挂 `variable`，`body` 挂 `className`。
+Fallback：`Site Wenkai Fallback`（度量对齐）→ `PingFang SC` → `Hiragino Sans GB` → `Microsoft YaHei` → `sans-serif`  
+正文使用 `font-display: swap`，并在 `app/layout.tsx` 预加载首屏分片 `/fonts/wenkai/interface.woff2`，`next.config.mjs` 为 `/fonts/*` 设置一年不可变缓存。首页文字共用一个小分片，其余字符按文章使用频率分片。需重新划分时，在生产构建后用 fonttools 和 brotli 执行 `scripts/subset-wenkai.py`。
 
 ### 3.2 字号与行高阶梯
 
@@ -353,7 +345,7 @@ md:gap-x-12 lg:gap-x-16 xl:gap-x-20
 
 - 根：`flex min-h-dvh flex-col`（`app/layout.tsx`）
 - `scrollbar-gutter: stable` 防滚动条挤版
-- 搜索索引：`layout` `<head>` 内 `prefetch /api/search-index`
+- 搜索索引：鼠标移入搜索按钮或键盘聚焦时预热，触屏打开时加载
 
 ---
 
@@ -432,8 +424,8 @@ gap-x-3 max-[375px]:gap-x-2.5 sm:gap-x-5
 ### 8.1 布局
 
 ```text
-footer.mt-16.sm:mt-20
-  └── div.bg-footer.text-footer-foreground
+footer（仅内页 mt-16 sm:mt-20）
+  └── div（底色设在 footer 本身）
         /* 首页：跟上方作品块相反。作品 bg-foreground，页脚 background
            亮色 #f8f4ee / 文字 #252525，暗色 #252525 / 文字 #f8f4ee
            内页 data-footer="page"：亮色 #252525 / 文字 #f8f4ee，暗色 #f8f4ee / 文字 #252525 */
@@ -483,56 +475,47 @@ section: relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 overflow-hidd
          bg-background text-foreground      /* 纸色。暗色模式 foreground / background 对调，Hero 变成墨色 */
 ```
 
-图层自下而上：粒子画布（外层 `mask` 底部 22% 渐隐，避免粒子在 Hero 下沿被切）→ 文案 → 滚动提示。粒子后面不加色晕。
+图层自下而上：粒子画布（外层 `mask` 底部 22% 渐隐，避免粒子在 Hero 下沿被切）→ 文案。粒子后面不加色晕。
 
 ### 9.2 粒子对象
 
-四种程序生成的形态循环变形，每种停留 4.2s，变形 2.4s：
+重瓣菊花由五层细长的舌状花瓣组成，外瓣舒展，内瓣向花心收拢。花瓣有弧度，三分之四偏正面的视角能看出层次。
 
-| 序号 | 形态 | 生成 |
-|------|------|------|
-| 0 | 球体 | 斐波那契球面，半径 1.15 |
-| 1 | 环面结 | (2,3) torus knot，管径 0.11 |
-| 2 | 螺旋星系 | 三条旋臂，绕 x 轴倾斜 0.95rad |
-| 3 | 洛伦兹吸引子 | σ=10, ρ=28, β=8/3 积分轨迹 |
-
-- 粒子数：桌面 15000，手机 8000。相机 `fov 35`、`z 6`，`OBJECT_SIZE = 2.7`。
-- 桌面：物体在右侧，右缘对齐顶栏最右的主题图标（Hero 内容区右缘再往里 8px）。每种形态按自转时水平面上的半径（99.5% 分位）和透视放大单独算横向偏移，变形时偏移跟着插值，所以哪种形态都不越线。外接直径取内容区宽 42%、视口高 60%、文案右侧可用宽度三者中较小的一个。手机（宽 < 640）：居中放在顶栏和文案之间，宽度不超过视口的 72%，高度落在这段空隙里，不压住文案。
-- 颜色：`--foreground` 为主色（压在纸色 Hero 上才看得见），约四分之一粒子用 `--chart-2` 点缀；运行时读取 CSS 变量，切换主题即时更新。
-- 混合：浅色模式 Hero 是纸色，用 `NormalBlending`、不透明度 0.6；深色模式 Hero 是墨色，用 `AdditiveBlending`、不透明度 0.9。远处粒子按深度衰减到 18%。
+- 桌面使用 22000 个点。花心在内容区约 75% 处，垂直对齐文案组中线。花径上限 460px，同时受首屏高度的 65% 和文案右侧可用宽度限制；大花径下点径随花瓣等比增大。
+- 手机使用 9500 个点。花朵居中，直径上限 240px，花与标题之间预留约 36px。
+- 花瓣从花心的 `--hero-pollen` 过渡到以 `--hero-petal` 为主的外缘。浅色用赭红与琥珀，深色用杏粉与浅金；主题切换时重新读取令牌。
+- 两个主题均使用普通透明混合，后层花瓣亮度较低。
 
 ### 9.3 Hero 动效
 
 | 行为 | 说明 |
 |------|------|
-| 入场 | 粒子从环形散落位置聚拢成球，约 2.2s |
-| 变形 | 按 seed 错开，变形中途向外炸开 0.55 再收拢 |
-| 自转 | y 轴 0.12rad/s，x 轴固定前倾 0.18 |
-| 鼠标 | 仅 `pointerType === "mouse"`：半径 0.6 内粒子被推开、前凸；整体随指针偏转（y ±0.35，x ±0.15） |
+| 入场 | 约 2.2s 内从花瓣周围聚拢，各点错时显现 |
+| 风动 | 阵风从左向右掠过，迎风侧外瓣先弯，花头绕下方支点稍晚倾斜，随风势减弱回正 |
+| 鼠标 | 鼠标靠近时推开局部粒子 |
 | 滚动 | 按 Hero 滚出比例，粒子像沙一样向下坠落、横向散开并淡出 |
 | 暂停 | 离开视口或标签页隐藏时不渲染 |
-| 减少动效 | 直接显示球体静态帧，不挂指针事件，文字无入场 |
+| 减少动效 | 直接显示花朵静态帧，不挂指针事件，文字无入场 |
 | 无 WebGL | 不渲染粒子，只留底色与文案 |
 
 ### 9.4 文案
 
-- 布局：`max-w-6xl` 容器内左对齐；桌面垂直居中，手机 `items-end pb-32`，和底部滚动提示分开。
-- 标题：`Hi there 👋`。`text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] text-foreground`
+- 布局：`max-w-6xl` 容器内左对齐；桌面垂直居中，lg 起文案向内收 48px，手机 `items-end pb-16`。
+- 标题：`Hi, I’m Lang 👋`（手势为标题字号的 75%）。`text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] text-foreground`
 - 副文：两行，`Former DevOps Engineer.` / `Now an unemployed OPC making AI slop.`。`text-base sm:text-lg text-foreground/70`
 - 社交：`gap-4 sm:gap-5`；GitHub、X 都是外链（`target="_blank"`，`rel="noopener noreferrer"`），地址读 `siteConfig.social.github.url`、`siteConfig.social.twitter.url`。GitHub `size-5`，X `size-4`。`text-foreground/60 hover:text-foreground`
 - 入场：`motion` fade-up，`0.8s`，依次延迟 0.2 / 0.35 / 0.5s。
-- 滚动提示：底部居中「Scroll」+ 竖线（手机 `bottom-6`，`sm` 起 `bottom-10`），亮条走 `hero-scroll-cue` 关键帧（`globals.css`），`motion-reduce:animate-none`，链接到 `#recent-posts-heading`（标题带 `scroll-mt`，不会钻进顶栏）。
 
 ### 9.5 Particle Scroll（正文沙化）
 
-首页有三段 `<ParticleScroll>`：`app/(home)/page.tsx` 包住近期文章，`home-shelf.tsx` 里文章和作品各一段。视口 70% 处是成形线：线以上是真实 DOM（可点击、可 hover），线以下化成沙，向上滚动时逐行、逐粒归位。沙粒颜色来自文字和卡片，区块底色本身不进遮罩。
+首页有两段 `<ParticleScroll>`：`app/(home)/page.tsx` 包住近期文章，`home-shelf.tsx` 只包住文章目录，作品直接显示。视口 70% 处是成形线：线以上是真实 DOM（可点击、可 hover），线以下化成沙，向上滚动时逐行、逐粒归位。沙粒颜色来自文字和卡片，区块底色本身不进遮罩。
 
 着色器参考 canvas-ui 的 `particle-scroll-react`。那版依赖实验性 HTML-in-Canvas API（只有开了实验开关的 Chrome 可用），并要求内容放进独立滚动容器，所以没有直接安装。这里改成：
 
 1. **栅格化**：把子树的背景色、边框、文字（逐字 `Range.getClientRects` + `fillText`）画进离屏 canvas，作为沙粒颜色纹理。有 `border-radius` 时背景和边框按圆角画，角外留透明，沙不会铺出直角。图片按元素框和 `object-fit` 画进沙；还没加载完就先不画，加载后再拍一次。描边图标（`path`、`line`、`circle`、`rect`）按 `viewBox` 画进沙，书签这类 Lucide 图标才能粒子化。字体加载完、尺寸变化、子树增删时重拍（防抖 160ms）。主题切换在 class 变更的同一轮重拍并立刻画上，不等下一帧，也不被悬停锁挡住。指针在区块里，以及离开后的 400ms 内，不重拍尺寸和子树，也不清成形进度。离开并过了这段时间后，若悬停期间文字变过，即使宽高相同也重拍一次；否则宽高相同就跳过，避免悬停收起时把整段文字再拍一遍。
 2. **遮罩**：第一条未成形行以下，用 `mask-image` 把 DOM 隐去（12px 渐隐），交给粒子。
 3. **粒子**：WebGL2 点精灵。画布是内容的兄弟节点，`absolute`、`z-20`、`pointer-events-none`，宽等于视口，高等于视口加上下各 30% 的余量，每帧用 `translate3d` 挪到视口上方余量处，随文档一起滚动。不能用 `fixed`：浏览器的合成器滚动比主线程画沙快，快速滚动时 DOM 和遮罩先滚上去，沙还按旧位置画，中间露出一条区块底色。外层 `overflow-y: clip`：画布不撑长页面，沙也不落进相邻区块；横向不裁，沙可以散出内容列。只处理与画布（含下方散开余量）相交的行。滚动惯性只拖文字和边缘的沙，卡片底色的沙不跟着下坠。行越过成形线还没归位时，越过得越远归位越快。
-4. **区块结束**：底边还在视口外时，成形线停在 70%。底边进入视口之后才往下推，再滚过「70% 线到视口底」的一半，这一段才全部成形。近期文章、文章、作品各自算，不互相等。整页接近页脚时同样下推，滚到页脚时也不会剩沙。
+4. **区块结束**：底边还在视口外时，成形线停在 70%。底边进入视口之后才往下推，再滚过「70% 线到视口底」的一半，这一段才全部成形。近期文章和文章目录各自算，不互相等。整页接近页脚时同样下推，滚到页脚时也不会剩沙。
 
 | 参数 | 值 |
 |------|-----|
@@ -553,14 +536,14 @@ section: relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 overflow-hidd
 
 ### 9.7 首页下层（文章 / 作品）
 
-文件：`components/home/home-shelf.tsx`。放在近期文章下面。底色写在 `<section>` 上，`ParticleScroll` 只包里面的文字和分行，所以底色和近期文章一样始终在，不会等沙成形才出现。两段成形线和近期文章相同。满宽破出 `main` 的水平留白（与 Hero 同一套 `left-1/2 w-screen -translate-x-1/2`）。底部 `-mb-16 sm:-mb-20` 抵消 Footer 的上外边距，避免夹出一条页面底色。接近页脚时随页尾成形线一起还原。
+文件：`components/home/home-shelf.tsx`。放在近期文章下面。底色写在 `<section>` 上，`ParticleScroll` 只包里面的文字和分行，所以底色和近期文章一样始终在，不会等沙成形才出现。文章区成形线和近期文章相同，作品区直接显示。满宽破出 `main` 的水平留白（与 Hero 同一套 `left-1/2 w-screen -translate-x-1/2`）。首页页脚本身没有上外边距，直接衔接作品区。接近页脚时随页尾成形线一起还原。
 
 | 块 | 锚点 | 底色 | 内容 |
 |----|------|------|------|
-| 文章 | `#articles` | `bg-background` | `min-h-svh`。左栏标题 + 引文（曹丕《典论·论文》），右栏三张竖向卡片，均分高度。桌面端第一张卡片顶与引文对齐（标题单独一行，引文和卡片同一行，都留 `mt-8`）。卡片 `bg-article-card`：浅色 `#333333`（暖调弥散阴影，文字 `#f8f4ee`），暗色 `#f8f4ee`（文字 `#252525`）。左上序号和栏名，右上书签与「进入」同色（亮 `#f8f4ee`、暗 `#252525`，描边会进沙），底栏以分隔线隔开，右侧是直角的「进入 →」。悬停不改卡片底色，按钮用 `color-mix` 在 250ms 贝塞尔下变色；底边过了成形线（`data-particle-reveal`）之后才上移 4px，还跨在线上时不动。完整成形后再悬停，引文下方以和近期文章标签、字数相同的淡入（`mt-8`，`text-sm`，0.28s）展示该板块篇数；未成形时不出现。列比与近期文章相同。链到 `/ai`、`/ops`、`/notes` |
-| 作品 | `#works` | `bg-foreground` | 桌面端至少一屏高（`min-h-svh`）。左栏是名字和摘要，贴着顶部，条目之间没有分隔线；悬停整行时名称和摘要一起轻微下压，没有下划线。右栏只有产品截图，没有卡片、标题和 more。亮色、暗色各一张（`siteConfig.works[].image.light`、`image.dark`），随主题切换。桌面端图片靠右，宽度约为右列的 78%，画幅 4:3，比原先略窄、略高，顶边略高于区块高度的 1/3，下方留空，右缘仍与文章区卡片对齐，点图片去 `moreHref`（`/products/[slug]` 或站外链接）。悬停左栏某一条，且图片底边已经过了成形线时，右栏才按指针做 3D 倾斜；还在沙里时不倾斜、也不换图片。截图按画面画进沙，成形线切过时跟着化开。手机端不撑满一屏：上下排，图片跟在列表下面，与文字同宽、左对齐。moreHref 是 `/products/[slug]` 时才生成详情页，站外链接不生成；详情页正文还没做。 |
+| 文章 | `#articles` | `bg-background` | 至少一屏高，内容整组垂直居中，超高时自然撑开。左栏引文与右栏目录顶部对齐。栏目名、简介、篇数与箭头组成整行链接；窄屏的简介换到下一行。行完整成形后，悬停或键盘聚焦时箭头向右上微移，减少动效时保持静止。 |
+| 作品 | `#works` | `bg-foreground` | 桌面端至少一屏高（`min-h-svh`）。左栏是名字和摘要，贴着顶部，条目之间没有分隔线；悬停整行时名称和摘要一起轻微下压，没有下划线。右栏只有产品截图，没有卡片、标题和 more。亮色、暗色各一张（`siteConfig.works[].image.light`、`image.dark`），随主题切换。桌面端图片靠右，宽度约为右列的 78%，画幅 4:3，比原先略窄、略高，顶边略高于区块高度的 1/3，下方留空，右缘仍与文章目录右缘对齐，点图片去 `moreHref`（`/products/[slug]` 或站外链接）。悬停左栏某一条，右栏才按指针做 3D 倾斜。作品区直接显示，无滚动沙化。手机端不撑满一屏：上下排，图片跟在列表下面，与文字同宽、左对齐。moreHref 是 `/products/[slug]` 时才生成详情页，站外链接不生成；详情页正文还没做。 |
 
-和上面交替：文章接 Hero 的纸色，作品接近期文章的墨色。区块底色只用这两种。文章卡片浅色 `#333333`、暗色 `#f8f4ee`。暗色近期文章右栏悬停是 `#252525`。首页页脚跟上方作品块相反：亮色 `#f8f4ee`、暗色 `#252525`。悬停只在卡片完整成形后上移 4px，桌面端第一张卡片顶与引文对齐。锚点用 `SITE_HEADER_OFFSET.anchorScrollMargin`。
+和上面交替：文章接 Hero 的纸色，作品接近期文章的墨色。区块底色只用这两种。手机端作品标题后直接列项目；Hero 社交链接和页脚链接的触控高度为 44px。窄屏分类列表将日期放在标题上方。近期文章末尾链接到归档。非空栏目排在空栏目之前，目录上方标「栏目」，末行无底线。暗色近期文章右栏悬停是 `#252525`。首页页脚跟上方作品块相反：亮色 `#f8f4ee`、暗色 `#252525`。锚点用 `SITE_HEADER_OFFSET.anchorScrollMargin`。
 
 ---
 
@@ -597,8 +580,8 @@ li.border-b.border-foreground/15.last:border-b-0
 
 ### 10.4 首页特有
 
-- 展示 10 篇（`DISPLAY_COUNT`）。右栏悬停 `--recent-row`：亮色纸色，暗色 `#252525`。行高不变。标题用 `scale-110`、`origin-bottom-left` 放大，不占额外高度。日期只在 active 时 `translate-x-2`（8px）向右，`transition-[translate,color] duration-300`，`motion-reduce:translate-none` 时不位移。摘要在左栏 `PostMeta`，不插进右栏，避免把成形线附近的下一行顶进沙里。底边过了成形线（`data-particle-reveal`）才进入悬停；还在沙里时不改变这一行。线滚过、指针已经在上面时再补上悬停
-- 左栏引文 + `PostMeta`（标签 `·` 分隔 + 字数 + 摘要）
+- 展示 10 篇（`DISPLAY_COUNT`）。右栏悬停 `--recent-row`：亮色纸色，暗色 `#252525`。行高不变。标题用 `scale-110`、`origin-bottom-left` 放大，不占额外高度。日期只在 active 时 `translate-x-2`（8px）向右，`transition-[translate,color] duration-300`，`motion-reduce:translate-none` 时不位移。底边过了成形线（`data-particle-reveal`）才进入悬停；还在沙里时不改变这一行。线滚过、指针已经在上面时再补上悬停
+- 左栏保留引文，悬停或聚焦条目时在引文下显示标签和字数
 - 表头：`text-[0.6875rem] tracking-[0.14em] uppercase text-muted-foreground`。只在 `md` 及以上显示；手机不放「日期 / 标题」行。标题 `#recent-posts-heading` 用 `SITE_HEADER_OFFSET.anchorScrollMargin`。日期列手机 `4.75rem`、`gap-x-3`、行 `py-5`。
 
 ### 10.5 分类页特有
@@ -860,11 +843,12 @@ Focus：`focus-visible:ring-2 focus-visible:ring-ring/30`。
 
 ### 16.2 命令面板
 
+- 含汉字的查询优先展示标题包含完整查询词的文章，再按全文相关性补足，最多八条。
 - 唤起：`Ctrl+K` / `⌘K`；或顶栏搜索按钮
 - 对话框：`sm:max-w-xl`
-- 占位符：`支持 Ctrl+K / ⌘K 唤醒，输入关键词搜索标题/内容…`
+- 占位符：`搜索文章标题或正文`
 - 结果上限 8 条；`title` boost ×3，`keywords` boost ×2
-- 索引预取：`layout` prefetch + 打开时 `ensureSearchEngine`
+- 索引预取：首次表达搜索意图时加载，与并发打开共用请求；失败可在面板重试
 
 ### 16.3 Tooltip
 
@@ -924,482 +908,39 @@ Focus：`focus-visible:ring-2 focus-visible:ring-ring/30`。
 
 ---
 
-## 20. 内容模型
+## 20. Giscus 评论区
 
-目录：`content/blogs/*.md`  
-编译：`content-collections.ts`
+文件：`components/comments.tsx`，挂载于博文页上下篇导航之后（`#comments`，`mt-12`，未挂载占位 `min-h-48`）。
 
-| 字段 | 必填 | 说明 |
-|------|------|------|
-| `title` | ✓ | |
-| `date` | ✓ | ISO 日期字符串 |
-| `updated` | | 展示在元信息行 |
-| `category` | | `ops` / `ai` / `notes`，默认 `notes` |
-| `summary` | | 列表摘要、OG |
-| `keywords` | | 标签；`parseKeywords` 支持 `,，;；|、` |
-| `featured` | | schema 存在，**UI 未读取**（遗留字段） |
-
-MDX 管道：`remark-gfm` → `rehypeNormalizeCodeLanguage` → `rehype-pretty-code` → `rehype-slug`。
+- **数据源**：GitHub Discussions（`gnalli/Lang`、`General`、`mapping="pathname"`、`strict="1"`、`inputPosition="top"`、`loading="lazy"`）。
+- **主题同步**：通过 `{origin}/giscus/site-light.css` 与 `site-dark.css` 对齐 §2 令牌，切换明暗模式时更新同一个 widget 的 `theme`，保留阅读位置与输入。
+- **自定义裁剪（两主题共有）**：隐藏 `.gsc-reactions-count` 与 `.gsc-left-header > em`，关闭 `.gsc-homepage-bg` 动画。
+- **CORS**：`next.config.mjs` 为 `/giscus/:path*` 配置 `Access-Control-Allow-Origin: *`，勿移除。
 
 ---
 
-## 21. 工程约定
+## 21. 访问趋势图表
 
-### 21.1 目录
+文件：`components/header/header-analytics-drawer.tsx`（由顶栏按钮 `dynamic(..., { ssr: false })` 懒加载），数据来自 `GET /api/analytics/site-trends`（近 14 日 PV/UV，仅打开时拉取，关闭取消请求）。
 
-```text
-app/           路由与 API；(home) 与 (pages) 各自提供对应页脚的布局
-components/
-  header/      顶栏（Server 壳 + Client 岛）
-  footer/      页脚（Server）；首页与内页由路由组布局分别渲染
-  home/        首页区块
-  blog/        阅读体验（TOC、代码、MDX 组件）
-  topic/       分类页
-  archive/     归档列表
-  seo/         JSON-LD
-  ui/          shadcn 基元
-lib/
-  config.ts           站点元信息、SEO、打赏
-  site-nav.ts         导航 / Footer 链接
-  site-header-offset.ts
-  blog-article-prose.ts
-  blog-sections.ts
-  blog-tags.ts
-  format-date.ts
-```
-
-### 21.2 配置入口
-
-| 改什么 | 去哪 |
-|--------|------|
-| 站名、描述、OG 图 | `lib/config.ts` |
-| 导航项 | `lib/site-nav.ts` |
-| 栏目文案、primaryTag | `lib/blog-sections.ts` |
-| 打赏文案与 QR | `lib/config.ts` → `donate` |
-| 全局色板 | `app/globals.css` |
-| Header 高度 | `globals.css` + `site-header-offset.ts` + Header 组件 |
-
-### 21.3 组件规则
-
-- 默认 Server Component；仅当需要 hooks / 事件 / 浏览器 API 时加 `"use client"`
-- 跨页偏移、prose 类名放 `lib/`，不散落 magic number
-- 列表行样式改一处时，**同步检查**首页、分类、归档三处
-- 动态重组件：`next/dynamic` + `{ ssr: false }`（访问趋势面板）
-
-### 21.4 UI 库
-
-- shadcn preset：`radix-mira`；图标 Lucide
-- 新组件：`npx shadcn@latest add <name>`
-- 样式入口：`app/globals.css` → `@import "shadcn/tailwind.css"`
+- **面板外壳**：直接用 `vaul` 底部抽屉（不改 `components/ui/drawer.tsx`），两档吸附点运行时换算为 px：紧凑档约 `31rem`（至少比全高矮 48px），全高档 `100dvh - var(--site-header-height)` 贴顶栏下沿；左右各留 `0.75rem`。外层 `Drawer.Content` 透明，圆角（`rounded-t-3xl`）、底色（`bg-popover`）、边框和阴影只写在内层面板上。
+- **关闭**：无关闭按钮，点遮罩/外部区域、按 `Esc` 或向下拖关闭（因 vaul 非模态补丁，遮罩需显式绑定 `onClick`）。
+- **折线图**：Recharts `LineChart` + shadcn Chart；PV 用 `--foreground`，UV 用 `--muted-foreground`（`strokeOpacity: 0.85`），隐藏纵向网格与默认点；三态（加载中 / Supabase 未配置 / 异常）在图表区内居中提示。
 
 ---
 
-## 22. Giscus 评论区
+## 22. 打赏弹层
 
-文件：`components/comments.tsx`  
-挂载：博文页 MDX 正文与上下篇导航之后，`mt-12` 容器内（`app/(pages)/blog/[slug]/page.tsx`）。
+文件：`components/blog/article-toc-sidebar-actions.tsx`（`TocDonateButton`），配置在 `lib/config.ts` 的 `siteConfig.donate`；仅桌面端（`lg+`）侧栏 TOC 下方显示，移动端抽屉不含。
 
-### 22.1 职责与数据源
-
-- 基于 [@giscus/react](https://github.com/giscus/giscus) 嵌入 GitHub Discussions 评论。
-- 仓库：`gnalli/Lang`；分类 `General`；`mapping="pathname"`（按路径区分讨论帖）。
-- `strict="1"`：仅仓库协作者可新建主贴（访客回复已有讨论）。
-- `reactionsEnabled="1"`；`inputPosition="top"`（输入框在顶部）；`lang="zh-CN"`；`loading="lazy"`。
-
-### 22.2 主题与站点同步
-
-Giscus 运行在 iframe 内，**不能**直接读 Tailwind 令牌。站点通过**自托管 CSS 主题 URL** 对齐视觉：
-
-| 模式 | 主题 URL |
-|------|----------|
-| 浅色 | `{origin}/giscus/site-light.css` |
-| 深色 | `{origin}/giscus/site-dark.css` |
-
-实现要点：
-
-1. `useTheme().resolvedTheme` + `useClientMounted()` 决定 `light` / `dark`。
-2. 未挂载前渲染占位：`#comments.min-h-48`，`aria-busy="true"`，避免 hydration 闪烁。
-3. `<Giscus key={giscusTheme} theme={giscusTheme} />` — URL 变化时整组件重建。
-4. `useEffect` 向 iframe `postMessage` 发送 `giscus.setConfig.theme`，切换站点主题时无需刷新页面。
-
-主题 CSS 位于 `public/giscus/`，颜色与 §2 令牌对齐，例如浅色：
-
-| Giscus 变量 | 对应站点 |
-|-------------|----------|
-| `--color-canvas-default` | `#f8f4ee`（`--background`） |
-| `--color-fg-default` | `#252525`（`--foreground`） |
-| `--color-btn-primary-bg` | `#364437`（`--primary`） |
-| `--color-border-default` | `#e8e0d4`（`--border`） |
-
-暗色主题同理映射 `#252525` / `#f8f4ee` / `#323432` 等。
-
-### 22.3 自定义裁剪（两主题共有）
-
-在 `site-light.css` / `site-dark.css` 末尾：
-
-```css
-.gsc-reactions-count { display: none; }   /* 隐藏反应计数 */
-.gsc-left-header > em { display: none; }  /* 隐藏左侧说明斜体 */
-.gsc-homepage-bg { animation: none; }    /* 关闭加载背景动画 */
-```
-
-浅色额外：评论回复区 `border-radius: unset`。暗色额外：评论框边框、分页按钮、textarea 字色修正。
-
-### 22.4 布局与间距
-
-| 属性 | 值 |
-|------|-----|
-| 容器 id | `comments` |
-| 上文间距 | 父级 `mt-12` |
-| 占位最小高度 | `min-h-48`（12rem） |
-| 宽度 | 随博文正文列（`BlogPostShell` 内 `article`） |
-
-Giscus iframe 宽度 100%，无需额外 `max-w`。
-
-### 22.5 CORS 与安全头
-
-`next.config.mjs` 为 `/giscus/:path*` 单独设置：
-
-```text
-Access-Control-Allow-Origin: *
-```
-
-以便 `giscus.app` iframe 加载自托管主题 CSS。全站其余路由仍用默认安全头。
-
-### 22.6 改 Giscus 时的检查清单
-
-- [ ] 更新 `public/giscus/site-light.css` **与** `site-dark.css` 成对
-- [ ] 主色 / 背景 / 边框与 `globals.css` 一致
-- [ ] 切换站点明暗模式后评论区无闪白、按钮不可读
-- [ ] 新 Discussions 分类需同步 `category` / `categoryId` props
-- [ ] 生产环境 `origin` 能访问 `/giscus/*.css`（勿被 CDN 错误缓存策略挡住）
+- **交互与定位**：悬停/聚焦展开，位于按钮上方右对齐（`bottom-full right-0 z-50 pb-2`），外层 `pb-2` 作 hover 桥接区，宽 `min(21rem, calc(100vw - 2rem))`，侧栏需保持 `overflow-visible` 避免裁剪。
+- **二维码槽**：双列 `aspect-square`，图片框固定 `bg-white` 保证暗色模式下可正常扫码。
 
 ---
 
-## 23. 访问趋势图表
-
-文件：`components/header/header-analytics-drawer.tsx`  
-入口：顶栏访问趋势按钮（`header-analytics-button.tsx` 内 `dynamic()` 懒加载，无 SSR）。
-
-数据：`GET /api/analytics/site-trends`（近 14 日 PV / UV；依赖 Supabase，未配置时返回 `ok: false`）。
-
-### 23.1 信息架构
-
-```text
-HeaderAnalyticsButton
-  └── HeaderAnalyticsDrawer (底部 Drawer，vaul snap points)
-        ├── 把手
-        ├── 标题 + 副标题
-        ├── ChartLegend
-        └── ChartPanel：折线图 / 加载 / 错误（中间弹性高度）
-```
-
-### 23.2 面板外壳
-
-从底部拉起的抽屉，不改 `components/ui/drawer.tsx`（目录抽屉还在用它）。直接用 `vaul`：字符串吸附点会被 `parseInt` 读成像素，所以两档都在运行时换成 px。紧凑档约 `31rem`，并且比全高档至少矮 48px。全高档是 `100dvh` 减去 `--site-header-height`，顶边贴着顶栏下沿，不盖住顶栏。打开时停在紧凑档，向上拖到全高档，图表区跟着变高。宽度贴底铺开，左右各留 `0.75rem`（`right-3 left-3`）。
-
-外层 `Drawer.Content` 是给 vaul 做位移的透明壳（`h-dvh`，无底色、无阴影）。圆角、边框、底色和阴影只写在内层面板上。外层若带 `bg-popover`，方盒会填进圆角缺口，阴影也变成直角。
-
-| 属性 | 类名 / 值 |
-|------|-----------|
-| 组件 | `vaul` 的 `Drawer.Root` / `Overlay` / `Content` / `Handle` |
-| 吸附 | `[peekPx, expandedPx]`，`fadeFromIndex={1}`（到全高遮罩才显现） |
-| 宽度 | `right-3 left-3`，贴底全宽 |
-| 表面 | 内层 `bg-popover`，`rounded-t-3xl`，`border-border`，`shadow-lg`，`overflow-hidden` |
-| 遮罩 | `bg-foreground/15`；紧凑档由 vaul 把透明度收到 0，仍可点击 |
-| 减少动效 | `motion-reduce:animate-none` |
-
-### 23.3 标题区
-
-```text
-Drawer.Title: text-sm font-semibold tracking-tight text-center → 「全站访问趋势」
-副标题:       text-xs text-muted-foreground text-center → 「近 14 日 PV / UV。向上拖可放大。」
-```
-
-**图例**（`ChartLegend`，非 Recharts 内置 legend）：
-
-| 系列 | 色块 | 数据键 |
-|------|------|--------|
-| PV | `size-1.5 rounded-full bg-foreground` | `pv` |
-| UV | `size-1.5 rounded-full bg-muted-foreground` | `uv` |
-
-图例文字：`text-[11px] text-muted-foreground`，`gap-3`。
-
-### 23.4 图表区 `ChartPanel`
-
-```text
-rounded-2xl bg-muted overflow-hidden
-图表：aspect-auto h-full min-h-36 w-full，占标题以下的剩余高度，底部留 `pb-4`
-```
-
-### 23.5 折线图规格（Recharts + shadcn Chart）
-
-`chartConfig`（`satisfies ChartConfig`）：
-
-```ts
-pv: { label: "PV", color: "var(--foreground)" }
-uv: { label: "UV", color: "var(--muted-foreground)" }
-```
-
-| 元素 | 规格 |
-|------|------|
-| 线条类型 | `type="monotone"` |
-| PV 线宽 | `strokeWidth={2}`，色 `var(--color-pv)` |
-| UV 线宽 | `strokeWidth={2}`，`strokeOpacity={0.85}` |
-| 数据点 | 默认 `dot={false}`；hover `activeDot={{ r: 3, strokeWidth: 0 }}` |
-| 网格 | `CartesianGrid vertical={false}`，`stroke: var(--border)`，`strokeOpacity: 0.55` |
-| X 轴 | `dataKey="label"`，无刻度线，`tick fontSize: 11`，`fill: var(--muted-foreground)`，`interval="preserveStartEnd"` |
-| Y 轴 | `width={32}`，`allowDecimals={false}`，同上 tick 样式 |
-| 边距 | `{ left: 0, right: 8, top: 4, bottom: 0 }` |
-| Tooltip | `ChartTooltipContent indicator="line"`；cursor 线 `var(--border)` |
-
-### 23.6 状态机
-
-| 状态 | UI |
-|------|-----|
-| `loading` | 图表区内居中「加载中…」 |
-| `ok: false, reason: not_configured` | 「Supabase 连接失败，请检查相关配置…」 |
-| `ok: false` 其他 | 「趋势数据暂时无法加载，请稍后重试。」 |
-| `ok: true` | 渲染 `LineChart` |
-
-打开面板时才 `fetch`；关闭不预取；`open` 变化时取消进行中的请求。
-
-### 23.7 关闭
-
-没有关闭按钮。点抽屉以外的区域（含左右留白和遮罩）会关掉：遮罩自己接 `onClick`，因为 vaul 补丁把 Radix Dialog 设成了非模态，点外面不会自动关。按 Esc，或从紧凑档向下拖，也会关闭。
-
-### 23.8 结构示意图
-
-```text
-              viewport
-   ┌──────────────────────────┐
-   │         ─────            │  ← 把手，顶角 rounded-t-3xl
-   │       全站访问趋势        │  ← 标题和副标题居中；紧凑档约 31rem，左右各留 0.75rem
-   │    近 14 日 PV / UV       │
-   │ PV · UV                   │
-   │ ┌──────────────────────┐ │
-   │ │       折线图          │ │  ← 剩余高度；拖到全高后变长
-   │ └──────────────────────┘ │
-   └──────────────────────────┘
-```
-
-### 23.9 改图表时的检查清单
-
-- [ ] 浅色 / 深色下 PV、UV 线与网格可区分
-- [ ] 打开停在紧凑档；向上拖到顶栏下沿，图表变高；贴底全宽，左右各留 0.75rem；顶角是圆角，阴影跟着圆角走
-- [ ] 未配置 Supabase 时文案友好、不抛客户端异常
-- [ ] 图例色块与 `chartConfig` 一致
-- [ ] 懒加载包体积：仅「访问趋势」点击后加载 Recharts 相关 chunk
-
----
-
-## 24. 打赏弹层
-
-文件：`components/blog/article-toc-sidebar-actions.tsx` → `TocDonateButton`  
-配置：`lib/config.ts` → `siteConfig.donate`（`message`、`wechatImage`、`alipayImage`）。
-
-仅出现在 **博文页侧栏 TOC 下方**（`lg+` 且有条目时）；移动端 TOC 抽屉**不含**打赏入口。
-
-### 24.1 在侧栏中的位置
-
-```text
-ArticleTocSidebar
-  ├── ArticleTocFumadocs
-  └── ArticleTocSidebarActions
-        ├── ArticleTocDivider（波浪线）
-        └── flex gap-2
-              ├── 回到顶部
-              ├── 复制 Markdown
-              └── 打赏 ← TocDonateButton
-```
-
-操作区：`mt-3`；分隔线上方 `mb-3`；底 `pb-4`。
-
-### 24.2 触发按钮
-
-与其它 TOC 操作按钮一致：
-
-| 属性 | 值 |
-|------|-----|
-| 组件 | `Button variant="ghost" size="icon-sm"` |
-| 图标 | Lucide `Gift`，`size-3.5` |
-| 字色 | `text-muted-foreground hover:text-foreground` |
-| `aria-label` | `打赏` |
-| Hover 标签 | 「好活当赏」，`text-[0.625rem]`，按钮下方 `mt-1`，`opacity 0→1`，`duration-200` |
-
-### 24.3 弹层几何与定位
-
-弹层在按钮**上方**展开（`bottom-full`），避免被正文遮挡。
-
-| 属性 | 值 |
-|------|-----|
-| 定位 | `absolute bottom-full left-1/2` |
-| 水平偏移 | `-translate-x-[calc(50%+1.5rem)]`（略向左偏，对齐 TOC 列视觉中心） |
-| 宽度 | `w-[min(21rem,calc(100vw-2rem))]`（最大 336px，两侧留 1rem 呼吸） |
-| 与按钮间距 | `pt-2`（弹层下方的透明命中区，便于鼠标移入） |
-| z-index | `z-50` |
-| 显隐 | 默认 `opacity-0 pointer-events-none`；`group-hover/donate` 时 `opacity-100 pointer-events-auto` |
-| 过渡 | `transition-opacity duration-200 ease-out` |
-
-> **注意**：纯 hover 展示，触屏无 hover 时难以唤起；若需移动端打赏，应另设入口（当前刻意仅桌面侧栏）。
-
-### 24.4 弹层卡片
-
-```text
-rounded-xl border border-border/70 bg-card shadow-lg
-px-4 pt-3 pb-4
-```
-
-**文案行**：
-
-```text
-text-xs text-left text-muted-foreground mb-3
-默认文案：siteConfig.donate.message → 「☕ 请我喝杯咖啡」
-```
-
-**双列 QR 网格**：`grid grid-cols-2 gap-2.5`
-
-### 24.5 收款码槽 `DonateQrSlot`
-
-**有图**（`wechatImage` / `alipayImage`，当前为 `/wx.jpg`、`/zfb.jpg`）：
-
-```text
-aspect-square w-full rounded-lg border border-border/60 bg-background
-Image: fill object-contain p-1 sizes="10rem"
-alt: 「微信赞赏码」/「支付宝收款码」
-```
-
-**无图占位**：
-
-```text
-aspect-square border-dashed border-border/70 bg-muted/25
-text-[0.625rem] text-muted-foreground/70
-aria-hidden
-```
-
-### 24.6 结构示意图（侧栏剖面）
-
-```text
-     博文正文列                    TOC 列 (12.5rem)
-  ┌──────────────────┐         ┌─────────────────┐
-  │                  │         │ 本页目录         │
-  │                  │         │  · H2 标题       │
-  │                  │         │  · H3 …          │
-  │                  │         ├─ ～～波浪分隔～～ ┤
-  │                  │         │ [↑] [⎘] [🎁]     │  ← 图标行
-  │                  │         │      ┌──────────┴──────────┐
-  │                  │         │      │ ☕ 请我喝杯咖啡      │
-  │                  │         │      │ ┌────┐    ┌────┐    │
-  │                  │         │      │ │微信│    │支付宝│   │
-  │                  │         │      │ │ QR │    │ QR │    │
-  │                  │         │      │ └────┘    └────┘    │
-  │                  │         │      └─────────────────────┘
-  │                  │         │           ▲ hover 打赏显示
-  └──────────────────┘         └─────────────────┘
-```
-
-### 24.7 与其它浮层 z-index 关系
-
-| 层 | z-index | 说明 |
-|----|---------|------|
-| 打赏弹层 | `z-50` | 与 Header 同级 |
-| 侧栏 TOC sticky | `z-30` | 低于打赏弹层 |
-| 移动 TOC FAB | `z-40` | 不在此功能路径 |
-
-弹层向上展开，通常不与 Header 重叠；若 TOC 贴近视口顶部，注意勿被 `overflow: hidden` 祖先裁剪（当前侧栏 `overflow-visible`）。
-
-### 24.8 配置与变更
-
-| 配置项 | 路径 | 说明 |
-|--------|------|------|
-| 文案 | `config.donate.message` | 弹层顶部说明 |
-| 微信码 | `config.donate.wechatImage` | `public` 下路径 |
-| 支付宝码 | `config.donate.alipayImage` | 同上 |
-
-改收款图后替换 `public/wx.jpg`、`public/zfb.jpg` 或更新配置路径即可，无需改组件。
-
-### 24.9 改打赏 UI 时的检查清单
-
-- [ ] 弹层不超出 `calc(100vw - 2rem)`
-- [ ] 双码正方形比例一致（`aspect-square`）
-- [ ] Hover 时鼠标可从按钮移入弹层不闪烁（依赖 `pt-2` 桥接区）
-- [ ] 暗色下 `bg-card` 与 QR 白底对比正常
-- [ ] 与「回到顶部」「复制」按钮 `gap-2` 对齐
-
----
-
-## 25. 变更检查清单
-
-### 25.1 Header / 顶栏
-
-- [ ] `globals.css` `--site-header-height`（两档断点）
-- [ ] `lib/site-header-offset.ts` 注释所列文件
-- [ ] 首页 Hero 顶部 / 底部无露缝（**手机 + 桌面**）
-- [ ] 博文 `scroll-margin`、TOC sticky、404 高度
-- [ ] 搜索在「文章」前；搜索、导航项、访问趋势、主题切换 **等距**（`gap-x-3 max-[375px]:gap-x-2.5 sm:gap-x-5`）
-
-### 25.2 列表页
-
-- [ ] 三处列表（首页 / 分类 / 归档）active 行样式一致
-- [ ] `PostListInlineSummary` 触屏与桌面表现
-- [ ] 日期列宽与 `format-*` 函数匹配
-
-### 25.3 博文 / TOC
-
-- [ ] 侧栏 `lg+` 显示、FAB `<lg` 显示
-- [ ] 锚点跳转后标题不被 Header 遮挡
-- [ ] 代码块浅色/深色对比度
-- [ ] 复制按钮、打赏 hover 弹层不溢出视口
-
-### 25.4 全局色板 / 主题
-
-- [ ] `:root` 与 `.dark` 成对更新
-- [ ] Footer `primary` 与正文对比
-- [ ] Shiki、Giscus、Tweet 双主题
-- [ ] `teal` 进度条在深色下可读
-
-### 25.5 Giscus / 分析 / 打赏
-
-- [ ] `public/giscus/` 双主题与 `globals.css` 同步
-- [ ] 评论区切换明暗模式无 iframe 闪白
-- [ ] 访问趋势面板：未配置 / 加载 / 成功三态 UI 正常
-- [ ] 图表 PV/UV 线在深浅色下可辨
-- [ ] 打赏 QR 替换后比例与边框正常；hover 桥接区不丢焦点
-
-### 25.6 上线前
-
-- [ ] `npm run typecheck && npm run lint && npm run build`
-- [ ] 生产环境勿设 `NEXT_PUBLIC_APP_URL=localhost`
-- [ ] 可选 Supabase / `GITHUB_TOKEN` 按 README 配置
-
----
-
-## 附录 A：有意保持轻量的部分
-
-- Google Analytics ID 写于 `layout.tsx`
-- Agentation 仅 `development`
-- `featured` frontmatter 未接入 UI
-- CDN 域 `cdn.cnlang.net` 于 `next.config.mjs` 白名单
-
----
-
-## 附录 B：推荐参考文件（读代码时）
-
-| 主题 | 文件 |
-|------|------|
-| 令牌 | `app/globals.css` |
-| Header 偏移 | `lib/site-header-offset.ts` |
-| 导航 | `components/header/header-nav.tsx` |
-| 列表交互 | `components/home/home-recent-posts.tsx` |
-| 首页下层 | `components/home/home-shelf.tsx` |
-| 正文排版 | `lib/blog-article-prose.ts` |
-| 打赏弹层 | `components/blog/article-toc-sidebar-actions.tsx` |
-| TOC 目录 | `components/blog/article-toc-fumadocs.tsx` |
-| Giscus | `components/comments.tsx`、`public/giscus/*.css` |
-| 访问趋势 | `components/header/header-analytics-drawer.tsx` |
-| Hero | `components/home/home-hero.tsx`、`components/home/hero-particles.tsx`、`components/home/particle-scroll.tsx` |
-| 按钮 | `components/ui/button.tsx` |
-
----
-
-*文档结束。修改实现后请同步更新对应章节与附录。*
+## 23. 变更检查清单
+
+- **Header 与高度**：改 `--site-header-height` 时同步核对 `lib/site-header-offset.ts`、Hero 顶底露缝、锚点 `scroll-margin`、TOC sticky 与 404 高度；保持导航等距。
+- **主题成对改**：`:root` / `.dark`、`public/giscus/site-light.css` / `site-dark.css`、Shiki、Tweet、打赏 QR 白底、趋势图双线均需双主题验证。
+- **三处列表一致**：首页近期文章、分类页、归档页的 active 行交互与日期格式保持一致。
+- **上线前**：执行 `npm run typecheck && npm run lint && npm run build`。

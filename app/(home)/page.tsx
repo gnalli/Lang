@@ -4,8 +4,8 @@ import { HomeHero } from "@/components/home/home-hero"
 import { HomeRecentPosts } from "@/components/home/home-recent-posts"
 import { HomeShelf, type HomeSectionCard } from "@/components/home/home-shelf"
 import { ParticleScroll } from "@/components/home/particle-scroll"
-import { BLOG_SECTIONS, resolveBlogCategory } from "@/lib/blog-sections"
 import { parseKeywords } from "@/lib/blog-tags"
+import { BLOG_SECTIONS, resolveBlogCategory } from "@/lib/blog-sections"
 import { PageViewBeacon } from "@/components/analytics/page-view-beacon"
 import { WebsiteJsonLd } from "@/components/seo/website-json-ld"
 import { siteConfig } from "@/lib/config"
@@ -41,13 +41,13 @@ export default async function HomePage() {
       latestTitle: posts[0]?.title ?? null,
     }
   })
+  sections.sort((a, b) => Number(b.count > 0) - Number(a.count > 0))
   const recentItems = sorted.slice(0, 10).map((b) => ({
     slug: b.slug,
     title: b.title,
     date: b.date,
-    wordCount: b.wordCount,
-    summary: b.summary ?? null,
     tags: parseKeywords(b.keywords),
+    wordCount: b.wordCount,
   }))
 
   return (

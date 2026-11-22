@@ -69,6 +69,7 @@ function useTocDrawerWidth(items: TocItem[]) {
 
 export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
   const [open, setOpen] = React.useState(false)
+  const pendingHeading = React.useRef<string | null>(null)
   const drawerWidthPx = useTocDrawerWidth(items)
 
   if (items.length === 0) {
@@ -104,6 +105,18 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
             </button>
           </DrawerTrigger>
           <DrawerContent
+            onCloseAutoFocus={(event) => {
+              const id = pendingHeading.current
+              pendingHeading.current = null
+              if (!id) return
+              const heading = document.getElementById(id)
+              if (!heading) return
+              event.preventDefault()
+              history.replaceState(history.state, "", "#" + encodeURIComponent(id))
+              heading.tabIndex = -1
+              heading.focus({ preventScroll: true })
+              heading.scrollIntoView({ block: "start", behavior: "instant" })
+            }}
             className={cn(
               // 覆盖 ui/drawer 默认的 before 卡片层（透明底 + inset 圆角）与遮罩接缝处易出现 1px 亮线；改为整面板实色 + 左侧阴影
               "flex h-dvh max-h-dvh min-h-0 flex-col gap-0 border-0 p-0 outline-none ring-0 ring-offset-0",
@@ -121,7 +134,10 @@ export function ArticleTocMobileFab({ items }: { items: TocItem[] }) {
               <ArticleTocFumadocs
                 items={items}
                 subItemsVisibility="always"
-                onItemNavigate={() => setOpen(false)}
+                onItemNavigate={(id) => {
+                    pendingHeading.current = id
+                    setOpen(false)
+                  }}
               />
             </div>
           </DrawerContent>
