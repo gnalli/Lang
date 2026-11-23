@@ -42,7 +42,7 @@ function readHeaderPx() {
   const raw = root.getPropertyValue("--site-header-height").trim()
   if (raw.endsWith("rem")) return Number.parseFloat(raw) * font
   if (raw.endsWith("px")) return Number.parseFloat(raw)
-  return 4 * font
+  return 3.5 * font
 }
 
 function readSizes() {

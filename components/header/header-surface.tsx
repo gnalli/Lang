@@ -1,48 +1,77 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-function subscribe(onChange: () => void) {
-  window.addEventListener("scroll", onChange, { passive: true })
-  window.addEventListener("resize", onChange)
-  return () => {
-    window.removeEventListener("scroll", onChange)
-    window.removeEventListener("resize", onChange)
-  }
-}
-
-function headerHeight() {
+function readHeaderHeight() {
   const raw = getComputedStyle(document.documentElement).getPropertyValue("--site-header-height")
   const value = Number.parseFloat(raw)
-  if (!Number.isFinite(value)) return 68
+  if (!Number.isFinite(value)) return 56
   return raw.includes("rem")
     ? value * Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
     : value
 }
 
 /** 顶栏正下方是近期文章或作品（墨色带）。 */
-function overHomeInk() {
-  const probe = headerHeight() + 1
+function overHomeInk(headerPx: number) {
+  const probe = headerPx + 1
   return [...document.querySelectorAll("[data-home-ink]")].some((band) => {
     const rect = band.getBoundingClientRect()
     return rect.top < probe && rect.bottom > probe
   })
 }
 
-function onHomePage() {
-  return document.querySelector("[data-home-hero]") != null
+type SurfaceState = {
+  scrolled: boolean
+  home: boolean
+  ink: boolean
 }
+
+const INITIAL_STATE: SurfaceState = { scrolled: false, home: false, ink: false }
 
 /** 顶部透明。首页滚动后用和当前区块相同的实色，其它页面才加毛玻璃。 */
 export function HeaderSurface({ children }: { children: React.ReactNode }) {
-  const scrolled = React.useSyncExternalStore(
-    subscribe,
-    () => window.scrollY > 8,
-    () => false,
-  )
-  const home = React.useSyncExternalStore(subscribe, onHomePage, () => false)
-  const ink = React.useSyncExternalStore(subscribe, overHomeInk, () => false)
+  const pathname = usePathname()
+  const [state, setState] = React.useState<SurfaceState>(INITIAL_STATE)
+
+  React.useEffect(() => {
+    let headerPx = readHeaderHeight()
+    let rafId = 0
+
+    const compute = () => {
+      rafId = 0
+      const scrolled = window.scrollY > 8
+      const home = pathname === "/" || document.querySelector("[data-home-hero]") != null
+      const ink = home && overHomeInk(headerPx)
+      setState((prev) =>
+        prev.scrolled === scrolled && prev.home === home && prev.ink === ink
+          ? prev
+          : { scrolled, home, ink },
+      )
+    }
+
+    const schedule = () => {
+      if (rafId) return
+      rafId = window.requestAnimationFrame(compute)
+    }
+
+    const onResize = () => {
+      headerPx = readHeaderHeight()
+      schedule()
+    }
+
+    compute()
+    window.addEventListener("scroll", schedule, { passive: true })
+    window.addEventListener("resize", onResize)
+    return () => {
+      if (rafId) window.cancelAnimationFrame(rafId)
+      window.removeEventListener("scroll", schedule)
+      window.removeEventListener("resize", onResize)
+    }
+  }, [pathname])
+
+  const { scrolled, home, ink } = state
 
   return (
     <header

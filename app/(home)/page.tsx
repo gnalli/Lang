@@ -55,7 +55,7 @@ export default async function HomePage() {
       <HomeHero />
       <div
         data-home-ink=""
-        className="relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 bg-foreground text-background"
+        className="relative -mx-4 bg-foreground text-background sm:-mx-6"
       >
         <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-6">
           <WebsiteJsonLd />

@@ -95,12 +95,12 @@
      * Sticky Header 高度，顶栏外壳直接使用。
      * Hero / TOC / 404 经 `lib/site-header-offset.ts` 引用。
      */
-    --site-header-height: 4rem;
+    --site-header-height: 3.25rem;
 }
 
 @media (min-width: 640px) {
     :root {
-        --site-header-height: 4.25rem;
+        --site-header-height: 3.5rem;
     }
 }
 
@@ -175,6 +175,11 @@
   }
   html {
     scrollbar-gutter: stable;
+  }
+  /* html 已预留滚动条槽位，避免 Radix react-remove-scroll 重复补右边距造成页面宽度抖动 */
+  body[data-scroll-locked] {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
   }
 }
 

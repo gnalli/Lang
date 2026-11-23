@@ -36,36 +36,11 @@ export function ArticleZoomableImage(
     React.useEffect(() => {
         if (!open) return
         const body = document.body
-        const html = document.documentElement
-        const scrollY = window.scrollY
-        const scrollbarWidth = window.innerWidth - html.clientWidth
-
-        const prev = {
-            position: body.style.position,
-            top: body.style.top,
-            left: body.style.left,
-            right: body.style.right,
-            overflow: body.style.overflow,
-            paddingRight: body.style.paddingRight,
-        }
-
-        body.style.position = "fixed"
-        body.style.top = `-${scrollY}px`
-        body.style.left = "0"
-        body.style.right = "0"
+        const prevOverflow = body.style.overflow
         body.style.overflow = "hidden"
-        if (scrollbarWidth > 0) {
-            body.style.paddingRight = `${scrollbarWidth}px`
-        }
 
         return () => {
-            body.style.position = prev.position
-            body.style.top = prev.top
-            body.style.left = prev.left
-            body.style.right = prev.right
-            body.style.overflow = prev.overflow
-            body.style.paddingRight = prev.paddingRight
-            window.scrollTo(0, scrollY)
+            body.style.overflow = prevOverflow
         }
     }, [open])
 

@@ -26,11 +26,11 @@ export const SITE_HEADER_OFFSET = {
 
 /** 读取 `--site-header-height` 的像素值（TOC 滚动高亮等客户端逻辑） */
 export function readSiteHeaderHeightPx(): number {
-  if (typeof window === "undefined") return 64
+  if (typeof window === "undefined") return 56
 
   const root = document.documentElement
   const raw = getComputedStyle(root).getPropertyValue("--site-header-height").trim()
-  if (!raw) return 64
+  if (!raw) return 56
 
   if (raw.endsWith("rem")) {
     const rem = Number.parseFloat(raw)
@@ -42,5 +42,5 @@ export function readSiteHeaderHeightPx(): number {
     return Number.parseFloat(raw)
   }
 
-  return 64
+  return 56
 }

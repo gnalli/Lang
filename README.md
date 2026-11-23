@@ -83,8 +83,9 @@ npm run analyze  # 构建并打开 bundle 分析报告（@next/bundle-analyzer�
 **`lib/config.ts`** 为主要入口：
 
 - **`site`**：站点名、作者（`name` + `profilePath`）、描述、图标
-- **`social`**：GitHub、Twitter、YouTube 等外链
+- **`social`**：GitHub、X（Twitter）外链
 - **`donate`**：侧边栏打赏文案与收款码图片路径（如 `/wx.jpg`、`/zfb.jpg`，文件放在 `public/`）
+- **`works`**：首页作品展示列表（支持 `image.light` / `image.dark` 随主题切换）
 - **`seo`**：生产域名 `metadataBase`、Open Graph、robots 等
 
 **图标**：`app/favicon.ico` 与 `public/apple-icon.png`，由 Next.js Metadata API 统一输出。
@@ -110,7 +111,7 @@ npm run analyze  # 构建并打开 bundle 分析报告（@next/bundle-analyzer�
 
 ## 阅读统计（Supabase，可选）
 
-启用博文 PV/UV 与顶栏趋势图前，需在 Supabase 项目中执行迁移脚本。
+启用博文 PV/UV 与命令面板（`⌘K` / `⌘.`）访问趋势图前，需在 Supabase 项目中执行迁移脚本。
 
 1. 在 [Supabase](https://supabase.com/) 创建项目，获取 **Project URL** 与 **service_role** 密钥（Settings → API）。
 2. 在 Supabase SQL Editor（或 `supabase db execute` / `psql`）中执行幂等迁移脚本 **`data/supabase_analytics_full_migration.sql`**，创建 `page_views` 表与 PV/UV 汇总视图（脚本末尾附历史回填与清理示例）。

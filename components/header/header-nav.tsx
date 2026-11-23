@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
-import { HeaderNavActions } from "./header-nav-actions"
 import { HeaderSearch } from "./header-search-button"
+import { HeaderThemeToggle } from "./header-theme-toggle"
 import { headerNavLinkClass } from "./nav-link-class"
 import { SITE_NAV_ITEMS } from "@/lib/site-nav"
 
@@ -35,7 +35,7 @@ export function HeaderNav() {
           </Link>
         ))}
 
-        <HeaderNavActions />
+        <HeaderThemeToggle />
       </div>
     </nav>
   )

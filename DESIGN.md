@@ -30,9 +30,8 @@
 18. [主题与暗色模式](#18-主题与暗色模式)
 19. [无障碍（a11y）](#19-无障碍a11y)
 20. [Giscus 评论区](#20-giscus-评论区)
-21. [访问趋势图表](#21-访问趋势图表)
-22. [打赏弹层](#22-打赏弹层)
-23. [变更检查清单](#23-变更检查清单)
+21. [打赏弹层](#21-打赏弹层)
+22. [变更检查清单](#22-变更检查清单)
 
 ---
 
@@ -137,8 +136,8 @@
 
 ```css
 /* app/globals.css */
---site-header-height: 4rem;        /* < 640px */
---site-header-height: 4.25rem;   /* ≥ 640px */
+--site-header-height: 3.25rem;     /* < 640px */
+--site-header-height: 3.5rem;      /* ≥ 640px */
 ```
 
 顶栏外壳直接用 `h-(--site-header-height)`，改高度只改这一处。
@@ -294,7 +293,7 @@ md:gap-x-12 lg:gap-x-16 xl:gap-x-20
 | 断点 | px | 项目内典型变化 |
 |------|-----|----------------|
 | `max-[375px]` | ≤375 | 导航字号、gap 压缩 |
-| `sm` | 640 | Header 高度 4.25rem、Hero 粒子布局切换、字号升档 |
+| `sm` | 640 | Header 高度 3.5rem、Hero 粒子布局切换、字号升档 |
 | `md` | 768 | 首页双栏、引文/列表分列 |
 | `lg` | 1024 | 博文 TOC 侧栏、Footer 双列 |
 | `xl` | 1280 | 首页列间距加大 |
@@ -359,10 +358,8 @@ HeaderSurface (client) → header.sticky.top-0.z-50.h-(--site-header-height)
         ├── Link[首页] → 头像 size-7 sm:size-8 rounded-md ring-1 ring-border + 「Lang.」（≥420px 显示）
         └── div.flex（链接组）
               ├── 搜索（图标，在「文章」前）
-              ├── SITE_NAV_ITEMS × 4（文章、作品、归档、关于）
-              └── HeaderNavActions (client)
-                    ├── 访问趋势（图标）
-                    └── 主题切换
+              ├── SITE_NAV_ITEMS × 3（文章、作品、归档）
+              └── 主题切换（图标）
 ```
 
 导航数据：`lib/site-nav.ts` → `SITE_NAV_ITEMS`。文章、作品链到首页 `/#articles`、`/#works`。左缘、右缘与 `max-w-6xl` 内容区对齐。
@@ -390,7 +387,7 @@ max-[375px]:text-sm
 
 品牌「Lang.」：`text-lg font-semibold tracking-tight`，`≥420px` 显示。
 
-搜索、访问趋势、主题切换共用 `headerIconButtonClass`：`size-8`，无边框，超窄屏 `size-7`；图标 `size-4`，`strokeWidth={1.75}`。搜索打开命令面板，访问趋势打开底部抽屉（动态 import，无 SSR）。
+搜索、主题切换共用 `headerIconButtonClass`：`size-8`，无边框，超窄屏 `size-7`；图标 `size-4`，`strokeWidth={1.75}`。搜索打开命令面板。
 
 ### 7.4 链接组内间距（等距规则）
 
@@ -398,24 +395,20 @@ max-[375px]:text-sm
 gap-x-3 max-[375px]:gap-x-2.5 sm:gap-x-5
 ```
 
-**适用于**：搜索 / 文章 / 作品 / 归档 / 关于 / 访问趋势 / 主题切换 — 全部同级视觉节奏。  
-`HeaderNavActions` 容器使用**相同** gap，不要用更小的 `gap-x-1`。
+**适用于**：搜索 / 文章 / 作品 / 归档 / 主题切换 — 全部同级视觉节奏。
 
 ### 7.5 图标按钮
 
-搜索、访问趋势、主题切换是同一套无边框图标按钮，不再收进下拉菜单。搜索仍可用 `Ctrl+K` / `⌘K`。访问趋势面板见 §23。
+搜索与主题切换是同一套无边框图标按钮，不再收进下拉菜单。搜索仍可用 `Ctrl+K` / `⌘K`。
 
 ### 7.6 Server / Client 边界
 
 | Server | Client |
 |--------|--------|
 | `header/index.tsx` | `header-surface.tsx`（滚动状态，children 仍由服务端渲染） |
-| `header-nav.tsx` | `header-nav-actions.tsx` |
-| | `header-search-button.tsx` |
-| | `header-analytics-button.tsx` |
+| `header-nav.tsx` | `header-search-button.tsx` |
 | | `header-theme-toggle.tsx` |
 | | `header-command-palette.tsx` |
-| | `header-analytics-drawer.tsx`（动态 import） |
 
 ---
 
@@ -440,7 +433,7 @@ footer（仅内页 mt-16 sm:mt-20）
 ### 8.2 左侧品牌区
 
 - 标题：`text-3xl sm:4xl md:5xl font-semibold tracking-tight`
-- 简介：`text-sm sm:text-base leading-relaxed text-primary-foreground/75`，`max-w-md`
+- 简介：`text-sm sm:text-base leading-relaxed text-footer-foreground/75`，`max-w-md`
 - 社交图标：`gap-4`；GitHub `size-5`，X `size-4`。新标签打开 `siteConfig.social` 里的 GitHub 与 X（`rel="noopener noreferrer"`，带 `aria-label`）
 
 ### 8.3 右侧链接区
@@ -454,8 +447,8 @@ footer（仅内页 mt-16 sm:mt-20）
 | 联系 | `footerHeading` | 同上 |
 
 ```text
-footerHeading = text-[0.6875rem] font-medium tracking-[0.16em] text-primary-foreground/55 uppercase
-footerLink    = text-sm text-primary-foreground/90 hover:text-primary-foreground
+footerHeading = text-[0.6875rem] font-medium tracking-[0.16em] text-footer-foreground/55 uppercase
+footerLink    = text-sm text-footer-foreground/90 hover:text-footer-foreground
 ```
 
 链接列表：`mt-4 space-y-2.5`；`prefetch={false}`。
@@ -469,7 +462,7 @@ footerLink    = text-sm text-primary-foreground/90 hover:text-primary-foreground
 ### 9.1 区块几何
 
 ```text
-section: relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 overflow-hidden
+section: relative -mx-4 sm:-mx-6 overflow-hidden
          -mt-[var(--site-header-height)]   /* SITE_HEADER_OFFSET.margin，顶到视口上沿 */
          h-svh min-h-[30rem]                /* SITE_HEADER_OFFSET.heroHeight，铺满首屏 */
          bg-background text-foreground      /* 纸色。暗色模式 foreground / background 对调，Hero 变成墨色 */
@@ -844,9 +837,10 @@ Focus：`focus-visible:ring-2 focus-visible:ring-ring/30`。
 ### 16.2 命令面板
 
 - 含汉字的查询优先展示标题包含完整查询词的文章，再按全文相关性补足，最多八条。
-- 唤起：`Ctrl+K` / `⌘K`；或顶栏搜索按钮
-- 对话框：`sm:max-w-xl`
-- 占位符：`搜索文章标题或正文`
+- 唤起：`Ctrl+K` / `⌘K`；或顶栏搜索按钮。使用非模态（`modal={false}`）避免锁定 `body` 滚动导致页面宽度抖动。
+- 对话框：`sm:max-w-md`（紧凑尺寸），输入栏高 `h-11`
+- 占位符：`搜索文章或命令…`
+- 快捷操作：内置「全站访问趋势（PV / UV）」，亦可直接按 `⌘.` / `Ctrl+.` 唤起底部趋势抽屉（`header-analytics-drawer.tsx`，动态 import 无 SSR）
 - 结果上限 8 条；`title` boost ×3，`keywords` boost ×2
 - 索引预取：首次表达搜索意图时加载，与并发打开共用请求；失败可在面板重试
 
@@ -889,6 +883,7 @@ Focus：`focus-visible:ring-2 focus-visible:ring-ring/30`。
 - 实现：`next-themes`，`attribute="class"`，`defaultTheme="system"`
 - **`disableTransitionOnChange`**：切主题时禁止过渡，防闪烁
 - 暗色触发：`html.dark`（`@custom-variant dark (&:is(.dark *))`）
+- 快捷键：非输入态且无弹层打开时按 `D` 切换明暗模式（`components/theme-provider.tsx`）
 - Shiki / Giscus / Tweet 均依赖 `html.dark` 或独立 CSS 变量，新增嵌入时需双主题验证
 
 ---
@@ -900,7 +895,7 @@ Focus：`focus-visible:ring-2 focus-visible:ring-ring/30`。
 | 导航 | `nav[aria-label="主导航"]` |
 | 目录 | `nav[aria-label="文章目录"]`；当前项 `aria-current="location"` |
 | 主题按钮 | `aria-label` 随模式切换中英文描述 |
-| 搜索 / 访问趋势 | 无边框图标按钮，`aria-label` 为「搜索」「访问趋势」 |
+| 搜索 | 无边框图标按钮，`aria-label` 为「搜索」 |
 | 装饰图 | `alt=""` + `aria-hidden` 或 `role="img" aria-hidden` |
 | 触屏目标 | 关键按钮 `min-h-11`；`touch-manipulation` |
 | 安全区 | Footer `pb-[env(safe-area-inset-bottom)]`；FAB/抽屉适配 `safe-area-inset-*` |
@@ -919,17 +914,7 @@ Focus：`focus-visible:ring-2 focus-visible:ring-ring/30`。
 
 ---
 
-## 21. 访问趋势图表
-
-文件：`components/header/header-analytics-drawer.tsx`（由顶栏按钮 `dynamic(..., { ssr: false })` 懒加载），数据来自 `GET /api/analytics/site-trends`（近 14 日 PV/UV，仅打开时拉取，关闭取消请求）。
-
-- **面板外壳**：直接用 `vaul` 底部抽屉（不改 `components/ui/drawer.tsx`），两档吸附点运行时换算为 px：紧凑档约 `31rem`（至少比全高矮 48px），全高档 `100dvh - var(--site-header-height)` 贴顶栏下沿；左右各留 `0.75rem`。外层 `Drawer.Content` 透明，圆角（`rounded-t-3xl`）、底色（`bg-popover`）、边框和阴影只写在内层面板上。
-- **关闭**：无关闭按钮，点遮罩/外部区域、按 `Esc` 或向下拖关闭（因 vaul 非模态补丁，遮罩需显式绑定 `onClick`）。
-- **折线图**：Recharts `LineChart` + shadcn Chart；PV 用 `--foreground`，UV 用 `--muted-foreground`（`strokeOpacity: 0.85`），隐藏纵向网格与默认点；三态（加载中 / Supabase 未配置 / 异常）在图表区内居中提示。
-
----
-
-## 22. 打赏弹层
+## 21. 打赏弹层
 
 文件：`components/blog/article-toc-sidebar-actions.tsx`（`TocDonateButton`），配置在 `lib/config.ts` 的 `siteConfig.donate`；仅桌面端（`lg+`）侧栏 TOC 下方显示，移动端抽屉不含。
 
@@ -938,9 +923,9 @@ Focus：`focus-visible:ring-2 focus-visible:ring-ring/30`。
 
 ---
 
-## 23. 变更检查清单
+## 22. 变更检查清单
 
 - **Header 与高度**：改 `--site-header-height` 时同步核对 `lib/site-header-offset.ts`、Hero 顶底露缝、锚点 `scroll-margin`、TOC sticky 与 404 高度；保持导航等距。
-- **主题成对改**：`:root` / `.dark`、`public/giscus/site-light.css` / `site-dark.css`、Shiki、Tweet、打赏 QR 白底、趋势图双线均需双主题验证。
+- **主题成对改**：`:root` / `.dark`、`public/giscus/site-light.css` / `site-dark.css`、Shiki、Tweet、打赏 QR 白底均需双主题验证。
 - **三处列表一致**：首页近期文章、分类页、归档页的 active 行交互与日期格式保持一致。
 - **上线前**：执行 `npm run typecheck && npm run lint && npm run build`。

@@ -14,7 +14,7 @@ export type HomeSectionCard = {
 
 export function HomeShelf({ sections }: { sections: HomeSectionCard[] }) {
   return (
-    <div className="relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2">
+    <div className="relative -mx-4 sm:-mx-6">
       <section
         id="articles"
         aria-labelledby="home-articles-heading"

@@ -30,7 +30,7 @@ export default function NotFound() {
         >
           <div
             className={cn(
-              "w-full shrink-0 rounded-2xl border border-border/60 bg-black/90 px-4 py-3 shadow-sm",
+              "w-full shrink-0 rounded-2xl border border-border/60 bg-foreground/90 px-4 py-3 shadow-sm",
               "ring-1 ring-border/30 sm:px-7 sm:py-5 dark:bg-muted"
             )}
           >

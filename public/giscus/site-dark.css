@@ -59,12 +59,12 @@ main {
   --color-fg-muted: #c4c4ba;
   --color-fg-subtle: #a8a89e;
   --color-fg-on-emphasis: #252525;
-  --color-canvas-default: #252525;
+  --color-canvas-default: transparent;
   --color-canvas-overlay: #2c2e2c;
-  --color-canvas-inset: #323432;
-  --color-canvas-subtle: #2c2e2c;
-  --color-border-default: rgb(248 244 238 / 18%);
-  --color-border-muted: rgb(248 244 238 / 12%);
+  --color-canvas-inset: #2c2e2c;
+  --color-canvas-subtle: #323432;
+  --color-border-default: rgb(248 244 238 / 12%);
+  --color-border-muted: rgb(248 244 238 / 8%);
   --color-neutral-muted: rgb(248 244 238 / 8%);
   --color-neutral-subtle: rgb(248 244 238 / 10%);
   --color-accent-fg: #f8f4ee;
@@ -86,8 +86,13 @@ main {
 }
 
 .gsc-homepage-bg {
-  background: #252525;
+  background: transparent;
   animation: none;
+}
+
+.gsc-comment-box,
+.gsc-comment {
+  background-color: #2c2e2c;
 }
 
 .gsc-comment-box {

@@ -103,7 +103,7 @@ export function HomeHero() {
     <section
       data-home-hero
       className={cn(
-        "relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 overflow-hidden bg-background text-foreground",
+        "relative -mx-4 overflow-hidden bg-background text-foreground sm:-mx-6",
         SITE_HEADER_OFFSET.margin,
         SITE_HEADER_OFFSET.heroHeight,
       )}

@@ -32,7 +32,7 @@ main {
   --color-prettylights-syntax-sublimelinter-gutter-mark: #5d6c7b;
   --color-prettylights-syntax-constant-other-reference-link: #364437;
   --color-btn-text: #252525;
-  --color-btn-bg: rgb(248 244 238);
+  --color-btn-bg: #fefefb;
   --color-btn-border: rgb(232 224 212);
   --color-btn-shadow: 0 0 transparent;
   --color-btn-inset-shadow: 0 0 transparent;
@@ -54,16 +54,16 @@ main {
   --color-btn-primary-disabled-bg: rgb(54 68 55 / 50%);
   --color-btn-primary-disabled-border: rgb(54 68 55 / 50%);
   --color-action-list-item-default-hover-bg: rgb(235 228 216 / 80%);
-  --color-segmented-control-bg: rgb(243 237 228);
-  --color-segmented-control-button-bg: rgb(248 244 238);
+  --color-segmented-control-bg: #f3ede4;
+  --color-segmented-control-button-bg: #fefefb;
   --color-segmented-control-button-selected-border: rgb(232 224 212);
   --color-fg-default: rgb(37 37 37);
   --color-fg-muted: rgb(93 108 123);
   --color-fg-subtle: rgb(93 108 123 / 70%);
-  --color-canvas-default: rgb(248 244 238);
-  --color-canvas-overlay: rgb(248 244 238);
-  --color-canvas-inset: rgb(243 237 228);
-  --color-canvas-subtle: rgb(240 235 227);
+  --color-canvas-default: transparent;
+  --color-canvas-overlay: #fefefb;
+  --color-canvas-inset: #fefefb;
+  --color-canvas-subtle: #f3ede4;
   --color-border-default: rgb(232 224 212);
   --color-border-muted: rgb(232 224 212 / 60%);
   --color-neutral-muted: rgb(232 224 212 / 50%);
@@ -86,8 +86,13 @@ main {
 }
 
 .gsc-homepage-bg {
-  background: rgb(248 244 238);
+  background: transparent;
   animation: none;
+}
+
+.gsc-comment-box,
+.gsc-comment {
+  background-color: #fefefb;
 }
 
 .gsc-comment:not(.gsc-reply-box) .gsc-replies {

@@ -55,6 +55,10 @@ function ThemeHotkey() {
         return
       }
 
+      if (document.querySelector('[role="dialog"]')) {
+        return
+      }
+
       setTheme(resolvedTheme === "dark" ? "light" : "dark")
     }
 

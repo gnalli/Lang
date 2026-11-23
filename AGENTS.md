@@ -24,7 +24,7 @@
 
 ## 框架约定
 
-- 默认 Server Component。只有 state、事件或浏览器 API 才加 `"use client"`，并收成叶子组件。Header 的 `index.tsx`、`header-nav.tsx` 和页脚是 Server Component；`app/(home)/layout.tsx` 与 `app/(pages)/layout.tsx` 分别渲染首页和内页页脚。`header-surface.tsx`（滚动状态，以 children 包住服务端导航）、搜索、访问趋势、主题是 Client Component。
+- 默认 Server Component。只有 state、事件或浏览器 API 才加 `"use client"`，并收成叶子组件。Header 的 `index.tsx`、`header-nav.tsx` 和页脚是 Server Component；`app/(home)/layout.tsx` 与 `app/(pages)/layout.tsx` 分别渲染首页和内页页脚。`header-surface.tsx`（滚动状态，以 children 包住服务端导航）、搜索、主题是 Client Component。
 - `params` / `searchParams` 是 Promise，使用前 `await`。
 - `export const revalidate = 120` 必须是字面量，不能引用常量。
 - 颜色用语义令牌（`bg-background`、`text-muted-foreground`、`border-border`）。不要新写 `bg-zinc-500` 或手写 `dark:` 颜色。已有例外记在 `DESIGN.md`（进度条、Tweet）。
@@ -32,11 +32,11 @@
 
 ## 这个仓库容易改错的地方
 
-**Header 高度只有一个来源。** `--site-header-height` 在 `app/globals.css`：默认 `4rem`，`sm`（640px）及以上 `4.25rem`。`header-surface.tsx` 直接用 `h-(--site-header-height)`，改高度只改变量，再确认头像与主题按钮放得下。
+**Header 高度只有一个来源。** `--site-header-height` 在 `app/globals.css`：默认 `3.25rem`，`sm`（640px）及以上 `3.5rem`。`header-surface.tsx` 直接用 `h-(--site-header-height)`，改高度只改变量，再确认头像与主题按钮放得下。
 
 页面上的顶栏占位、锚点、TOC sticky、404 高度只用 `lib/site-header-offset.ts` 的 `SITE_HEADER_OFFSET`。不要写 `scroll-mt-20` 这类魔法数。
 
-**导航必须等距。** 链接组与 `HeaderNavActions`（访问趋势、主题切换）都使用 `gap-x-3 max-[375px]:gap-x-2.5 sm:gap-x-5`。搜索按钮在「文章」前面，和链接组同一条 gap。文字链接共用 `headerNavLinkClass`，图标按钮共用 `headerIconButtonClass`（`components/header/nav-link-class.ts`），不要加圆形边框。
+**导航必须等距。** 链接组内搜索、导航链接与主题切换共用 `gap-x-3 max-[375px]:gap-x-2.5 sm:gap-x-5`。搜索按钮在「文章」前面，和链接组同一条 gap。文字链接共用 `headerNavLinkClass`，图标按钮共用 `headerIconButtonClass`（`components/header/nav-link-class.ts`），不要加圆形边框。
 
 **首页下层。** 视觉细则见 `DESIGN.md` 第 9 节，改代码时必须守住：
 - **双底色交替**：仅用 `bg-background`（Hero、文章）与 `bg-foreground`（近期文章、作品）交替，不加第三种底色；底色写在 `ParticleScroll` 外层 `<section>` 上。
